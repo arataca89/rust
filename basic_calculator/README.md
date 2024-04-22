@@ -1,12 +1,9 @@
-# Pacote: basic_calculator
+# basic_calculator
 
- basic_calculator
+ Este pacote implementa implementa uma calculadora aritmética simples. 
  
- O pacote basic_calculator implementa uma calculadora aritmética
- simples. Este crate possui os módulos e funções da biblioteca.
- 
-Módulo: pilha_generica
-======================
+## Módulo: pilha_generica
+
 Este módulo implementa a funcionalidade de criar pilhas dos tipos
 primitivos: inteiros, de ponto flutuante e char.
  
