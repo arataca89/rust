@@ -15,7 +15,6 @@ is_empty(&self) -> bool
 	Retorna true se a pilha estiver vazia (sem nenhum item), senão
 	retorna false.
 
-
 push(&mut self, valor: T)
 	Insere um valor do tipo genérico T na pilha e
 	incrementa o tamanho (size) em uma unidade.
