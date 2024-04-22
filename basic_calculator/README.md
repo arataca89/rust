@@ -1,14 +1,13 @@
 # basic_calculator
 
- Este pacote implementa implementa uma calculadora aritmética simples. 
+ Este pacote implementa uma calculadora aritmética simples. 
  
 ## Módulo: pilha_generica
 
-Este módulo implementa a funcionalidade de criar pilhas dos tipos
-primitivos: inteiros, de ponto flutuante e char.
+Este módulo implementa a funcionalidade de criar pilhas dos tipos primitivos: inteiros, de ponto flutuante e char.
  
 Métodos implementados:
-
+```
 new() -> Pilha<T>{
 	Cria uma pilha vazia, do tipo genérico T.
 
@@ -36,7 +35,7 @@ print(&self)
 		['3', '+', '5']
 		[1970, 1985, 2015]
 		[3.14159, 2.65, 1.2345]
-
+```
 
 O tipo Pilha implementa Debug e Copy.
 A trait Debug permite usar println! com o tipo generico T.
