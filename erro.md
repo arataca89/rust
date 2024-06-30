@@ -9,6 +9,20 @@ Código combinável refere-se a um código onde os componentes ou módulos de so
 
 Manter o código combinável é importante porque, sem esse requisito, poderíamos entrar em pânico sempre que nos deparássemos com algo inesperado. (o pânico faz com que a tarefa atual seja interrompida e, na maioria dos casos, todo o programa é abortado.) Aqui está um exemplo:
 
+<pre>
+  // Guess a number between 1 and 10.
+// If it matches the number we had in mind, return `true`. Else, return `false`.
+fn guess(n: i32) -> bool {
+    if n < 1 || n > 10 {
+        panic!("Invalid number: {}", n);
+    }
+    n == 5
+}
+
+fn main() {
+    guess(11);
+}
+</pre>
 
 ### Referências
 https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/book/first-edition/error-handling.html#the-basics
