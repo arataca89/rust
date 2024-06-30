@@ -7,6 +7,9 @@ Você pode pensar no tratamento de erros como sendo o uso de análise de casos p
 
 Código combinável refere-se a um código onde os componentes ou módulos de software são organizados de maneira a serem facilmente combinados para criar novas funcionalidades. A ideia de código combinável defende a criação de pequenas unidades independentes que sejam tratadas como blocos de construção para sistemas maiores.
 
+Manter o código combinável é importante porque, sem esse requisito, poderíamos entrar em pânico sempre que nos deparássemos com algo inesperado. (o pânico faz com que a tarefa atual seja interrompida e, na maioria dos casos, todo o programa é abortado.) Aqui está um exemplo:
+
+
 ### Referências
 https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/book/first-edition/error-handling.html#the-basics
 
