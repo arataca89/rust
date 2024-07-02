@@ -1,6 +1,6 @@
 # Tratamento de erros em Rust
 
-O tratamento de de erros em programação pode ser basicamente dividido em dois ramos: <tt>manipulação de exceções</tt> e <tt>retorno de valores</tt>. Rust opta por retornar valores. 
+O tratamento de de erros em programação pode ser basicamente dividido em dois ramos: ```manipulação de exceções``` e ```retorno de valores```. Rust opta por retornar valores. 
 
 ## Básico
 Você pode pensar no tratamento de erros como sendo o uso de análise de casos para determinar se uma determinada tarefa ou cálculo foi bem-sucedido ou não. Como você verá, a chave para o tratamento ergonômico de erros é reduzir a quantidade de análise  de casos explícita que o programador precisa fazer enquanto mantém o código combinável.
@@ -45,19 +45,19 @@ fn main() {
 Se você fornecer zero argumentos a este programa (erro 1) ou se o primeiro argumento não for um número inteiro (erro 2), o programa entrará em pânico como no primeiro exemplo.
 
 ## Unwrapping
-No exemplo anterior, afirmamos que o programa simplesmente entraria em pânico se atingisse uma das duas condições de erro, mas o programa não inclui uma chamada explícita a <tt>panic!</tt> como no primeiro exemplo. Isso ocorre porque panic! está embutida nas chamadas a <tt>unwrap</tt>.
+No exemplo anterior, afirmamos que o programa simplesmente entraria em pânico se atingisse uma das duas condições de erro, mas o programa não inclui uma chamada explícita a ```panic!``` como no primeiro exemplo. Isso ocorre porque panic! está embutida nas chamadas a ```unwrap```.
 
-“unwrap” algo em Rust é dizer: “Dê-me o resultado do cálculo e, se houver um erro, entre em pânico e pare o programa”. Seria melhor se mostrássemos o código de unwrap porque é muito simples, mas para fazer isso, primeiro precisaremos explorar os tipos <tt>Option</tt> e <tt>Result</tt>. Ambos possuem um método chamado unwrap definido neles.
+“unwrap” algo em Rust é dizer: “Dê-me o resultado do cálculo e, se houver um erro, entre em pânico e pare o programa”. Seria melhor se mostrássemos o código de unwrap porque é muito simples, mas para fazer isso, primeiro precisaremos explorar os tipos ```Option``` e ```Result```. Ambos possuem um método chamado unwrap definido neles.
 
 ## Option
-O tipo <tt>Option</tt> é definido na [biblioteca padrão](https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/std/option/enum.Option.html):
+O tipo ```Option``` é definido na [biblioteca padrão](https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/std/option/enum.Option.html):
 ```
 enum Option<T> {
     None,
     Some(T),
 }
 ```
-O tipo <tt>Option</tt> é uma forma de usar o sistema de tipos do Rust para expressar a possibilidade de ausência. Codificar a possibilidade de ausência no sistema de tipos é um conceito importante porque fará com que o compilador force o programador a lidar com essa ausência. Vamos dar uma olhada em um exemplo que tenta encontrar um caractere em uma string:
+O tipo ```Option``` é uma forma de usar o sistema de tipos do Rust para expressar a possibilidade de ausência. Codificar a possibilidade de ausência no sistema de tipos é um conceito importante porque fará com que o compilador force o programador a lidar com essa ausência. Vamos dar uma olhada em um exemplo que tenta encontrar um caractere em uma string:
 ```
 // Procura em 'haystack' pelo caractere Unicode 'needle' . Se for encontrado,
 // retorna o byte offset do caractere. Senão, 'None' é retornado.
@@ -70,7 +70,7 @@ fn find(haystack: &str, needle: char) -> Option<usize> {
     None
 }
 ```
-Observe que quando esta função encontra um caractere correspondente, ela não retorna apenas o <tt>offset</tt>. Em vez disso, retorna <tt>Some(offset)</tt>. <tt>Some</tt> é uma variante ou construtor de valor para o tipo <tt>Option</tt>. Você pode pensar nisso como uma função com o tipo ```fn<T>(value: T) -> Option<T>```. Da mesma forma, <tt>None</tt> também é um construtor de valor, exceto que não possui argumentos. Você pode pensar em <tt>None</tt> como uma função com o tipo <tt>fn<T>() -> Option<T></tt>.
+Observe que quando esta função encontra um caractere correspondente, ela não retorna apenas o ```offset```. Em vez disso, retorna ```Some(offset)```. ```Some``` é uma variante ou construtor de valor para o tipo ```Option```. Você pode pensar nisso como uma função com o tipo ```fn<T>(value: T) -> Option<T>```. Da mesma forma, ```None``` também é um construtor de valor, exceto que não possui argumentos. Você pode pensar em ```None``` como uma função com o tipo ```fn<T>() -> Option<T>```.
 
 ### Referências
 https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/book/first-edition/error-handling.html#the-basics
