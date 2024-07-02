@@ -70,7 +70,7 @@ fn find(haystack: &str, needle: char) -> Option<usize> {
     None
 }
 ```
-Observe que quando esta função encontra um caractere correspondente, ela não retorna apenas o <tt>offset</tt>. Em vez disso, retorna <tt>Some(offset)</tt>. <tt>Some</tt> é uma variante ou construtor de valor para o tipo <tt>Option</tt>. Você pode pensar nisso como uma função com o tipo <tt>fn<T>(value: T) -> Option<T></tt>. Da mesma forma, <tt>None</tt> também é um construtor de valor, exceto que não possui argumentos. Você pode pensar em <tt>None</tt> como uma função com o tipo <tt>fn<T>() -> Option<T></tt>.
+Observe que quando esta função encontra um caractere correspondente, ela não retorna apenas o <tt>offset</tt>. Em vez disso, retorna <tt>Some(offset)</tt>. <tt>Some</tt> é uma variante ou construtor de valor para o tipo <tt>Option</tt>. Você pode pensar nisso como uma função com o tipo ```fn<T>(value: T) -> Option<T>```. Da mesma forma, <tt>None</tt> também é um construtor de valor, exceto que não possui argumentos. Você pode pensar em <tt>None</tt> como uma função com o tipo <tt>fn<T>() -> Option<T></tt>.
 
 ### Referências
 https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/book/first-edition/error-handling.html#the-basics
