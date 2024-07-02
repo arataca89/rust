@@ -45,7 +45,8 @@ fn main() {
 Se você fornecer zero argumentos a este programa (erro 1) ou se o primeiro argumento não for um número inteiro (erro 2), o programa entrará em pânico como no primeiro exemplo.
 
 ## Unwrapping
-
+No exemplo anterior, afirmamos que o programa simplesmente entraria em pânico se atingisse uma das duas condições de erro, mas o programa não inclui uma chamada explícita a <tt>panic!</tt> como no primeiro exemplo. Isso ocorre porque panic! está embutida nas chamadas a <tt>unwrap</tt>.
+“unwrap” algo em Rust é dizer: “Dê-me o resultado do cálculo e, se houver um erro, entre em pânico e pare o programa”. Seria melhor se mostrássemos o código de unwrap porque é muito simples, mas para fazer isso, primeiro precisaremos explorar os tipos <tt>Opion</tt> e <tt>Result</tt>. Ambos possuem um método chamado unwrap definido neles.
 
 ### Referências
 https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/book/first-edition/error-handling.html#the-basics
