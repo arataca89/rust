@@ -30,6 +30,23 @@ Se você tentar executar este código, o programa irá travar com uma mensagem c
 thread 'main' panicked at src/main.rs:7:9:
 Número inválido: 11
 ```
+Aqui está outro exemplo. Um programa que aceita um número inteiro como argumento, duplica-o e imprime-o:
+```
+use std::env;
+
+fn main() {
+    let mut argv = env::args();
+    let arg: String = argv.nth(1).unwrap(); // erro 1
+    let n: i32 = arg.parse().unwrap(); // erro 2
+    println!("{}", 2 * n);
+}
+
+```
+Se você fornecer zero argumentos a este programa (erro 1) ou se o primeiro argumento não for um número inteiro (erro 2), o programa entrará em pânico como no primeiro exemplo.
+
+## Unwrapping
+
+
 ### Referências
 https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/book/first-edition/error-handling.html#the-basics
 
