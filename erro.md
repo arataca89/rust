@@ -25,7 +25,11 @@ fn main() {
 }
 
 ```
-
+Se você tentar executar este código, o programa irá travar com uma mensagem como esta:
+```
+thread 'main' panicked at src/main.rs:7:9:
+Número inválido: 11
+```
 ### Referências
 https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/book/first-edition/error-handling.html#the-basics
 
