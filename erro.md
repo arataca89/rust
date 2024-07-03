@@ -72,6 +72,39 @@ fn find(haystack: &str, needle: char) -> Option<usize> {
 ```
 Observe que quando esta função encontra um caractere correspondente, ela não retorna apenas o ```offset```. Em vez disso, retorna ```Some(offset)```. ```Some``` é uma variante ou construtor de valor para o tipo ```Option```. Você pode pensar nisso como uma função com o tipo ```fn<T>(value: T) -> Option<T>```. Da mesma forma, ```None``` também é um construtor de valor, exceto que não possui argumentos. Você pode pensar em ```None``` como uma função com o tipo ```fn<T>() -> Option<T>```.
 
+Abaixo usamos a função ```find()``´:
+```
+fn main() {
+    let file_name = "foobar.rs";
+    match find(file_name, '.') {
+        None => println!("Nenhuma extensão de arquivo encontrada."),
+        Some(i) => println!("Extensão do arquivo: {}", &file_name[i+1..]),
+    }
+}
+```
+Este código usa correspondência de padrões para fazer análise de caso no ```Option<usize>``` retornado pela função ```find()```. Na verdade, a análise de caso é a única maneira de obter o valor armazenado dentro de um ```Option<T>```. Isso significa que você, como programador, deve lidar com o caso quando ```Option<T>``` for ```None``` em vez de ```Some(t)```.
+
+Mas espere,  e com relação a ```unwrap```, que usamos anteriormente? Não houve análise de caso lá! Em vez disso, a análise do caso foi colocada dentro do método ```unwrap``` para você. Você mesmo pode definir se quiser:
+```
+enum Option<T> {
+    None,
+    Some(T),
+}
+
+impl<T> Option<T> {
+    fn unwrap(self) -> T {
+        match self {
+            Option::Some(val) => val,
+            Option::None =>
+              panic!("called `Option::unwrap()` on a `None` value"),
+        }
+    }
+}
+```
+O método ```unwrap``` abstrai a análise do caso. É exatamente isso que torna o uso de ```unwrap``` ergonômico. Infelizmente, esse ```panic!``` significa que ```unwrap``` não é combinável, não é adequado quando queremos escrever código combinável.
+
+## Compondo valores ```Option<T>```
+
 ### Referências
 https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/book/first-edition/error-handling.html#the-basics
 
