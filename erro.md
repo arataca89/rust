@@ -121,6 +121,22 @@ fn extension_explicit(file_name: &str) -> Option<&str> {
 ```
 (Dica: não use este código. Em vez disso, use o método [extension](https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/std/path/struct.Path.html#method.extension) da biblioteca padrão.)
 
+O código permanece simples, mas o importante a notar é que o tipo de ```find()``` nos obriga a considerar a possibilidade de ausência. Isso é bom porque significa que o compilador não nos deixará esquecer acidentalmente o caso em que o nome de um arquivo não possui extensão. Por outro lado, fazer análises explícitas de casos como fizemos em ```extension_explicit()``` todas as vezes pode ser um pouco cansativo.
+
+Na verdade, a análise de caso em ```extension_explicit()``` segue um padrão muito comum: mapear uma função para o valor dentro de um ```Option<T>```, a menos que a opção seja ```None```, nesse caso, retorna ```None```.
+
+Rust possui polimorfismo paramétrico, então é muito fácil definir um combinador que abstraia esse padrão:
+```
+fn map<F, T, A>(option: Option<T>, f: F) -> Option<A> where F: FnOnce(T) -> A {
+    match option {
+        None => None,
+        Some(value) => Some(f(value)),
+    }
+}
+```
+Na verdade, ```map``` é [definido como um método](https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/std/option/enum.Option.html#method.map) em ```Option<T>``` na biblioteca padrão. Como método, ele possui uma assinatura ligeiramente diferente: os métodos tomam self, &self ou &mut self como seu primeiro argumento.
+
+
 ### Referências
 https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/book/first-edition/error-handling.html#the-basics
 
