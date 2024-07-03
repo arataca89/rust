@@ -96,7 +96,7 @@ impl<T> Option<T> {
         match self {
             Option::Some(val) => val,
             Option::None =>
-              panic!("called `Option::unwrap()` on a `None` value"),
+              panic!("chamada a `Option::unwrap()` em um valor `None`"),
         }
     }
 }
@@ -104,6 +104,22 @@ impl<T> Option<T> {
 O método ```unwrap``` abstrai a análise do caso. É exatamente isso que torna o uso de ```unwrap``` ergonômico. Infelizmente, esse ```panic!``` significa que ```unwrap``` não é combinável, não é adequado quando queremos escrever código combinável.
 
 ## Compondo valores ```Option<T>```
+No exemplo anterior da função ```find()```, vimos como usar ```find()``` para descobrir a extensão em um nome de arquivo. É claro que nem todos os nomes de arquivos possuem o ```.``` (ponto) neles, então é possível que o nome do arquivo não tenha extensão. Esta possibilidade de ausência é codificada nos tipos usando ```Option<T>```. Em outras palavras, o compilador nos forçará a abordar a possibilidade de não existir uma extensão. No nosso caso, apenas imprimimos uma mensagem dizendo isso.
+
+Obter a extensão de um nome de arquivo é uma operação bastante comum, então faz sentido colocá-la em uma função:
+```
+fn find(haystack: &str, needle: char) -> Option<usize> { haystack.find(needle) }
+// Retorna a extensão do nome de arquivo dado, onde a extensão é definida
+// como todos os caracteres depois do primeiro caractere `.` (ponto).
+// Se `file_name` não tiver o caractere `.`, então `None` é retornado.
+fn extension_explicit(file_name: &str) -> Option<&str> {
+    match find(file_name, '.') {
+        None => None,
+        Some(i) => Some(&file_name[i+1..]),
+    }
+}
+```
+(Dica: não use este código. Em vez disso, use o método [extension](https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/std/path/struct.Path.html#method.extension) da biblioteca padrão.)
 
 ### Referências
 https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/book/first-edition/error-handling.html#the-basics
