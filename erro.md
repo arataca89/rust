@@ -134,7 +134,7 @@ fn map<F, T, A>(option: Option<T>, f: F) -> Option<A> where F: FnOnce(T) -> A {
     }
 }
 ```
-Na verdade, ```map``` é [definido como um método](https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/std/option/enum.Option.html#method.map) em ```Option<T>``` na biblioteca padrão. Como método, ele possui uma assinatura ligeiramente diferente: os métodos tomam self, &self ou &mut self como seu primeiro argumento.
+Na verdade, ```map``` é [definido como um método](https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/std/option/enum.Option.html#method.map) em ```Option<T>``` na biblioteca padrão. Como método, ele possui uma assinatura ligeiramente diferente: os métodos tomam ```self```, ```&self``` ou ```&mut self``` como seu primeiro argumento.
 
 
 ### Referências
