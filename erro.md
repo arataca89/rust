@@ -159,18 +159,6 @@ Como no ```map``` usado acima, a implementação da biblioteca padrão é um mé
 
 O truque aqui é que o valor padrão deve ter o mesmo tipo que o valor que pode estar dentro do ``` Option<T>```. Usá-lo é muito simples em nosso caso:
 ```
-fn find(haystack: &str, needle: char) -> Option<usize> {
-    for (offset, c) in haystack.char_indices() {
-        if c == needle {
-            return Some(offset);
-        }
-    }
-    None
-}
-
-fn extension(file_name: &str) -> Option<&str> {
-    find(file_name, '.').map(|i| &file_name[i+1..])
-}
 fn main() {
     assert_eq!(extension("foobar.csv").unwrap_or("rs"), "csv");
     assert_eq!(extension("foobar").unwrap_or("rs"), "rs");
