@@ -166,6 +166,31 @@ fn main() {
 ```
 (Observe que ```unwrap_or``` é [definido como um método](https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/std/option/enum.Option.html#method.unwrap_or) em ```Option<T>``` na biblioteca padrão, então usamos ele aqui em vez da função independente que definimos acima. Não se esqueça de verificar o método ```unwrap_or_else``` mais geral.)
 
+Há mais um combinador ao qual achamos que vale a pena prestar atenção especial: ```and_then```. Facilita processamentos que admitem a possibilidade de ausência. Por exemplo, grande parte do código nesta seção trata de encontrar uma extensão com um nome de arquivo. Para fazer isso, primeiro você precisa do nome do arquivo, que normalmente é extraído de um caminho de arquivo (path). Embora a maioria dos caminhos de arquivo tenha um nome de arquivo, nem todos têm. Por exemplo, ```.```, ```..``` ou ```/```.
+
+Portanto, temos a tarefa de encontrar uma extensão de acordo com o caminho do arquivo. Vamos começar com uma análise explícita do caso:
+```
+fn file_path_ext_explicit(file_path: &str) -> Option<&str> {
+    match file_name(file_path) {
+        None => None,
+        Some(name) => match extension(name) {
+            None => None,
+            Some(ext) => Some(ext),
+        }
+    }
+}
+
+fn file_name(file_path: &str) -> Option<&str> {
+  // Implementação omitida.
+  unimplemented!()
+}
+```
+Você pode pensar que poderíamos usar ```map```, como fizemos antes, para reduzir a análise de caso, mas neste caso não funciona...
+```
+fn file_path_ext(file_path: &str) -> Option<&str> {
+    file_name(file_path).map(|x| extension(x)) // Erro de compilação.
+}
+```
 
 ### Referências
 https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/book/first-edition/error-handling.html#the-basics
