@@ -136,6 +136,46 @@ fn map<F, T, A>(option: Option<T>, f: F) -> Option<A> where F: FnOnce(T) -> A {
 ```
 Na verdade, ```map``` é [definido como um método](https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/std/option/enum.Option.html#method.map) em ```Option<T>``` na biblioteca padrão. Como método, ele possui uma assinatura ligeiramente diferente: os métodos tomam ```self```, ```&self``` ou ```&mut self``` como seu primeiro argumento.
 
+Armados com nosso novo combinador, podemos reescrever nosso método ```extension_explicit``` para nos livrarmos da análise de caso:
+```
+fn find(haystack: &str, needle: char) -> Option<usize> { haystack.find(needle) }
+// Retorna a extensão de um dado nome de arquivo, onde a extensão é definida
+// como todos os caracteres após o caractere '.' (ponto).
+// Se `file_name` não possuir o caractere `.`, então `None` é retornado.
+fn extension(file_name: &str) -> Option<&str> {
+    find(file_name, '.').map(|i| &file_name[i+1..])
+}
+```
+Um outro padrão que comumente encontramos é atribuir um valor padrão ao caso em que um valor de ```Option``` é ```None```. Por exemplo, talvez o seu programa assuma que a extensão de um arquivo é ```rs``` caso não tenha nenhuma extensão. Como você pode imaginar, a análise de caso para isso não é específica para extensões de arquivo - ela pode funcionar com qualquer ```Option<T>```:
+```
+fn unwrap_or<T>(option: Option<T>, default: T) -> T {
+    match option {
+        None => default,
+        Some(value) => value,
+    }
+}
+```
+Como no ```map``` usado acima, a implementação da biblioteca padrão é um método em vez de uma função livre.
+
+O truque aqui é que o valor padrão deve ter o mesmo tipo que o valor que pode estar dentro do ``` Option<T>```. Usá-lo é muito simples em nosso caso:
+```
+fn find(haystack: &str, needle: char) -> Option<usize> {
+    for (offset, c) in haystack.char_indices() {
+        if c == needle {
+            return Some(offset);
+        }
+    }
+    None
+}
+
+fn extension(file_name: &str) -> Option<&str> {
+    find(file_name, '.').map(|i| &file_name[i+1..])
+}
+fn main() {
+    assert_eq!(extension("foobar.csv").unwrap_or("rs"), "csv");
+    assert_eq!(extension("foobar").unwrap_or("rs"), "rs");
+}
+```
 
 ### Referências
 https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/book/first-edition/error-handling.html#the-basics
