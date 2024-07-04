@@ -164,6 +164,8 @@ fn main() {
     assert_eq!(extension("foobar").unwrap_or("rs"), "rs");
 }
 ```
+(Observe que ```unwrap_or``` é [definido como um método](https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/std/option/enum.Option.html#method.unwrap_or) em ```Option<T>``` na biblioteca padrão, então usamos ele aqui em vez da função independente que definimos acima. Não se esqueça de verificar o método ```unwrap_or_else``` mais geral.)
+
 
 ### Referências
 https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/book/first-edition/error-handling.html#the-basics
