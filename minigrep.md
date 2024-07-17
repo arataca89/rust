@@ -69,7 +69,7 @@ error: process didn't exit successfully: `target\debug\minigrep.exe string arqui
 
 C:\Users\arataca89\Documents\rust\packages\minigrep>
 ```
-E agora temos a execução com a passagem com um aquivo texto inserido no diretório do pacote.
+E agora temos a execução com a passagem de um aquivo texto inserido no diretório do pacote.
 ```
 C:\Users\arataca89\Documents\rust\packages\minigrep>cargo run -- string rust.txt
     Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.01s
