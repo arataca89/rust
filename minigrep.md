@@ -1,5 +1,5 @@
 # minigrep - escrevendo um programa de linha de comando
-Projeto descrito no [capítulo 12 do "Livro"](https://doc.rust-lang.org/book/ch12-00-an-io-project.html)
+Baseado no projeto descrito no [capítulo 12 do "Livro"](https://doc.rust-lang.org/book/ch12-00-an-io-project.html)
 
 Este projeto escreve uma versão simples da clássica ferramenta ```grep``` presente em sistemas "Unix like". O comando ```grep```, basicamente, procura por um padrão de string em um arquivo. Para isso ele recebe como argumentos um caminho de arquivo (path) e uma string. O comando então lê o arquivo, procura pelas linhas que têm a string procurada e imprime estas linhas na tela.
 
@@ -48,7 +48,7 @@ fn main() {
     println!("{}",arquivo);
 }
 ```
-```fs::read_to_string()``` recebe um caminho de arquivo (path) e retorna ```Result<String>```. ```Result<T, E>``` é o tipo usado para retornar e propagar erros. É um enum com as variantes ````Ok(T)```, representando sucesso e contendo um valor, e ```Err(E)```, representando erro e contendo um valor de erro. [Result](https://doc.rust-lang.org/std/result/).
+```fs::read_to_string()``` recebe um caminho de arquivo (path) e retorna ```Result<String>```. ```Result<T, E>``` é o tipo usado para retornar e propagar erros. É um ```enum``` com as variantes ```Ok(T)```, representando sucesso e contendo um valor, e ```Err(E)```, representando erro e contendo um valor de erro. [Result](https://doc.rust-lang.org/std/result/).
 ```
 enum Result<T, E> {
    Ok(T),
@@ -100,3 +100,26 @@ inspeções de tipos, um formatador automático, e muito mais.
 
 C:\Users\arataca89\Documents\rust\packages\minigrep>
 ```
+
+## 3. Organização do código
+
+A comunidade Rust desenvolveu diretrizes (guidelines) para a organização dos projetos de modo a facilitar o entendimento e manutenção do código. Não convém que todo o código fique na função ```main()```. Para pequenos projetos de estudo e testes rápidos isso é aceitável, mas quando o projeto começa a crescer o entendimento e manutenção já ficarão prejudicados. As diretrizes da comunidade Rust para a organização do código são:
+
+* Divida o projeto nos arquivos ```main.rs``` e ```lib.rs```. ```lib.rs``` deve conter a lógica do programa;
+* Enquanto a lógica de análise da linha de comando for pequena ela pode permanecer em ```main.rs```;
+* Quando a lógica de análise da linha de comando começar a ficar complicada mova-a para ```lib.rs```;
+
+Após este processo as responsabilidades da função ```main()``` devem ser:
+
+* Chamar a lógica de análise da linha de comando com os valores dos argumentos passados na linha de comando;
+* Ajustar qualquer outro tipo de configuração;
+* Chamar a função ```run()``` que deve estar em ```lib.rs``` e vai executar a lógica principal do programa;
+* Manipular erros retornados por ```run()```.
+
+Este padrão separa as tarefas: ```main.rs``` se encarrega de rodar o programa; e ```lib.rs``` é responsável por toda a lógica.
+
+Note que esta organização não permite testar ```main()``` diretamente pois ela apenas chama a lógica que está em funções em ```lib.rs```. Assim, os testes devem ser executados por funções que estarão em ```lib.rs```. ```main()``` terá um código pequeno e simples o suficiente para que a análise visual do código identifique erros.
+
+## 4. Retirando a análise dos argumentos de linha de comando de ```main()```
+
+asdfg
