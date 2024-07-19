@@ -201,5 +201,145 @@ fn parse_args(args: &[String]) -> Config {
 A solução melhor, porém mais complicada, seria configurar o tempo de vida (lifetime) das referências.
 
 ## 6. Criando um construtor para o tipo  ```Config```
+Note que a função ```parse_args()``` recebe o vetor com os argumentos da linha de comando, cria um objeto ```Config```, o configura e o retorna. Podemos melhorar nosso código transformando essa função em um método ```new()``` , associado a  ```struct Config``` , que cria um novo objeto ```Config```. Esta alteração tornará nosso código mais idiomático, mais no jeito Rust de ser, já que normalmente os tipos da biblioteca são criados assim.
+```
+use std::env;
+use std::fs;
+
+struct Config{
+    string: String,
+    filepath: String,
+}
+
+impl Config{
+    fn new(args: &[String]) -> Config {
+        let string = args[1].clone();
+        let filepath = args[2].clone();
+        Config{string, filepath}
+    }
+}
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    let config =  Config::new(&args);
+
+    let file  = fs::read_to_string(config.filepath)
+    .expect("Erro ao tentar ler o arquivo.");
+
+    println!("string  : {}", config.string);
+    println!("filepath:\n{}",file);
+}
+
+```
+
+## 7. Tratamento de erro
+Atualmente nosso programa não está tratando erro. Se tentarmos executar sem passar os argumentos esperados receberemos uma saida semelhante a:
+```
+C:\Users\arataca89\Documents\rust\packages\minigrep>cargo run
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running `target\debug\minigrep.exe`
+thread 'main' panicked at src/main.rs:11:18:
+index out of bounds: the len is 1 but the index is 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: process didn't exit successfully: `target\debug\minigrep.exe` (exit code: 101)
+
+C:\Users\arataca89\Documents\rust\packages\minigrep>
+```
+Inicialmente podemos simplesmente verificar se os argumentos foram passados e, caso não tenham sido, executar a macro ```panic!```.
+```
+impl Config{
+    fn new(args: &[String]) -> Config {
+        if args.len() < 3 {
+            panic!("Erro. Poucos argumentos.\nUso: minigrep string arquivo");
+        }
+        let string = args[1].clone();
+        let filepath = args[2].clone();
+        Config{string, filepath}
+    }
+}
+```
+Tal modificação já melhora, mas é indicada enquanto estamos no desenvolvimento. Ela nos dará uma saída semelhante a:
+```
+C:\Users\arataca89\Documents\rust\packages\minigrep>cargo run
+   Compiling minigrep v0.1.0 (C:\Users\arataca89\Documents\rust\packages\minigrep)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.51s
+     Running `target\debug\minigrep.exe`
+thread 'main' panicked at src/main.rs:12:13:
+Erro. Poucos argumentos.
+Uso: minigrep string arquivo
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: process didn't exit successfully: `target\debug\minigrep.exe` (exit code: 101)
+
+C:\Users\arataca89\Documents\rust\packages\minigrep>
+```
+Apesar da mensagem mais amigável ainda não é o ideal. Além do mais ```panic!``` é mais apropriada para um problema do programa que para um erro do usuário, que é o que temos aqui. O usuário deve fornecer a string e o arquivo para que nosso programa faça o trabalho dele. Código idiomático Rust deve retornar ```Result``` de modo que quem chama possa tratar o possível erro.
+
+Assim, nosso método que constrói um objeto ```Config``` deve retornar um ```Result<T,E>```, ou seja, deve retornar um objeto ```Config``` em caso de sucesso ou um erro em caso de falha. Para isso iremos alterar o nome do métoto ```new()``` para ```build()``` porque código idiomático Rust considera que ```new()``` nunca falha.
+```
+use std::env;
+use std::fs;
+use std::process;
+
+struct Config{
+    string: String,
+    filepath: String,
+}
+
+impl Config{
+    fn build(args: &[String]) -> Result<Config, &'static str> {
+        if args.len() < 3 {
+            return Err("Erro:Poucos argumentos.");
+        }
+        let string = args[1].clone();
+        let filepath = args[2].clone();
+        
+        Ok(Config{string, filepath})
+    }
+}
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    let config =  Config::build(&args).unwrap_or_else(|err|{
+        println!("{err}");
+        println!("Uso: minigrep string arquivo");
+        process::exit(1);
+    });
+
+    let file  = fs::read_to_string(config.filepath)
+    .expect("Erro ao tentar ler o arquivo.");
+
+    println!("string  : {}", config.string);
+    println!("filepath:\n{}",file);
+}
+```
+Agora, se o usuário naõ entrar com os argumentos corretamente a saída será:
+```
+C:\Users\arataca89\Documents\rust\packages\minigrep>cargo run
+   Compiling minigrep v0.1.0 (C:\Users\arataca89\Documents\rust\packages\minigrep)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.77s
+     Running `target\debug\minigrep.exe`
+Erro:Poucos argumentos.
+Uso: minigrep string arquivo
+error: process didn't exit successfully: `target\debug\minigrep.exe` (exit code: 1)
+
+C:\Users\arataca89\Documents\rust\packages\minigrep>
+```
+Note que não aparece a indicação de pânico nem a nota referindo-se a RUST_BACKTRACE. O encerramento ficou bem mais elegante. 
+
+A função que cria um objeto ```Config``` agora é assim:
+```
+    fn build(args: &[String]) -> Result<Config, &'static str> {
+        if args.len() < 3 {
+            return Err("Erro:Poucos argumentos.");
+        }
+        let string = args[1].clone();
+        let filepath = args[2].clone();
+        
+        Ok(Config{string, filepath})
+    }
+```
+Ela retorna um ```Result``` com uma instância ```Config``` no caso de sucesso e uma ```&'static str``` no caso de erro. Os valores de erro retornados em situações semelhantes a essa sempre serão literais de string que possuem lifetime ```'static```.
 
 asdfg
