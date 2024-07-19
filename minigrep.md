@@ -120,6 +120,86 @@ Este padrão separa as tarefas: ```main.rs``` se encarrega de rodar o programa; 
 
 Note que esta organização não permite testar ```main()``` diretamente pois ela apenas chama a lógica que está em funções em ```lib.rs```. Assim, os testes devem ser executados por funções que estarão em ```lib.rs```. ```main()``` terá um código pequeno e simples o suficiente para que a análise visual do código identifique erros.
 
-## 4. Retirando a análise dos argumentos de linha de comando de ```main()```
+## 4. Retirando a análise dos argumentos da linha de comando para fora de ```main()```
+```
+use std::env;
+use std::fs;
+
+fn parse_args(args: &[String]) -> (&str,&str) {
+    let string = &args[1];
+    let filepath = &args[2];
+    (string, filepath)
+}
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+    // for i in 0..args.len(){
+    //     println!{"arg[{}]: {}",i,args[i]};
+    // }
+
+    let(string, filepath) = parse_args(&args);
+
+    let file  = fs::read_to_string(filepath)
+    .expect("Erro ao tentar ler o arquivo.");
+
+    println!("string  : {}", string);
+    println!("filepath:\n{}",file);
+}
+```
+
+## 5. Juntando os valores referentes a string a ser procurada e o nome do arquivo em uma única estrutura
+
+Note que atualmente o código da função que avalia os argumentos da linha de comando, ```parse_args()```, retorna uma tupla e imediatamente a desmembra em duas variáveis. 
+```
+ let(string, filepath) = parse_args(&args);
+```
+Isto indica que provavelmente seria interessante melhorar nossa abstração e criar uma estrutura para encapsular estes dois valores. 
+
+Nosso programa precisa de uma string a ser procurada e de um arquivo onde procurar por tal string. Note que estes valores estão relacionados. Atualmente a tupla que recebe os valores da função ```parse_args()``` funciona mas não transmite bem esse significado. Não indica que os valores estão relacionados. Colocar estes valores em uma ```struct``` e atribuir a eles nomes significativos facilitará o entendimento, indicando que os valores estão relacionados e qual seu propósito.
+Isso facilitará futuras alterações ou manutenção no código.
+```
+use std::env;
+use std::fs;
+
+struct Config{
+    string: String,
+    filepath: String,
+}
+
+fn parse_args(args: &[String]) -> Config {
+    let string = args[1].clone();
+    let filepath = args[2].clone();
+    Config{string, filepath}
+}
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    let config = parse_args(&args);
+
+    let file  = fs::read_to_string(config.filepath)
+    .expect("Erro ao tentar ler o arquivo.");
+
+    println!("string  : {}", config.string);
+    println!("filepath:\n{}",file);
+}
+```
+Observe que a variável ```args``` na função ```main()``` é proprietária do vetor de argumentos da linha de comando e apenas empresta este vetor para a função ```parse_args()```.
+```
+    let args: Vec<String> = env::args().collect();
+
+    let config = parse_args(&args);
+```
+Isto significa que se a função ```parse_args()``` tentar assumir a propriedade dos argumentos para construir o objeto ```Config``` a ser retornado, isso irá violar as regras de empréstimo de Rust (borrowing). Uma maneira simples, porém ineficiente, de resolver este problema é usar o método ```clone()``` para criar uma cópia dos dados que poderão ser apropriados pelo objeto ```Config```.
+```
+fn parse_args(args: &[String]) -> Config {
+    let string = args[1].clone();
+    let filepath = args[2].clone();
+    Config{string, filepath}
+}
+```
+A solução melhor, porém mais complicada, seria configurar o tempo de vida (lifetime) das referências.
+
+## 6. Criando um construtor para o tipo  ```Config```
 
 asdfg
