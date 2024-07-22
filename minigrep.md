@@ -273,7 +273,7 @@ error: process didn't exit successfully: `target\debug\minigrep.exe` (exit code:
 
 C:\Users\arataca89\Documents\rust\packages\minigrep>
 ```
-Apesar da mensagem mais amigável ainda não é o ideal. Além do mais ```panic!``` é mais apropriada para um problema do programa que para um erro do usuário, que é o que temos aqui. O usuário deve fornecer a string e o arquivo para que nosso programa faça o trabalho dele. Código idiomático Rust deve retornar ```Result``` de modo que quem chama possa tratar o possível erro.
+Apesar da mensagem mais amigável, ainda não é o ideal. Além do mais ```panic!``` é mais apropriada para um problema do programa que para um erro do usuário, que é o que temos aqui. O usuário deve fornecer a string e o arquivo para que nosso programa faça o trabalho dele. Código idiomático Rust deve retornar ```Result``` de modo que quem chama possa tratar o possível erro.
 
 Assim, nosso método que constrói um objeto ```Config``` deve retornar um ```Result<T,E>```, ou seja, deve retornar um objeto ```Config``` em caso de sucesso ou um erro em caso de falha. Para isso iremos alterar o nome do métoto ```new()``` para ```build()``` porque código idiomático Rust considera que ```new()``` nunca falha.
 ```
@@ -314,7 +314,7 @@ fn main() {
     println!("filepath:\n{}",file);
 }
 ```
-Agora, se o usuário naõ entrar com os argumentos corretamente a saída será:
+Agora, se o usuário não entrar com os argumentos corretamente, a saída será:
 ```
 C:\Users\arataca89\Documents\rust\packages\minigrep>cargo run
    Compiling minigrep v0.1.0 (C:\Users\arataca89\Documents\rust\packages\minigrep)
@@ -340,6 +340,18 @@ A função que cria um objeto ```Config``` agora é assim:
         Ok(Config{string, filepath})
     }
 ```
-Ela retorna um ```Result``` com uma instância ```Config``` no caso de sucesso e uma ```&'static str``` no caso de erro. Os valores de erro retornados em situações semelhantes a essa sempre serão literais de string que possuem lifetime ```'static```.
+Ela retorna um ```Result``` com uma instância ```Config``` em caso de sucesso, e uma ```&'static str``` em caso de erro. Os valores de erro retornados em situações semelhantes a essa sempre serão literais de string que possuem lifetime ```'static```.
+
+Retornar um valor ```Err``` de ```Config::build```, em caso de erro, permite que ```main()``` possa processar o erro de maneira adequada.
+```
+    let config =  Config::build(&args).unwrap_or_else(|err|{
+        println!("{err}");
+        println!("Uso: minigrep string arquivo");
+        process::exit(1);
+    });
+```
+O método ```unwrap_or_else()``` é útil em situações semelhantes a essa. Em caso de sucesso ele retorna o valor encapsulado na variante ```Ok``` de ```Result```. Em caso de erro ele executa a closure passada como argumento. Neste caso, nossa closure recebe a mensagem de erro retornada por ```build()```, exibe esta mensagem na tela e encerra o programa com ```process::exit()```. 
+
+
 
 asdfg
