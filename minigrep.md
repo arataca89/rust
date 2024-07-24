@@ -352,6 +352,104 @@ Retornar um valor ```Err``` de ```Config::build```, em caso de erro, permite que
 ```
 O método ```unwrap_or_else()``` é útil em situações semelhantes a essa. Em caso de sucesso ele retorna o valor encapsulado na variante ```Ok``` de ```Result```. Em caso de erro ele executa a closure passada como argumento. Neste caso, nossa closure recebe a mensagem de erro retornada por ```build()```, exibe esta mensagem na tela e encerra o programa com ```process::exit()```. 
 
+## 8. Retirando a lógica principal de ```main()```
+A fim de seguir as melhores práticas, citadas mais acima, e tornar o código mais fácil de ler, entender e manutenir vamos criar uma função chamada ```run()``` a qual conterá toda a lógica principal que atualmente ainda está em ```main()```. Após esta alteração, ```main()``` estará livre de manipular os argumentos passados na linha de comando e do respectivo tratamento de erro, ficando concisa e fácil de ser verificada por uma simples inspeção visual. Esta alteração também facilitará a escrita de testes para o código que executa a lógica principal.
+```
+use std::env;
+use std::fs;
+use std::process;
+
+struct Config{
+    string: String,
+    filepath: String,
+}
+
+impl Config{
+    fn build(args: &[String]) -> Result<Config, &'static str> {
+        if args.len() < 3 {
+            return Err("Erro:Poucos argumentos.");
+        }
+        let string = args[1].clone();
+        let filepath = args[2].clone();
+        
+        Ok(Config{string, filepath})
+    }
+}
+
+fn run(config: Config){
+    let file  = fs::read_to_string(config.filepath)
+    .expect("Erro ao tentar ler o arquivo.");
+
+    println!("string  : {}", config.string);
+    println!("file    :\n{}",file);
+}
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    let config =  Config::build(&args).unwrap_or_else(|err|{
+        println!("{err}");
+        println!("Uso: minigrep string arquivo");
+        process::exit(1);
+    });
+
+    run(config);
+}
+```
+## 9. Refatorando ```run()``` para que execute o tratamento de erro
+Similar ao que foi feito com ```Config::build()``` vamos refatorar ```run()``` para que, em vez de chamar ```panic!```, ela retorne um ```Result<T,E>```.
+```
+use std::env;
+use std::fs;
+use std::process;
+use std::error::Error;
+
+
+struct Config{
+    string: String,
+    filepath: String,
+}
+
+impl Config{
+    fn build(args: &[String]) -> Result<Config, &'static str> {
+        if args.len() < 3 {
+            return Err("Erro:Poucos argumentos.");
+        }
+        let string = args[1].clone();
+        let filepath = args[2].clone();
+        
+        Ok(Config{string, filepath})
+    }
+}
+
+fn run(config: Config) -> Result<(),Box<dyn Error>> {
+
+    let file  = fs::read_to_string(config.filepath)?;
+
+    println!("string  : {}", config.string);
+    println!("file    :\n{}",file);
+
+    Ok(())
+}
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    let config =  Config::build(&args).unwrap_or_else(|err|{
+        println!("{err}");
+        println!("Uso: minigrep string arquivo");
+        process::exit(1);
+    });
+
+    if let Err(e) = run(config){
+        println!("Erro:{e}");
+        process::exit(1);
+    }
+}
+```
+
+
+
 
 
 asdfg
