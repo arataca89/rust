@@ -447,7 +447,15 @@ fn main() {
     }
 }
 ```
+A primeira observação acerca deste código recai no tipo de retorno da função ```run()```. Agora a função retorna ```Result<(),Box<dyn Error>>```. Observe que, em caso de sucesso, a função retorna um ```Ok()``` contendo o [tipo unidade](https://doc.rust-lang.org/std/primitive.unit.html), ```()```; segundo a referência Rust, O tipo ```()``` tem exatamente um valor, que é ```()```, e é usado quando não há outro valor significativo a ser retornado. Este valor é normalmente usado implicitamente em funções que não apresentam valor de retorno em suas implementações, ou seja, os códigos abaixo são equivalentes:
+```
+fn myfunction() -> () {}
 
+fn myfunction() {}
+```
+Em caso de erro, ```run()``` agora retorna um objeto trait do tipo ```Box<dyn Error>```; para isso há necessidade de importar ```std::error::Error```. Este retorno indica que a função retornará um tipo que implementa a trait ```Error```, mas não especificamos qual tipo será. Isso nos dá flexibilidade para retornar valores de erro que podem ser de tipos diferentes em diferentes casos de erro. A palavra-chave ```dyn``` aqui significa dinâmico (dynamic).
+
+Note também que ```expect``` foi substituída pelo operador ```?```. Em vez de chamar ```panic!``` em caso de erro, o operador ```?``` retornará o valor do erro da função atual para o chamador manipular.
 
 
 
