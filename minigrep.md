@@ -457,7 +457,11 @@ Em caso de erro, ```run()``` agora retorna um objeto trait do tipo ```Box<dyn Er
 
 Note também que ```expect``` foi substituída pelo operador ```?```. Em vez de chamar ```panic!``` em caso de erro, o operador ```?``` retornará o valor do erro da função atual para o chamador manipular.
 
+A sintaxe retornando um ```Ok()``` com um tipo unidade, ```Ok(())``` pode parecer estranha, mas é a maneira idiomática Rust de indicar que a função executará seu trabalho sem retornar nada.
 
+Note também que em ```main()```, ao chamar ```run()``` nós agora só precisamos tratar o erro, pois ```run()``` não retornará nada em caso de sucesso. Isto nos permite usar a construção ```if let``` em vez de termos que usar  ```unwrap_or_else```.
 
+## 10. Separando a lógica para um crate de biblioteca
 
+Para melhor organização do projeto vamos 
 asdfg
