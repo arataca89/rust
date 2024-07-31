@@ -11,6 +11,9 @@ Este projeto escreve uma versão simples da clássica ferramenta ```grep``` pres
 
 [4. Retirando a análise dos argumentos da linha de comando para fora de ```main()```](#4-Retirando-a-análise-dos-argumentos-da-linha-de-comando-para-fora-de-main)
 
+[5. Juntando os valores referentes a string a ser procurada e o nome do arquivo em uma única estrutura](#5-Juntando-os-valores-referentes-a-string-a-ser-procurada-e-o-nome-do-arquivo-em-uma-única-estrutura)
+
+
 
 ## 1. Recebendo argumentos da linha de comando
 
