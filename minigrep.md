@@ -463,5 +463,68 @@ Note também que em ```main()```, ao chamar ```run()``` nós agora só precisamo
 
 ## 10. Separando a lógica para um crate de biblioteca
 
-Para melhor organização do projeto vamos 
+Para melhor organização do projeto vamos dividir o código entre os arquivos ```main.rs``` e ```lib.rs```, assim poderemos testar o código e deixar ```main.rs``` com poucas responsabilidades. Vamos mover todo o código que não está na função ```main()``` para o arquivo ```lib.rs```:
+* A função ```run()```;
+* As declarações ```use``` necessárias;
+* A estrutura ```Config```;
+* A implementação dos métodos para ```Config```, no caso apenas a função ```build()```.
+
+Abaixo temos o código do arquivo ```lib.rs```
+```
+// lib.rs
+use std::fs;
+use std::error::Error;
+
+pub struct Config{
+    pub string: String,
+    pub filepath: String,
+}
+
+impl Config{
+    pub fn build(args: &[String]) -> Result<Config, &'static str> {
+        if args.len() < 3 {
+            return Err("Erro:Poucos argumentos.");
+        }
+        let string = args[1].clone();
+        let filepath = args[2].clone();
+        
+        Ok(Config{string, filepath})
+    }
+}
+
+pub fn run(config: Config) -> Result<(),Box<dyn Error>> {
+
+    let file  = fs::read_to_string(config.filepath)?;
+
+    println!("string  : {}", config.string);
+    println!("file    :\n{}",file);
+
+    Ok(())
+}
+```
+E aqui temos como ficou o arquivo ```main.rs```:
+```
+// main.rs
+use std::env;
+use std::process;
+
+use minigrep::Config;
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    let config =  Config::build(&args).unwrap_or_else(|err|{
+        println!("{err}");
+        println!("Uso: minigrep string arquivo");
+        process::exit(1);
+    });
+
+    if let Err(e) = minigrep::run(config){
+        println!("Erro:{e}");
+        process::exit(1);
+    }
+}
+```
+
+
 asdfg
