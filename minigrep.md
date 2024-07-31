@@ -7,6 +7,10 @@ Este projeto escreve uma versão simples da clássica ferramenta ```grep``` pres
 
 [2. Lendo o arquivo](#2-Lendo-o-arquivo)
 
+[3. Organização do código](#3-Organização-do-código)
+
+[4. Retirando a análise dos argumentos da linha de comando para fora de ```main()```](#4-Retirando-a-análise-dos-argumentos-da-linha-de-comando-para-fora-de-```main()```)
+
 
 ## 1. Recebendo argumentos da linha de comando
 
