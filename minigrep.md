@@ -29,6 +29,8 @@ Este projeto escreve uma versão simples da clássica ferramenta ```grep``` pres
 
 [13. Escrevendo código para o teste passar](#13-Escrevendo-código-para-o-teste-passar)
 
+[14. Inserindo a chamada a ```search()``` em ```run()```](#14-Inserindo-a-chamada-a-search-em-run)
+
 ---
 
 ## 1. Recebendo argumentos da linha de comando
@@ -613,9 +615,9 @@ mod tests{
     fn test1(){
         let query = "string";
         let contents = "\
-        linha 1 
-        linha 2 string
-        linha 3 ";
+linha 1 
+linha 2 string
+linha 3 ";
         assert_eq!(vec!["linha 2 string"], search(query,contents));
     }
 }
@@ -627,5 +629,24 @@ A barra invertida logo após as aspas duplas, no início da string "contents" di
 Note que foi necessário definir um lifetime ```'a``` na função ```search()```. Este lifetime conecta o parâmetro ```contents``` e o valor de retorno. Isto é necessário porque não há criação de novos valores aqui, os valores são emprestados. Aqui indicamos que o vetor retornado possui referências a slices de string que estão no parâmetro ```contents``` e para que essas referências existam ```contents``` deve existir. Se este ajuste de lifetime não for feito, Rust emitirá uma erro de compilação.
 
 ## 13. Escrevendo código para o teste passar
+
+Para o teste passar devemos ajustar a função ```search()``` que é quem irá procurar pela string nas linhas e retornar um vetor com as linhas. Esta codificação é facilitada pela biblioteca Rust que possui duas funções interessantes para este programa. Para percorrer as linhas do arquivo podemos usar o  método ```lines()``` que itera linha por linha numa string. Este método retorna um iterator; e para verificar se a linha possui a string podemos usar o método ```contains()``` que, como o nome sugere, verifica se um slice de string contém uma "sub-slice" de string passada como argumento. Abaixo temos o código de ```search()```.
+```
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+
+    let mut results = Vec::new();
+
+    for line in contents.lines(){
+        if line.contains(query){
+            results.push(line);
+        }
+    }
+
+    results
+}
+```
+Agora se executarmos o comando ```cargo test```, o teste irá passar.
+
+## 14. Inserindo a chamada a ```search()``` em ```run()```
 
 asdfgh
