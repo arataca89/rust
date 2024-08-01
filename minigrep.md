@@ -630,7 +630,7 @@ Note que foi necessário definir um lifetime ```'a``` na função ```search()```
 
 ## 13. Escrevendo código para o teste passar
 
-Para o teste passar devemos ajustar a função ```search()``` que é quem irá procurar pela string nas linhas. Esta codificação é facilitada pela biblioteca Rust que possui duas funções interessantes para este programa. Para percorrer as linhas do arquivo podemos usar o  método ```lines()``` que itera linha por linha numa string. Este método retorna um iterator; e para verificar se a linha possui a string podemos usar o método ```contains()``` que, como o nome sugere, verifica se um slice de string contém uma "sub-slice" de string passada como argumento. Abaixo temos o código de ```search()```.
+Para o teste passar devemos ajustar a função ```search()``` que é quem irá procurar pela string nas linhas. Esta codificação é facilitada pela biblioteca Rust que possui duas funções interessantes para este programa. Para percorrer as linhas do arquivo podemos usar o  método ```lines()``` que itera linha por linha numa string; e para verificar se a linha possui a string podemos usar o método ```contains()``` que, como o nome sugere, verifica se um slice de string contém uma "sub-slice" de string passada como argumento. Abaixo temos o código de ```search()```.
 ```
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
 
