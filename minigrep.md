@@ -620,7 +620,7 @@ mod tests{
     }
 }
 ```
-Foi adicionado o módulo ```tests``` a uma primeira função de teste. A função ```search()``` foi escrita para o teste falhar, ela retorna um vetor ```&str``` vazio enquanto a função de teste compara este vetor retornado com um vetor que possui a linha que seria retornada numa situação de funcionamento normal do programa.
+Foi adicionado o módulo ```tests``` e uma primeira função de teste. A função ```search()``` foi escrita para o teste falhar, ela retorna um vetor ```&str``` vazio enquanto a função de teste compara este vetor retornado com um vetor que possui a linha que seria retornada numa situação de funcionamento normal do programa.
 
 A barra invertida logo após as aspas duplas, no início da string "contents" diz ao Rust para não coloca o caractere de nova linha no início do conteúdo desta string literal.
 
