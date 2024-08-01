@@ -17,7 +17,7 @@ Este projeto escreve uma versão simples da clássica ferramenta ```grep``` pres
 
 [7. Tratamento de erro](#7-Tratamento-de-erro)
 
-[8. Retirando a lógica principal de ```main()```](#8-Retirando-a-lógica-principal-de-main-)
+[8. Retirando a lógica principal de ```main()```](#8-Retirando-a-lógica-principal-de-main)
 
 ## 1. Recebendo argumentos da linha de comando
 
