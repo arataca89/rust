@@ -622,7 +622,7 @@ mod tests{
 ```
 Foi adicionado o módulo ```tests``` e uma primeira função de teste. A função ```search()``` foi escrita para o teste falhar, ela retorna um vetor ```&str``` vazio enquanto a função de teste compara este vetor retornado com um vetor que possui a linha que seria retornada numa situação de funcionamento normal do programa.
 
-A barra invertida logo após as aspas duplas, no início da string "contents" diz ao Rust para não coloca o caractere de nova linha no início do conteúdo desta string literal.
+A barra invertida logo após as aspas duplas, no início da string "contents" diz ao Rust para não colocar o caractere de nova linha no início do conteúdo desta string literal.
 
 Note que foi necessário definir um lifetime ```'a``` na função ```search()```. Este lifetime conecta o parâmetro ```contents``` e o valor de retorno. Isto é necessário porque não há criação de novos valores aqui, os valores são emprestados. Aqui indicamos que o vetor retornado possui referências a slices de string que estão no parâmetro ```contents``` e para que essas referências existam ```contents``` deve existir. Se este ajuste de lifetime não for feito, Rust emitirá uma erro de compilação.
 
