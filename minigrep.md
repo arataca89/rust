@@ -19,6 +19,12 @@ Este projeto escreve uma versão simples da clássica ferramenta ```grep``` pres
 
 [8. Retirando a lógica principal de ```main()```](#8-Retirando-a-lógica-principal-de-main)
 
+[9. Refatorando ```run()``` para que execute o tratamento de erro](#9-Refatorando-run-para-que-execute-o-tratamento-de-erro)
+
+[10. Separando a lógica para um crate de biblioteca](#10-Separando-a-lógica-para-um-crate-de-biblioteca)
+
+---
+
 ## 1. Recebendo argumentos da linha de comando
 
 Inicialmente nosso programa tem que aceitar argumentos da linha de comando. No site [https://crates.io](https://crates.io) existem bibliotecas que permitem manipular argumentos de linha de comando, mas neste projeto esta tarefa será implementada pois é um projeto de estudo.
