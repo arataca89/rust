@@ -13,7 +13,11 @@ Este projeto escreve uma versão simples da clássica ferramenta ```grep``` pres
 
 [5. Juntando os valores referentes a string a ser procurada e o nome do arquivo em uma única estrutura](#5-Juntando-os-valores-referentes-a-string-a-ser-procurada-e-o-nome-do-arquivo-em-uma-única-estrutura)
 
+[6. Criando um construtor para o tipo  ```Config```](#6-Criando-um-construtor-para-o-tipo-Config)
 
+[7. Tratamento de erro](#7-Tratamento-de-erro)
+
+[8. Retirando a lógica principal de ```main()```](#8-Retirando-a-lógica-principal-de-main-)
 
 ## 1. Recebendo argumentos da linha de comando
 
