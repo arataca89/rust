@@ -562,7 +562,7 @@ Adicionaremos a lógica principal do nosso ```minigrep``` para procurar por uma 
 3. Refatorar o código quando necessário, certificando-se que continua a passar no teste;
 4. Voltar ao passo 1.
 
-Este típo de desenvolvimento ajuda muito pois quando escrevemos o teste temos que pensar em como nossa função deve comportar-se, o que deve rececer, o que deve retornar, etc... ou seja, ajuda inclusive no design da função propriamente dita.
+Este típo de desenvolvimento ajuda muito pois quando escrevemos o teste temos que pensar em como nossa função deve comportar-se, o que deve receber, o que deve retornar, etc... ou seja, ajuda inclusive no design da função propriamente dita.
 
 
 asdfg
