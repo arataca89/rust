@@ -649,4 +649,19 @@ Agora se executarmos o comando ```cargo test```, o teste irá passar.
 
 ## 14. Inserindo a chamada a ```search()``` em ```run()```
 
+Com ```search``` funcionando beleza basta inserir uma chamada em ```run()```.
+
+```
+pub fn run(config: Config) -> Result<(),Box<dyn Error>> {
+
+    let file  = fs::read_to_string(config.filepath)?;
+
+    for line in search(&config.string, &file){
+        println!("{line}");
+    }
+
+    Ok(())
+}
+```
+
 asdfgh
