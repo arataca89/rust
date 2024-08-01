@@ -23,6 +23,8 @@ Este projeto escreve uma versão simples da clássica ferramenta ```grep``` pres
 
 [10. Separando a lógica para um crate de biblioteca](#10-Separando-a-lógica-para-um-crate-de-biblioteca)
 
+[11. Desenvolvendo a funcionalidade da biblioteca usando TDD](#11-Desenvolvendo-a-funcionalidade-da-biblioteca-usando-TDD)
+
 ---
 
 ## 1. Recebendo argumentos da linha de comando
@@ -547,6 +549,20 @@ fn main() {
     }
 }
 ```
+Note a utilização da palavra-chave ```pub``` em ```lib.rs```. Como será a API do nosso programa a estrutura e funções deste crate devem ter acesso público. Em ```main.rs``` tivemos que importar as funcionalidades usando ```use```.
+
+## 11. Desenvolvendo a funcionalidade da biblioteca usando TDD
+
+TDD, "Test-Driven Development", "Desenvolvimento Dirigido por Testes" numa tradução livre, é muito usado em Rust. Neste ponto extraímos a lógica principal e colocamos em ```lib.rs```; e deixamos em ```main.rs``` apenas a coleta dos argumentos de linha de comando e o tratamento de erros. Agora é muito mais fácil escrever testes para a funcionalidade principal do nosso código. Podemos chamar funções diretamente com vários argumentos e verificar valores de retorno sem precisar chamar o binário na linha de comando, apenas usaremos as ferramentas de testes do Rust.
+
+Adicionaremos a lógica principal do nosso ```minigrep``` para procurar por uma string e exibir cada linha do arquivo que tenha esta string. Para isso usaremos o TDD que, basicamente, consiste em:
+
+1. Escrever um teste que deve falhar;
+2. Alterar o código para que o teste passe, tenha sucesso;
+3. Refatorar o código quando necessário, certificando-se que continua a passar no teste;
+4. Voltar ao passo 1.
+
+Este típo de desenvolvimento ajuda muito pois quando escrevemos o teste temos que pensar em como nossa função deve comportar-se, o que deve rececer, o que deve retornar, etc... ou seja, ajuda inclusive no design da função propriamente dita.
 
 
 asdfg
