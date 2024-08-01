@@ -25,6 +25,10 @@ Este projeto escreve uma versão simples da clássica ferramenta ```grep``` pres
 
 [11. Desenvolvendo a funcionalidade da biblioteca usando TDD](#11-Desenvolvendo-a-funcionalidade-da-biblioteca-usando-TDD)
 
+[12. Escrevendo o teste que falha](#12-Escrevendo-o-teste-que-falha)
+
+[13. Escrevendo código para o teste passar](#13-Escrevendo-código-para-o-teste-passar)
+
 ---
 
 ## 1. Recebendo argumentos da linha de comando
@@ -564,5 +568,64 @@ Adicionaremos a lógica principal do nosso ```minigrep``` para procurar por uma 
 
 Este típo de desenvolvimento ajuda muito pois quando escrevemos o teste temos que pensar em como nossa função deve comportar-se, o que deve receber, o que deve retornar, etc... ou seja, ajuda inclusive no design da função propriamente dita.
 
+## 12. Escrevendo o teste que falha
+```
+// lib.rs
+use std::fs;
+use std::error::Error;
+
+pub struct Config{
+    pub string: String,
+    pub filepath: String,
+}
+
+impl Config{
+    pub fn build(args: &[String]) -> Result<Config, &'static str> {
+        if args.len() < 3 {
+            return Err("Erro:Poucos argumentos.");
+        }
+        let string = args[1].clone();
+        let filepath = args[2].clone();
+        
+        Ok(Config{string, filepath})
+    }
+}
+
+pub fn run(config: Config) -> Result<(),Box<dyn Error>> {
+
+    let file  = fs::read_to_string(config.filepath)?;
+
+    //println!("string  : {}", config.string);
+    //println!("file    :\n{}",file);
+
+    Ok(())
+}
+
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+    vec![]
+}
+
+#[cfg(test)]
+mod tests{
+    use super::*;
+
+    #[test]
+    fn test1(){
+        let query = "string";
+        let contents = "\
+        linha 1 
+        linha 2 string
+        linha 3 ";
+        assert_eq!(vec!["linha 2 string"], search(query,contents));
+    }
+}
+```
+Foi adicionado o módulo ```tests``` a uma primeira função de teste. A função ```search()``` foi escrita para o teste falhar, ela retorna um vetor ```&str``` vazio enquanto a função de teste compara este vetor retornado com um vetor que possui a linha que seria retornada numa situação de funcionamento normal do programa.
+
+A barra invertida logo após as aspas duplas, no início da string "contents" diz ao Rust para não coloca o caractere de nova linha no início do conteúdo desta string literal.
+
+Note que foi necessário definir um lifetime ```'a``` na função ```search()```. Este lifetime conecta o parâmetro ```contents``` e o valor de retorno. Isto é necessário porque não há criação de novos valores aqui, os valores são emprestados. Aqui indicamos que o vetor retornado possui referências a slices de string que estão no parâmetro ```contents``` e para que essas referências existam ```contents``` deve existir. Se este ajuste de lifetime não for feito, Rust emitirá uma erro de compilação.
+
+## 13. Escrevendo código para o teste passar
 
 asdfg
