@@ -13,7 +13,7 @@ Este projeto escreve uma versão simples da clássica ferramenta ```grep``` pres
 
 [5. Juntando os valores referentes a string a ser procurada e o nome do arquivo em uma única estrutura](#5-Juntando-os-valores-referentes-a-string-a-ser-procurada-e-o-nome-do-arquivo-em-uma-única-estrutura)
 
-[6. Criando um construtor para o tipo  ```Config```](#6-Criando-um-construtor-para-o-tipo-Config)
+[6. Criando um construtor para o tipo ```Config```](#6-Criando-um-construtor-para-o-tipo-Config)
 
 [7. Tratamento de erro](#7-Tratamento-de-erro)
 
@@ -216,7 +216,7 @@ fn parse_args(args: &[String]) -> Config {
 ```
 A solução melhor, porém mais complicada, seria configurar o tempo de vida (lifetime) das referências.
 
-## 6. Criando um construtor para o tipo  ```Config```
+## 6. Criando um construtor para o tipo ```Config```
 Note que a função ```parse_args()``` recebe o vetor com os argumentos da linha de comando, cria um objeto ```Config```, o configura e o retorna. Podemos melhorar nosso código transformando essa função em um método ```new()``` , associado a  ```struct Config``` , que cria um novo objeto ```Config```. Esta alteração tornará nosso código mais idiomático, mais no jeito Rust de ser, já que normalmente os tipos da biblioteca são criados assim.
 ```
 use std::env;
