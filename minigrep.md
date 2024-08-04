@@ -31,6 +31,10 @@ Este projeto escreve uma versão simples da clássica ferramenta ```grep``` pres
 
 [14. Inserindo a chamada a ```search()``` em ```run()```](#14-Inserindo-a-chamada-a-search-em-run)
 
+[15. Adicionando o recurso ```case insensitive```](#15-Adicionando-o-recurso-case-insensitive)
+
+[16. Inserindo a nova funcionalidade em ```run()```](#16-Inserindo-a-nova-funcionalidade-em-run)
+
 ---
 
 ## 1. Recebendo argumentos da linha de comando
@@ -663,5 +667,118 @@ pub fn run(config: Config) -> Result<(),Box<dyn Error>> {
     Ok(())
 }
 ```
+## 15. Adicionando o recurso ```case insensitive```
 
-asdfgh
+Vamos adicionar o recurso para que a busca ignore a caixa das letras. Inicialmente, seguindo o desenvolvimento dirigido a testes, TDD, vamos criar o teste para a função que executará esta tarefa.
+
+```
+// lib.rs
+
+.....
+(código omitido)
+.....
+
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+
+    let mut results = Vec::new();
+
+    for line in contents.lines(){
+        if line.contains(query){
+            results.push(line);
+        }
+    }
+
+    results
+}
+
+pub fn search_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+
+    //let mut results = Vec::new();
+
+    // for line in contents.lines(){
+    //     if line.contains(query){
+    //         results.push(line);
+    //     }
+    // }
+
+    // results
+
+    vec![]
+}
+
+#[cfg(test)]
+mod tests{
+    use super::*;
+
+    #[test]
+    fn case_sensitive(){
+        let query = "string";
+        let contents = "\
+linha 1 
+linha 2 string
+linha 3 ";
+        assert_eq!(vec!["linha 2 string"], search(query,contents));
+    }
+
+    #[test]
+    fn case_insensitive(){
+        let query = "String";
+        let contents = "\
+linha 1 
+linha 2 String
+linha 3 string";
+        assert_eq!(vec!["linha 2 String","linha 3 string"], search_insensitive(query,contents));
+    }
+
+}
+```
+
+Executando ```cargo test``` nosso teste insensitive deve falhar. Agora vamos implementar o código para que o teste passe.
+```
+// lib.rs
+.....
+(código omitido)
+.....
+
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+
+    let mut results = Vec::new();
+
+    for line in contents.lines(){
+        if line.contains(query){
+            results.push(line);
+        }
+    }
+
+    results
+}
+
+pub fn search_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+
+    let query = query.to_lowercase();
+
+    let mut results = Vec::new();
+
+    for line in contents.lines(){
+        if line.to_lowercase().contains(&query){
+            results.push(line);
+        }
+    }
+
+    results
+
+}
+.....
+(código omitido)
+.....
+```
+Note a utilização do método de biblioteca ```to_lowercase()``` para converter as slices de string para caixa baixa e poder fazer a comparação apropriadamente.
+
+Uma variável local auxiliar foi criada na função ```search_insensitive()``` para armazenar o valor de ```query``` convertido para caixa baixa. Isto é possível pois ```to_lowercase()``` retorna uma nova ```String```. Isto permite a comparação sem alterar o valor original. O mesmo acontece com a variável ```line``` do loop ```for```. Veja que a comparação no loop ```for``` é feita com o objeto retornado por ```to_lowercase()``` e não com ```line```. Assim, ```line``` insere a slice de string original no vetor, se a comparação for verdadeira.
+
+Como essa variável auxiliar local ```query``` vai receber um objeto ```String```, temos que inserir o ```&``` na chamada a ```contains()```, pois este método recebe um slice de string e não um objeto String.
+
+
+## 16. Inserindo a nova funcionalidade em ```run()```
+
+asdfgh  df 123
