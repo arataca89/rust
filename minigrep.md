@@ -734,6 +734,7 @@ linha 3 string";
 ```
 
 Executando ```cargo test``` nosso teste insensitive deve falhar. Agora vamos implementar o código para que o teste passe.
+
 ```
 // lib.rs
 .....
@@ -772,6 +773,7 @@ pub fn search_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
 (código omitido)
 .....
 ```
+
 Note a utilização do método de biblioteca ```to_lowercase()``` para converter as slices de string para caixa baixa e poder fazer a comparação apropriadamente.
 
 Uma variável local auxiliar foi criada na função ```search_insensitive()``` para armazenar o valor de ```query``` convertido para caixa baixa. Isto é possível pois ```to_lowercase()``` retorna uma nova ```String```. Isto permite a comparação sem alterar o valor original. O mesmo acontece com a variável ```line``` do loop ```for```. Veja que a comparação no loop ```for``` é feita com o objeto retornado por ```to_lowercase()``` e não com ```line```. Assim, ```line``` insere a slice de string original no vetor, se a comparação for verdadeira.
@@ -781,4 +783,98 @@ Como essa variável auxiliar local ```query``` vai receber um objeto ```String``
 
 ## 16. Inserindo a nova funcionalidade em ```run()```
 
-asdfgh  df 123
+Para executar ativando ```ignore case``` , primeiro vamos inserir um campo booleano na estrutura ```Config``` que nos permita escolher qual das funções ```search``` usar:
+
+```
+.....
+(código omitido)
+.....
+pub struct Config{
+    pub string: String,
+    pub filepath: String,
+    pub ignore_case: bool,
+}
+.....
+(código omitido)
+.....
+```
+
+Depois devemos modificar ```run()``` para que verifique o valor de ```ignore_case``` e escolha a função correta:
+```
+.....
+(código omitido)
+.....
+pub fn run(config: Config) -> Result<(),Box<dyn Error>> {
+
+    let file  = fs::read_to_string(config.filepath)?;
+
+    let results = if config.ignore_case {
+        search_insensitive(&config.string, &file)
+    } else {
+        search(&config.string, &file)
+    };
+
+    for line in results {
+        println!("{line}");
+    }
+
+    Ok(())
+}
+.....
+(código omitido)
+.....
+```
+
+Finalmente devemos verificar o valor da variável de ambiente que será usada para ligar ou desligar ```ignore_case```. 
+
+```
+.....
+(código omitido)
+.....
+    pub fn build(args: &[String]) -> Result<Config, &'static str> {
+        if args.len() < 3 {
+            return Err("Erro:Poucos argumentos.");
+        }
+        let string = args[1].clone();
+        let filepath = args[2].clone();
+        let ignore_case = env::var("IGNORE_CASE").is_ok();
+        
+        Ok(Config{string, filepath, ignore_case})
+    }
+    
+.....
+(código omitido)
+.....
+```
+
+Foi usada a função ```env::var()```. Esta função recebe o nome de uma variável de ambiente e retorna um ```Result```. Este ```Result``` retornará como ```Ok``` , com o valor da variável de ambiente, se ela exitir; ou retornará um ```Err``` caso ela não exista no ambiente. Foi usado também o método ```is_ok()``` no ```Result``` retornado para verificar a existência da variável de ambiente. Se a variável de ambiente não estiver sido configurada, ```is_ok()``` retornará ```false```.
+
+
+Note que não nos interessa, neste caso, o valor da variável de ambiente, apenas se ela está definida ou não. Por isso que aqui foi usada a função ```is_ok()``` e não ```unwrap```, ```expect``` ou qualquer outro método que normalmente se usa com ```Result```.
+
+Para executar o programa com a opção ```ignore case``` devemos primeiro ajustar a variável de ambiente. Em ambiente Linux o comando será:
+
+```
+$ IGNORE_CASE=1 cargo run -- String rust.txt
+```
+
+Em ambiente Windows devemos criar a variável de ambiente no ```cmd``` do Windows. Para isso use o comando:
+```
+SET IGNORE_CASE=1
+```
+Agora, ao executar ```cargo run``` nosso programa vai ativar a opção ```ignore case```.
+
+```
+cargo run -- String rust.txt
+```
+
+Para desativar a variável de ambiente use o comando:
+```
+SET IGNORE_CASE=
+```
+
+Após ativar essa variável de ambiente a saída do programa irá exibir as linhas sem considerar a caixa, como é esperado.
+
+---
+
+arataca89@gmail.com
