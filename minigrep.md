@@ -1,5 +1,7 @@
 # minigrep - escrevendo um programa de linha de comando
+
 Baseado no projeto descrito no [capítulo 12 do "Livro"](https://doc.rust-lang.org/book/ch12-00-an-io-project.html)
+
 
 Este projeto escreve uma versão simples da clássica ferramenta ```grep``` presente em sistemas "Unix like". O comando ```grep```, basicamente, procura por um padrão de string em um arquivo. Para isso ele recebe como argumentos um caminho de arquivo (path) e uma string. O comando então lê o arquivo, procura pelas linhas que têm a string procurada e imprime estas linhas na tela.
 
@@ -34,6 +36,8 @@ Este projeto escreve uma versão simples da clássica ferramenta ```grep``` pres
 [15. Adicionando o recurso ```case insensitive```](#15-Adicionando-o-recurso-case-insensitive)
 
 [16. Inserindo a nova funcionalidade em ```run()```](#16-Inserindo-a-nova-funcionalidade-em-run)
+
+[17. Enviando as mensagens de erro para ```strerr```](#17-Enviando-as-mensagens-de-erro-para-strerr)
 
 ---
 
@@ -875,6 +879,30 @@ SET IGNORE_CASE=
 
 Após ativar essa variável de ambiente a saída do programa irá exibir as linhas sem considerar a caixa, como é esperado.
 
----
 
+## 17. Enviando as mensagens de erro para ```strerr```
+
+Normalmente, os programas de linha de comando enviam as mensagens de erro para a saída de erro padrão, de modo que ainda possamos ver mensagens de erro na tela mesmo se redirecionarmos a saída bem sucedida para um arquivo.
+
+Para fazer isto basta alterar a macro ```println!``` para ```eprintln!``` em ```main()```.
+```
+fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    let config =  Config::build(&args).unwrap_or_else(|err|{
+        eprintln!("{err}");
+        eprintln!("Uso: minigrep string arquivo");
+        process::exit(1);
+    });
+
+    if let Err(e) = minigrep::run(config){
+        eprintln!("Erro:{e}");
+        process::exit(1);
+    }
+}
+```
+
+---
 arataca89@gmail.com
+
+Última atualização: 20240812
