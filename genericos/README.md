@@ -4,6 +4,9 @@ Toda linguagem de programação tem ferramentas para efetivamente tratar a dupli
 
 [1. Evitando a duplicação de código usando uma função](#1-Evitando-a-duplicação-de-código-usando-uma-função)
 
+[2. Usando genéricos para que nossa função aceite qualquer tipo de dados](#2-Usando-genéricos-para-que-nossa-função-aceite-qualquer-tipo-de-dados)
+
+[3. Usando genéricos em structs](#3-Usando-genéricos-em-structs)
 
 ---
 
@@ -59,15 +62,15 @@ fn main() {
 ```
 Note que houve duplicação de código e isto é cansativo e propenso a erros. Outra grande desvantagem da duplicação de código é no momento de realizar alguma correção ou alteração. Você terá que alterar seu código em vários locais e esquecer de um deles é bem comum.
 
-Uma maneira de evitar esta duplicação de código seria criar uma função que recebe uma lista de inteiros e retorna seu maior valor.
+Uma maneira de evitar esta duplicação de código seria criar uma função que recebe uma lista de inteiros e retorna seu maior valor. Esta solução torna nosso código mais claro e nos permite expressar o conceito de encontrar o maior número em uma lista de forma abstrata. 
+
 
 ```
+fn maior(slice_int: &[i32]) -> &i32 {
 
-fn maior(vetor_int: &[i32]) -> &i32 {
+    let mut maior_valor = &slice_int[0];
 
-    let mut maior_valor = &vetor_int[0];
-
-    for n in vetor_int {
+    for n in slice_int {
         if n > maior_valor {
             maior_valor = n;
         }
@@ -92,6 +95,84 @@ fn main() {
 
 ```
  
+ ## 2. Usando genéricos para que nossa função aceite qualquer tipo de dados
+ 
+E se quisermos uma função que retorne o maior valor em um slice de char, ou em um slice de f64, ou em um slice de qualquer outro tipo de dados ??? Uma solução seria escrever outra função similar a nossa função ```maior()``` usando outro tipo de dados, mas isto também caracterizaria duplicação de código. O recurso dos genéricos pode ser utilizado nestes casos. 
+ 
+Genéricos são usados para criar funções ou structs que podem ser usadas com muitos tipos de dados concretos diferentes. Abaixo temos a implementação da função ```maior()``` usando genéricos.
+
+```
+fn maior<T>(slice_t: &[T]) -> &T {
+    let mut maior_valor = &slice_t[0];
+
+    for n in slice_t {
+        if n > maior_valor {
+            maior_valor = n;
+        }
+    }
+
+    maior_valor
+}
+
+fn main() {
+    let v1 = vec![34, 50, 25, 100, 65];
+
+    let x = maior(&v1);
+
+    println!("O maior valor é {x}"); // 100
+
+    let v2 = vec!['a','s','d','f','g'];
+
+    let x = maior(&v2);
+
+    println!("O maior valor é {x}"); // s
+}
+```
+Ao ser compilado este código emitirá a seguinte mensagem de erro:
+```
+error[E0369]: binary operation `>` cannot be applied to type `&T`
+ --> src/main.rs:7:14
+  |
+7 |         if n > maior_valor {
+  |            - ^ ----------- &T
+  |            |
+  |            &T
+  |
+help: consider restricting type parameter `T`
+  |
+3 | fn maior<T: std::cmp::PartialOrd>(slice_t: &[T]) -> &T {
+  |           ++++++++++++++++++++++
+```
+Nas mensagens de erro exibidas, ```std::cmp::PartialOrd``` é uma ```trait```. Esta mensagem significa que a função ```maior()``` não funcionará para todos os tipos possíveis que ```T``` poderá assumir. Como queremos comparar valores do tipo ```T```, podemos usar apenas tipos cujos valores podem ser ordenados. Para habilitar comparações, a biblioteca padrão Rust tem a trait ```std::cmp::PartialOrd``` que você pode implementar em seus tipos (mais informações em [https://doc.rust-lang.org/beta/std/cmp/trait.PartialOrd.html](https://doc.rust-lang.org/beta/std/cmp/trait.PartialOrd.html)). 
+
+Note que o compilador emite um ```help``` onde ele considera restringir  os tipos válidos para ```T``` somente aos tipos que implementam ```PartialOrd``` e este exemplo será compilado. Isto acontece porque a biblioteca padrão implementa ```PartialOrd``` em ```i32``` e ```char```, que são os tipos utilizados neste exemplo.
+
+Seguindo a dica do compilador, nossa função ```maior()``` ficará assim:
+```
+//fn maior<T>(slice_T: &[T]) -> &T {
+fn maior<T: std::cmp::PartialOrd>(slice_t: &[T]) -> &T {
+    let mut maior_valor = &slice_t[0];
+
+    for n in slice_t {
+        if n > maior_valor {
+            maior_valor = n;
+        }
+    }
+
+    maior_valor
+}
+```
+E agora o código compilará beleza.
+
+Observe a sintaxe que indica que o tipo ```T``` implementa a trait ```PartialOrd```.
+
+```
+<T: std::cmp::PartialOrd>
+```
+
+ ## 3. Usando genéricos em structs
+ 
+ asdfg
 
 ---
 ## Referências
@@ -102,4 +183,4 @@ fn main() {
 
 arataca89@gmail.com
 
-Última atualização: 20240902
+Última atualização: 20240904
