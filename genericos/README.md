@@ -8,6 +8,8 @@ Toda linguagem de programação tem ferramentas para efetivamente tratar a dupli
 
 [3. Usando genéricos em structs](#3-Usando-genéricos-em-structs)
 
+[4. Usando genéricos em enums](#4-Usando-genéricos-em-enums)
+
 ---
 
 ## 1. Evitando a duplicação de código usando uma função
@@ -170,7 +172,48 @@ Observe a sintaxe que indica que o tipo ```T``` implementa a trait ```PartialOrd
 <T: std::cmp::PartialOrd>
 ```
 
+É importante também notar que o identificador do parâmero do tipo genérico,  ```T``` neste caso, pode ser qualquer identificador válido, mas por convenção usa-se uma letra maiúscula (T, V, U, etc...).
+
+
  ## 3. Usando genéricos em structs
+ 
+ ```
+ struct Point<T> {
+    x: T,
+    y: T,
+}
+
+fn print<T: std::fmt::Display>(p: Point<T>){
+    println!("{{{},{}}}",p.x,p.y);
+}
+
+fn main() {
+    let ponto_int = Point { x: 5, y: 10 };
+    let ponto_float = Point { x: 1.0, y: 4.0 };
+
+    print(ponto_int);
+    print(ponto_float);
+}
+```
+
+Observe que neste caso a função ```print()``` aceitará tipos que implementam a trait ```std::fmt::Display```. Se não fizermos isso, a compilação emitirá um erro solicitando esta implementação.
+
+```
+error[E0277]: `T` doesn't implement `std::fmt::Display`
+ --> src/main.rs:8:26
+  |
+8 |     println!("{{{},{}}}",p.x,p.y);
+  |                          ^^^ `T` cannot be formatted with the default formatter
+  |
+  = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+  = note: this error originates in the macro `$crate::format_args_nl` which comes from the expansion of the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider restricting type parameter `T`
+  |
+6 | fn print<T: std::fmt::Display>(p: Point<T>){
+  |           +++++++++++++++++++
+```
+ 
+ ## 4. Usando genéricos em enums
  
  asdfg
 
@@ -183,4 +226,4 @@ Observe a sintaxe que indica que o tipo ```T``` implementa a trait ```PartialOrd
 
 arataca89@gmail.com
 
-Última atualização: 20240904
+Última atualização: 20240905
