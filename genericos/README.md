@@ -10,6 +10,8 @@ Toda linguagem de programação tem ferramentas para efetivamente tratar a dupli
 
 [4. Usando genéricos em enums](#4-Usando-genéricos-em-enums)
 
+[5. Usando genéricos em métodos](#5-Usando-genéricos-em-métodos)
+
 ---
 
 ## 1. Evitando a duplicação de código usando uma função
@@ -213,9 +215,86 @@ help: consider restricting type parameter `T`
   |           +++++++++++++++++++
 ```
  
- ## 4. Usando genéricos em enums
+## 4. Usando genéricos em enums
  
- asdfg
+Assim como nas structs, as enums podem ter tipos genéricos em suas variantes. Observe abaixo uma implementação da enum ```Option<T>``` que faz parte da biblioteca padrão da lingaugem Rust.
+
+```
+enum Option<T> {
+    Some(T),
+    None,
+}
+```
+
+Note que esta enum possui um parâmetro genérico chamado ```T``` e duas variantes:
+
+* ```Some``` que tem um valor; e
+* ```None``` que não tem nenhum valor.
+
+
+Ao usar  ```Option<T>```, podemos expressar o conceito abstrato de um valor opcional e, como ```Option<T>``` é genérico, podemos usar essa abstração independentemente do tipo concreto de dados a ser utilizado.
+
+Outro exemplo da utilização de genéricos na biblioteca Rust é a enum ```Result```.
+
+```
+enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+```
+
+A enum ```Result``` possui duas variantes:
+
+* ```Ok``` que tem o parâmetro genérico ```T```; e
+* ```Err``` que tem o parâmtero genérico ```E```
+
+Note que neste caso usamos dois tipos genéricos, indicando que em ```Result``` podemos usar dois tipos concretos diferentes.
+
+```Result``` expressa o conceito abstrato de uma operação que pode ser bem sucedida e retornar um valor de algum tipo ```T``` ou mal sucedida e retornar um valor do tipo ```E```, que significa erro.
+
+## 5. Usando genéricos em métodos
+
+```
+struct Point<T> {
+    x: T,
+    y: T,
+}
+
+impl<T> Point<T> {
+    fn x(&self) -> &T {
+        &self.x
+    }
+
+    fn y(&self) -> &T {
+        &self.y
+    }
+}
+
+impl Point<f32> {
+    fn distance_from_origin(&self) -> f32 {
+        (self.x.powi(2) + self.y.powi(2)).sqrt()
+    }
+}
+
+
+fn main() {
+    let p = Point{x: 5, y: 10};
+
+    println!("p.x = {}", p.x());
+    println!("p.y = {}", p.y());
+
+    let p2 = Point{x: 2.0, y: 3.0};
+
+    println!("Distância de p2 até a origem: {}", p2.distance_from_origin());
+}
+```
+Observe que você pode implementar métodos para qualquer tipo concreto e pode também implementar métodos para determinados tipos, como foi feito acima no método ```distance_from_origin()``` o 	qual só atua em ```Point``` do tipo ```f32```.
+
+Este código significa que o tipo ```Point<f32>``` terá um método ```distance_from_origin()```; outras instâncias de ```Point<T>``` onde ```T``` não é do tipo ```f32``` não terão esse método definido.
+
+
+
+asdfg
 
 ---
 ## Referências
@@ -226,4 +305,4 @@ help: consider restricting type parameter `T`
 
 arataca89@gmail.com
 
-Última atualização: 20240905
+Última atualização: 20240907
