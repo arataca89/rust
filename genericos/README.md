@@ -12,6 +12,10 @@ Toda linguagem de programação tem ferramentas para efetivamente tratar a dupli
 
 [5. Usando genéricos em métodos](#5-Usando-genéricos-em-métodos)
 
+[6. Usando parêmtros genéricos diferentes em métodos](#6-Usando-parêmtros-genéricos-diferentes-em-métodos)
+
+[7. Custo de performance usando genéricos](#7-Custo-de-performance-usando-genéricos)
+
 ---
 
 ## 1. Evitando a duplicação de código usando uma função
@@ -293,8 +297,49 @@ Observe que você pode implementar métodos para qualquer tipo concreto e pode t
 Este código significa que o tipo ```Point<f32>``` terá um método ```distance_from_origin()```; outras instâncias de ```Point<T>``` onde ```T``` não é do tipo ```f32``` não terão esse método definido.
 
 
+## 6. Usando parâmetros genéricos diferentes em métodos
 
-asdfg
+```
+struct Point<X1, Y1> {
+    x: X1,
+    y: Y1,
+}
+
+impl<X1, Y1> Point<X1, Y1> {
+    fn mixup<X2, Y2>(self, other: Point<X2, Y2>) -> Point<X1, Y2> {
+        Point {
+            x: self.x,
+            y: other.y,
+        }
+    }
+}
+
+fn main() {
+    let p1 = Point { x: 5, y: 10.4 };
+    let p2 = Point { x: "Hello", y: 'c' };
+
+    let p3 = p1.mixup(p2);
+
+    println!("p3.x = {}, p3.y = {}", p3.x, p3.y); // p3.x = 5, p3.y = c
+}
+```
+
+Neste exemplo, observe que ```p1``` foi criado com ```x``` sendo um ```i32``` com valor 5; e ```y``` sendo um ```f64``` com valor 10.4.
+
+```p2```, por sua vez, foi criado com ```x``` sendo um ```&str``` (slice de string) com valor "Hello"; e ```y``` sendo um ```char``` com valor 'c'. 
+
+Como o método ```mixup()``` foi declarado com outros parâmetros genéricos podemos misturar os tipos criando um ```Point``` com o ```x``` de ```p1``` e o ```y``` de ```p2```.
+
+
+## 7. Custo de performance usando genéricos 
+
+Você pode estar se perguntando se há algum custo no tempo de execução ao usar parâmetros genéricos. A boa notícia é que usar tipos genéricos não fará seu programa rodar mais devagar do que faria com tipos concretos.
+
+Rust faz isso realizando a monomorfização do código usando genéricos em tempo de compilação. Monomorfização é o processo de transformar código genérico em código específico substituindo os parâmetros genéricos por tipos concretos que são usados no momento da compilação. 
+
+O Rust reescreve o código substituindo os parâmetros genéricos com os tipos concretos e só depois executa a compilação, então não há custo em tempo de execução. Quando o código é executado, ele funciona como se nós tivéssemos escrito as structs, funções e métodos com os tipos concretos. 
+
+Este processo torna o uso de genéricos em Rust extremamente prático e eficiente em tempo de execução.
 
 ---
 ## Referências
@@ -305,4 +350,4 @@ asdfg
 
 arataca89@gmail.com
 
-Última atualização: 20240907
+Última atualização: 20240909
