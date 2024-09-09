@@ -1,4 +1,4 @@
-# Tipos genéricos, traits e lifetime em Rust
+# Genéricos em Rust
 
 Toda linguagem de programação tem ferramentas para efetivamente tratar a duplicação de conceitos e códigos. Em Rust, uma destas ferramentas são os genéricos. Como o próprio nome já indica, o tipo genérico em um código significa que este código poderá ser executado com qualquer tipo concreto e funcionará do mesmo jeito.
 
