@@ -221,7 +221,7 @@ help: consider restricting type parameter `T`
  
 ## 4. Usando genéricos em enums
  
-Assim como nas structs, as enums podem ter tipos genéricos em suas variantes. Observe abaixo uma implementação da enum ```Option<T>``` que faz parte da biblioteca padrão da lingaugem Rust.
+Assim como nas structs, as enums podem ter tipos genéricos em suas variantes. Observe abaixo uma implementação da enum ```Option<T>``` que faz parte da biblioteca padrão da linguagem Rust.
 
 ```
 enum Option<T> {
