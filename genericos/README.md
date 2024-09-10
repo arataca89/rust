@@ -12,7 +12,7 @@ Toda linguagem de programação tem ferramentas para efetivamente tratar a dupli
 
 [5. Usando genéricos em métodos](#5-Usando-genéricos-em-métodos)
 
-[6. Usando parêmtros genéricos diferentes em métodos](#6-Usando-parêmtros-genéricos-diferentes-em-métodos)
+[6. Usando parâmetros genéricos diferentes em métodos](#6-Usando-parâmtros-genéricos-diferentes-em-métodos)
 
 [7. Custo de performance usando genéricos](#7-Custo-de-performance-usando-genéricos)
 
