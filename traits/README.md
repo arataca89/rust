@@ -368,7 +368,7 @@ help: if you change the return type to expect trait objects, box the returned ex
 149 ~         Box::new(Circulo{raio: 4.5})
 ```
 
-Com esta implementação Rust espera que o tipo retornado seja 'Retangulo' e emite erro porque o ramo 'else' retorna um tipo 'Circulo'. Isso acontece porque Rust precisa saber que o tipo retornado será escolhido dinamicamente e para isso podemos que usar o tipo 'Box' (como sugerido na mensagem de erro). 'Box' é uma estrutura que refere-se a um objeto alocado no heap.
+Com esta implementação Rust espera que o tipo retornado seja 'Retangulo' e emite erro porque o ramo 'else' retorna um tipo 'Circulo'. Isso acontece porque Rust precisa saber que o tipo retornado será escolhido dinamicamente e para isso podemos usar o tipo 'Box' (como sugerido na mensagem de erro). 'Box' é uma estrutura que refere-se a um objeto alocado no heap.
 
 ```
 // Função que retorna tipos que implementam a trait 'FiguraPlana
