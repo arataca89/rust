@@ -14,7 +14,7 @@ Traits são semelhantes ao recurso chamado de interfaces em outras linguagens.
 
 [4. Implementação padrão em métodos de uma trait](#4-Implementação-padrão-em-métodos-de-uma-trait)
 
-[5. Trait como parâmetro](#5-Trait-como-parâmetro)
+[5. Trait como parâmetro](#5-Trait-como-parâmetro-de-função)
 
 [6. Retornando tipos que implementam uma trait](#6-Retornando-tipos-que-implementam-uma-trait)
 
