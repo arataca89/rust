@@ -13,6 +13,8 @@ A sintaxe de lifetime não é um conceito que a maioria das outras linguagens de
 
 [2. O borrow checker](#2-O-borrow-checker)
 
+[3. Lifetimes genéricos em funções](#3-Lifetimes-genéricos-em-funções)
+
 ---
 
 ## 1. Evitando dangling references usando lifetimes
@@ -87,6 +89,23 @@ fn main() {
 ```
 
 O tempo e vida (lifetime) de ``` r ``` é anotado como ``` 'a ``` e o de ``` x ``` é anotado como ``` 'b ```. Observe que o escopo de 'b é bem menor que o escopo de 'a. Rust compara estes escopos em tempo de compilação e vê que r tem o escopo 'a mas refere-se a uma posição de memória que tem escopo 'b e o programa não é aceito porque 'b é menor que 'a. O objeto referenciado, no caso x, não vive tanto quanto a própria referência, no caso r. 
+
+Abaixo temos a correção deste código para que ele não tenha dangling reference compile sem erros.
+
+```
+fn main() {
+    let x = 5;            // ----------+-- 'b
+                          //           |
+    let r = &x;           // --+-- 'a  |
+                          //   |       |
+    println!("r: {r}");   //   |       |
+                          // --+       |
+}                         // ----------+  
+```
+
+Agora o lifetime de x, que é 'b, é maior que o lifetime de r, que é 'a; e r pode referenciar x porque Rust sabe que a referência em r sempre será válida pois x, o objeto referenciado, tem um tempo de vida maior que a referência.
+
+## 3. Lifetimes genéricos em funções
 
 asd
 
