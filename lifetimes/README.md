@@ -9,9 +9,9 @@ O Rust exige que anotemos as relações usando parâmetros de lifetime genérico
 A sintaxe de lifetime não é um conceito que a maioria das outras linguagens de programação possui, então isso vai parecer estranho no início. Este artigo discute as maneiras mais comuns de utilização de lifetimes de modo que você possa se familiarizar com o conceito. 
 
 
-[## 1. Evitando dangling references usando lifetimes](#1-Evitando-dangling-references-usando-lifetimes)
+[1. Evitando dangling references usando lifetimes](#1-Evitando-dangling-references-usando-lifetimes)
 
-[## 2. O borrow checker](#2-O-borrow-checker)
+[2. O borrow checker](#2-O-borrow-checker)
 
 ---
 
@@ -69,7 +69,7 @@ Se Rust permitisse que esse código funcionasse, 'r' estaria referenciando memó
 
 ## 2. O borrow checker
 
-O compilador Rust possui um recurso chamado 'borrow checker' (verificador de emprestimo) que compara os escopos para determinar se todos os empréstimos são válidos.
+O compilador Rust possui um recurso chamado 'borrow checker' (verificador de empréstimo) que compara os escopos para determinar se todos os empréstimos são válidos.
 
 Abaixo vemos o código anterior com anotações mostrando os tempos de vida (lifetimes) das variáveis.
 
@@ -86,7 +86,7 @@ fn main() {
 }                         // ---------+
 ```
 
-O tempo e vida (lifetime) de 'r' é anotado como ``` 'a ``` e o de 'x' é anotado como ``` 'b ```. Observe que o escopo de 'b é bem menor que o escopo de 'a. Rust compara estes escopos em tempo de compilação e vê que 'r' tem o escopo 'a mas refere-se a uma posição de memória que tem escopo 'b' e o programa não é aceito porque 'b é menor que 'a. O objeto referenciado, no caso 'x, não vive tanto quanto a própria referência, no caso 'r. 
+O tempo e vida (lifetime) de ``` r ``` é anotado como ``` 'a ``` e o de ``` x ``` é anotado como ``` 'b ```. Observe que o escopo de 'b é bem menor que o escopo de 'a. Rust compara estes escopos em tempo de compilação e vê que r tem o escopo 'a mas refere-se a uma posição de memória que tem escopo 'b e o programa não é aceito porque 'b é menor que 'a. O objeto referenciado, no caso x, não vive tanto quanto a própria referência, no caso r. 
 
 asd
 
