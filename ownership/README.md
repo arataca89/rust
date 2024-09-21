@@ -6,6 +6,7 @@ Ownership (propriedade) é o recurso do Rust que tem mais implicações profunda
 
 [2. Movendo dados na memória](#2-Movendo-dados-na-memória)
 
+[3. Clonando dados na memória](#3-Clonando-dados-na-memória)
 
 ---
 
@@ -79,11 +80,66 @@ Vamos dar uma olhada no mesmto tipo de código, mas usando um tipo complexo, por
 
 Isso parece muito semelhante, então poderíamos assumir que a forma como funciona seria a mesma: ou seja, a segunda linha faria uma cópia do valor em s1 e o vincularia a s2. Mas isso não é bem o que acontece. 
 
-Observe na figura abaixo como um objeto String é armazenado. Um objeto String é composto por três partes: um ponteiro para a memória que contém o conteúdo da string, um comprimento e uma capacidade. Este grupo de dados é armazenado na pilha. À direita está a memória no heap que contém o conteúdo. 
+Observe na figura abaixo como um objeto String é armazenado na memória. Na parte esquerda temos a representação do objeto s1 do tipo String. Um objeto String é composto por três partes: um ponteiro(ptr) para a memória que contém o conteúdo da string, um comprimento(len) e uma capacidade(capacity). Este grupo de dados é armazenado na pilha. À direita está a memória no heap que contém o conteúdo. 
 
 <img alt="Campos de um objeto String" src="images/ownership1.svg" class="center" style="width: 50%;">
  
- 
+O comprimento é a quantidade de memória, em bytes, que o conteúdo da String está usando atualmente. A capacidade é a quantidade total de memória, em bytes, que a String recebeu do alocador. A diferença entre comprimento e capacidade é importante, mas não neste contexto, então, por enquanto, está tudo bem ignorar a capacidade. 
+
+Quando atribuímos s1 a s2, os dados da String são copiados, o que significa que copiamos o ponteiro, o comprimento e a capacidade que estão na pilha. Não copiamos os dados na memória heap para os quais o ponteiro se refere. Em outras palavras, a representação de dados na memória se parece com a figura abaixo. 
+
+<img alt="Atribuindo um objeto String a outra variavel" src="images/ownership2.svg" class="center" style="width: 50%;">
+
+A representação <font color="red">NÃO</font> se parece com a figura abaixo, que é como a memória seria se o Rust copiasse os dados do heap também. Se o Rust fizesse isso, a operação s2 = s1 poderia ser muito cara em termos de desempenho de tempo de execução se os dados no heap fossem grandes. 
+
+<img alt="Se String fosse copiado" src="images/ownership3.svg" class="center" style="width: 50%;">
+
+Anteriormente, dissemos que quando uma variável sai do escopo, o Rust chama automaticamente a função drop() e limpa a memória heap para essa variável. Mas observe, na figura mais acima referente a atribuição de s1 a s2, que ambos os ponteiros de dados apontam para a mesma região de memória heap. Isso é um problema: quando s2 e s1 saem do escopo, ambos tentarão liberar a mesma memória. Isso é conhecido como erro de liberação dupla (double free error) e é um dos bugs de segurança de memória que mencionamos anteriormente. Liberar memória duas vezes pode levar à corrupção de memória, o que pode levar a vulnerabilidades de segurança.
+
+Para garantir a segurança da memória, após a linha ```let s2 = s1;```, o Rust considera s1 como inválido. Portanto, o Rust não precisa liberar nada quando s1 sai do escopo. Verifique o que acontece quando você tenta usar s1 depois que s2 é criado; não funcionará: 
+
+```
+    let s1 = String::from("hello");
+    let s2 = s1;
+
+    println!("{s1}, world!");
+```
+
+Ao compilar este código você receberá o seguinte erro porque Rust impede que você use a referência inválida: 
+
+```
+$ cargo run
+   Compiling ownership v0.1.0 (file:///projects/ownership)
+error[E0382]: borrow of moved value: `s1`
+ --> src/main.rs:5:15
+  |
+2 |     let s1 = String::from("hello");
+  |         -- move occurs because `s1` has type `String`, which does not implement the `Copy` trait
+3 |     let s2 = s1;
+  |              -- value moved here
+4 |
+5 |     println!("{s1}, world!");
+  |               ^^^^ value borrowed here after move
+  |
+  = note: this error originates in the macro `$crate::format_args_nl` which comes from the expansion of the macro `println` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider cloning the value if the performance cost is acceptable
+  |
+3 |     let s2 = s1.clone();
+  |                ++++++++
+
+For more information about this error, try `rustc --explain E0382`.
+error: could not compile `ownership` (bin "ownership") due to 1 previous error
+```
+
+Se você já ouviu os termos shallow copy(cópia superficial) e deep copy(cópia profunda) ao trabalhar com outras linguagens, o conceito de copiar o ponteiro, o comprimento e a capacidade sem copiar os dados provavelmente soa como fazer uma cópia superficial. Mas, como o Rust também invalida a primeira variável, em vez de ser chamada de cópia superficial, este procedimento é conhecido como movimentação. Neste exemplo, diríamos que s1 foi movido para s2. Então, o que realmente acontece é mostrado na figura abaixo.
+
+<img alt="Movimentação de um objeto String" src="images/ownership4.svg" class="center" style="width: 50%;">
+
+Isso resolve nosso problema! Com apenas a variável s2 válida, quando ela sair do escopo, ela sozinha liberará a memória, e pronto.
+
+Além disso, há uma escolha de design que é implícita por isso: Rust nunca criará automaticamente cópias "profundas" de seus dados. Portanto, qualquer cópia automática pode ser considerada barata em termos de desempenho de tempo de execução. 
+
+## 3. Clonando dados na memória
 
 asd
 
