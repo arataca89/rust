@@ -8,6 +8,15 @@ Ownership (propriedade) é o recurso do Rust que tem mais implicações profunda
 
 [3. Clonando dados na memória](#3-Clonando-dados-na-memória)
 
+[4. A trait Copy](#4-A-trait-Copy)
+
+[5. Ownership e funções](#5-Ownership-e-funções)
+
+[6. Valores de retorno e escopo](#6-Valores-de-retorno-e-escopo)
+
+[7. Referências e empréstimo](#7-Referências-e-empréstimo)
+
+
 ---
 
 ## 1. Entendendo o que é ownership
@@ -140,6 +149,121 @@ Isso resolve nosso problema! Com apenas a variável s2 válida, quando ela sair 
 Além disso, há uma escolha de design que é implícita por isso: Rust nunca criará automaticamente cópias "profundas" de seus dados. Portanto, qualquer cópia automática pode ser considerada barata em termos de desempenho de tempo de execução. 
 
 ## 3. Clonando dados na memória
+
+Se quisermos fazer deep copy(cópia profunda) de um objeto, ou seja, copiar os dados armazenados na memória heap além dos dados armazenados na memória stack (pilha), podemos usar o método ```clone()```.
+
+```
+    let s1 = String::from("hello");
+    let s2 = s1.clone();
+
+    println!("s1 = {s1}, s2 = {s2}");
+```
+
+Após este código teremos dois objetos String, cada um com suas partes na memória stack e na memória heap. Lembre-se que este método executa a cópia como imaginamos mas tem um custo.
+
+Lembre-se que tipos simples (inteiros, float, char, boolean) que têm um tamanho conhecido em tempo de compilação, são armazenados inteiramente na pilha (memória stack), então cópias dos valores reais são rápidas de fazer. Isso significa que neste caso não há necessidade de usar o método clone(). Em outras palavras, não há diferença entre shallow copy(cópia superficial) e deep copy(cópia profunda) ao lidar com tipos simples, então chamar clone() não faria nada diferente da cópia superficial comum.
+
+## 4. A trait Copy
+
+Rust possui uma anotação especial chamada de ```trait Copy``` que podemos colocar em tipos que são armazenados na pilha, como inteiros. Se um tipo implementa o trait Copy, variáveis que o usam não são movidas, mas sim copiadas, tornando-as ainda válidas após a atribuição a outra variável. 
+
+O Rust não permite que anotemos um tipo com Copy se o tipo, ou qualquer uma de suas partes, implementou a trait ```Drop```. Se o tipo precisar de algum procedimento especial quando o valor sair do escopo e adicionarmos a anotação Copy a esse tipo, obteremos um erro de compilação. Para saber como adicionar a anotação Copy ao seu tipo para implementar a trait, consulte [Traits deriváveis](https://doc.rust-lang.org/book/appendix-03-derivable-traits.html).
+
+Então, quais tipos implementam a trait Copy? Você pode verificar a documentação do tipo fornecido para ter certeza, mas, como regra geral, qualquer grupo de valores escalares simples pode implementar Copy, e nada que exija alocação na memória heap ou aquisição de algum recurso pode implementar Copy. Aqui estão alguns dos tipos que implementam Copy:
+
+* Todos os tipos inteiros, como u32.
+* O tipo booleano, bool, com valores true e false.
+* Todos os tipos de ponto flutuante, como f64.
+* O tipo de caractere, char.
+* Tuplas, se elas contiverem apenas tipos que também implementam Copy. Por exemplo, (i32, i32) implementa Copy, mas (i32, String) não.
+
+## 5. Ownership e funções
+
+A mecânica de passar um valor para uma função é semelhante àquela quando se atribui um valor a uma variável. Passar uma variável para uma função moverá ou copiará, assim como a atribuição. 
+
+```
+fn main() {
+    let s = String::from("hello");  // s entra no escopo
+
+    takes_ownership(s);             // o valor de s é movido para dentro da função...
+                                    // ... e não é mais válido aqui
+
+    let x = 5;                      // x entra no escopo
+
+    makes_copy(x);                  // x poderia ser movido para dentro da função,
+                                    // mas i32 é Copy, então beleza
+                                    // usar x depois
+} // Aqui x sai do escopo; s também, mas como s foi movido está tudo certo.
+
+fn takes_ownership(some_string: String) { // some_string entra no escopo
+    println!("{some_string}");
+} // Aqui, some_string sai do escopo e `drop()` é chamado e
+  // a memória alocada é liberada.
+
+fn makes_copy(some_integer: i32) { // some_integer entra no escopo
+    println!("{some_integer}");
+} // Aqui, some_integer sai do escopo. Nada de especial acontece.
+```
+Se tentássemos usar s após a chamada para takes_ownership(), Rust lançaria um erro de compilação. Essas verificações estáticas nos protegem de erros. 
+
+## 6. Valores de retorno e escopo
+
+Retornar valores também pode transferir a propriedade. 
+
+```
+fn main() {
+    let s1 = gives_ownership();         // gives_ownership move seu valor de retorno
+                                        // value into s1
+
+    let s2 = String::from("hello");     // s2 entra no escopo
+
+    let s3 = takes_and_gives_back(s2);  // s2 é movido para dentro de
+                                        // takes_and_gives_back(), que por sua vez
+                                        // move seu valor de retorno para s3
+} // Aqui, s3 sai do escopo e drop() é chamado. s2 foi movido, então nada
+  // acontece. s1 sai do escopo e drop() é chamado.
+
+fn gives_ownership() -> String {             // gives_ownership() moverá seu
+                                             // valor de retorno para a função chamadora.
+
+    let some_string = String::from("yours"); // some_string entra no escopo
+
+    some_string                              // some_string é retornada e
+                                             // movida para fora para a função chamadora.
+}
+
+// Esta função pega um objeto String e retorna outro.
+fn takes_and_gives_back(a_string: String) -> String { // a_string entra no escopo
+
+    a_string  // a_string é retornada e movida para a função chamadora.
+}
+```
+
+A propriedade de uma variável segue o mesmo padrão sempre: atribuir um valor a outra variável move o valor. Quando uma variável que inclui dados no heap sai do escopo, o valor será limpo por drop(), a menos que a propriedade dos dados tenha sido movida para outra variável. 
+
+Embora isso funcione, assumir a propriedade e depois retornar a propriedade com cada função é um pouco tedioso. E se quisermos permitir que uma função use um valor, mas não assuma a propriedade? É bastante irritante que tudo o que passarmos também precise ser passado de volta se quisermos usá-lo novamente, além de quaisquer dados resultantes do corpo da função que possamos querer retornar também. 
+
+Rust nos permite retornar múltiplos valores usando uma tupla, como mostrado abaixo.
+
+```
+fn main() {
+    let s1 = String::from("hello");
+
+    let (s2, len) = calculate_length(s1);
+
+    println!("The length of '{s2}' is {len}.");
+}
+
+fn calculate_length(s: String) -> (String, usize) {
+    let length = s.len(); // len() retorna o tamanho da String
+
+    (s, length)
+}
+``` 
+
+Mas nem sempre é isso que queremos. Felizmente para nós, Rust tem um recurso para usar um valor sem transferir a propriedade, chamado ```referência```. 
+
+## 7. Referências e empréstimo
 
 asd
 
