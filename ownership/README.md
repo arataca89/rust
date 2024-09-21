@@ -81,8 +81,6 @@ Isso parece muito semelhante, então poderíamos assumir que a forma como funcio
 
 Observe na figura abaixo como um objeto String é armazenado. Um objeto String é composto por três partes: um ponteiro para a memória que contém o conteúdo da string, um comprimento e uma capacidade. Este grupo de dados é armazenado na pilha. À direita está a memória no heap que contém o conteúdo. 
 
- ![Campos de um objeto String](./images/ownership1.svg)
- 
 <img alt="Campos de um objeto String" src="images/ownership1.svg" class="center" style="width: 50%;">
  
  
