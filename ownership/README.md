@@ -16,6 +16,9 @@ Ownership (propriedade) é o recurso do Rust que tem mais implicações profunda
 
 [7. Referências e empréstimo](#7-Referências-e-empréstimo)
 
+[8. Dangling References](#8-Dangling-References)
+
+[9. O tipo de dados slice](#9-O-tipo-de-dados-slice)
 
 ---
 
@@ -265,6 +268,239 @@ Mas nem sempre é isso que queremos. Felizmente para nós, Rust tem um recurso p
 
 ## 7. Referências e empréstimo
 
+Observe que no código da função  calculate_length() temos que retornar a String para que a função chamadora ainda possa usar a String após a chamada a calculate_length(). Isto tem que ser feito porque a String foi movida para dentro calculate_length(). Por isso tivemos que retornar a String e o tamanho da String, os dois valores encapsulados numa tupla.
+
+Em vez disso, podemos fornecer uma referência ao valor da String. Uma referência é como um ponteiro, pois é um endereço de memória que podemos seguir para acessar os dados armazenados naquele endereço; esses dados são de propriedade de alguma outra variável. Ao contrário de um ponteiro, uma referência tem a garantia de apontar para um valor válido de um tipo específico durante a vida útil dessa referência.
+
+Abaixo temos a função calculate_length() refatorada para usar uma referência a um objeto como parâmetro em vez de assumir a propriedade do valor: 
+
+```
+fn main() {
+    let s1 = String::from("hello");
+
+    let len = calculate_length(&s1);
+
+    println!("The length of '{s1}' is {len}.");
+}
+
+fn calculate_length(s: &String) -> usize {
+    s.len()
+}
+```
+
+O caractere de e-comercial (``` & ```) representa uma referência  e permite que você se refira a algum valor sem assumir a propriedade dele.
+
+A sintaxe ``` &s1 ``` permite-nos criar uma referência que se refere ao valor de ``` s1 ``` sem ter sua propriedade. Como não tem a propriedade de s1 o valor para o qual a referência aponta não será descartado quando a referência deixar de ser usada. 
+
+```
+fn calculate_length(s: &String) -> usize { // s é uma referência para um objeto do tipo String
+    s.len()
+} // Aqui, s sai do escopo. Mas como  não tem a propriedade do valor referenciado, drop() não é chamado.
+```
+
+Chamamos a ação de criar uma referência de empréstimo (borrowing). Como na vida real, se uma pessoa possui algo, você pode pegá-lo emprestado dela. Quando terminar, você tem que devolvê-lo. Você não é o dono. 
+
+Assim como as variáveis, as referências são imutáveis por padrão. O código abaixo não irá compilar.
+
+```
+fn main() {
+    let s = String::from("hello");
+
+    change(&s);
+}
+
+fn change(some_string: &String) {
+    some_string.push_str(", world");
+}
+```
+
+Para alterar um valor referenciado você deve utilizar referências mutáveis. O código abaixo compila sem erros. Observe que usamos ```mut``` tanto na declaração de s quanto na referência usada na chamada da função.
+
+```
+fn main() {
+    let mut s = String::from("hello");
+
+    change(&mut s);
+}
+
+fn change(some_string: &mut String) {
+    some_string.push_str(", world");
+}
+```
+
+Referências mutáveis têm uma grande restrição: se você tiver uma referência mutável para um valor, você NÃO pode ter outras referências para esse valor. 
+
+```
+    let mut s = String::from("hello");
+
+    let r1 = &mut s;
+    let r2 = &mut s;
+
+    println!("{}, {}", r1, r2);
+```
+
+O código acima emitirá o seguinte erro de compilação.
+
+```
+$ cargo run
+   Compiling ownership v0.1.0 (file:///projects/ownership)
+error[E0499]: cannot borrow `s` as mutable more than once at a time
+ --> src/main.rs:5:14
+  |
+4 |     let r1 = &mut s;
+  |              ------ first mutable borrow occurs here
+5 |     let r2 = &mut s;
+  |              ^^^^^^ second mutable borrow occurs here
+6 |
+7 |     println!("{}, {}", r1, r2);
+  |                        -- first borrow later used here
+
+For more information about this error, try `rustc --explain E0499`.
+error: could not compile `ownership` (bin "ownership") due to 1 previous error
+```
+
+O benefício de ter essa restrição é que Rust pode prevenir corridas de dados (data races) em tempo de compilação. Uma corrida de dados é semelhante a uma condição de corrida (race condition) e acontece quando esses três comportamentos ocorrem:
+
+* Dois ou mais ponteiros acessam os mesmos dados ao mesmo tempo.
+* Pelo menos um dos ponteiros está sendo usado para escrever nos dados.
+* Não há nenhum mecanismo sendo usado para sincronizar o acesso aos dados.
+
+Corridas de dados causam comportamento indefinido e podem ser difíceis de diagnosticar e corrigir quando você está tentando rastreá-las em tempo de execução; Rust previne esse problema recusando compilar código com corridas de dados! 
+
+Note que podemos usar chaves para criar um novo escopo, permitindo múltiplas referências mutáveis, apenas não simultâneas. 
+
+```
+    let mut s = String::from("hello");
+
+    {
+        let r1 = &mut s;
+    } // r1 sai do escopo aqui, então podemos criar nova referencia sem problemas 
+    
+    let r2 = &mut s;
+```
+
+Rust impõe uma regra semelhante para combinar referências mutáveis e imutáveis. Este código resulta em um erro:
+
+```
+    let mut s = String::from("hello");
+
+    let r1 = &s; // sem problemas
+    let r2 = &s; // sem problemas
+    let r3 = &mut s; // GRANDE PROBLEMA
+
+    println!("{}, {}, and {}", r1, r2, r3);
+```
+
+Aqui temos o erro:
+
+```
+$ cargo run
+   Compiling ownership v0.1.0 (file:///projects/ownership)
+error[E0502]: cannot borrow `s` as mutable because it is also borrowed as immutable
+ --> src/main.rs:6:14
+  |
+4 |     let r1 = &s; // no problem
+  |              -- immutable borrow occurs here
+5 |     let r2 = &s; // no problem
+6 |     let r3 = &mut s; // BIG PROBLEM
+  |              ^^^^^^ mutable borrow occurs here
+7 |
+8 |     println!("{}, {}, and {}", r1, r2, r3);
+  |                                -- immutable borrow later used here
+
+For more information about this error, try `rustc --explain E0502`.
+error: could not compile `ownership` (bin "ownership") due to 1 previous error
+```
+
+Observe que também não podemos ter uma referência mutável enquanto temos uma imutável para o mesmo valor. 
+
+Usuários de uma referência imutável não esperam que o valor mude repentinamente! No entanto, múltiplas referências imutáveis são permitidas porque ninguém que está apenas lendo os dados tem a capacidade de afetar a leitura de outra pessoa. 
+
+Observe que o escopo de uma referência começa a partir de onde ela é introduzida e continua até a última vez que a referência é usada. Por exemplo, o código abaixo irá compilar porque a última utilização das referências imutáveis, o ```println!```, ocorre antes da referência mutável ser introduzida: 
+
+```
+    let mut s = String::from("hello");
+
+    let r1 = &s; // sem problemas
+    let r2 = &s; // sem problemas
+    println!("{r1} and {r2}");
+    // as variáveis r1 e r2 will não são usadas após este ponto
+
+    let r3 = &mut s; // sem problemas
+    println!("{r3}");
+```
+
+Os escopos das referências imutáveis r1 e r2 terminam após o println! onde são usadas pela última vez, o que é antes da referência mutável r3 ser criada. Esses escopos não se sobrepõem, então este código é permitido: o compilador pode dizer que a referência não está mais sendo usada em um ponto antes do final do escopo. 
+
+Embora erros de empréstimo possam ser frustrantes às vezes, lembre-se que é o compilador Rust apontando um possível bug antecipadamente (em tempo de compilação em vez de em tempo de execução) e mostrando exatamente onde o problema está. Então você não precisa rastrear por que seus dados não são o que você pensava que eram. 
+
+## 8. Dangling References
+
+Em linguagens com ponteiros, é fácil criar erroneamente um dangling pointer (ponteiro pendurado) - um ponteiro que referencia um local na memória que pode ter sido dado a outro ponteiro - liberando alguma memória enquanto preserva um ponteiro para essa memória. Em Rust, por outro lado, o compilador garante que as referências nunca serão referências penduradas: se você tiver uma referência a alguns dados, o compilador garantirá que os dados não sairão do escopo antes que a referência aos dados o faça. 
+
+Vamos tentar criar uma referência pendente para ver como o Rust as previne com um erro de compilação: 
+
+```
+fn main() {
+    let reference_to_nothing = dangle();
+}
+
+fn dangle() -> &String {
+    let s = String::from("hello");
+
+    &s
+}
+```
+
+Este código emitirá o seguinte erro:
+
+```
+$ cargo run
+   Compiling ownership v0.1.0 (file:///projects/ownership)
+error[E0106]: missing lifetime specifier
+ --> src/main.rs:5:16
+  |
+5 | fn dangle() -> &String {
+  |                ^ expected named lifetime parameter
+  |
+  = help: this function's return type contains a borrowed value, but there is no value for it to be borrowed from
+help: consider using the `'static` lifetime, but this is uncommon unless you're returning a borrowed value from a `const` or a `static`
+  |
+5 | fn dangle() -> &'static String {
+  |                 +++++++
+help: instead, you are more likely to want to return an owned value
+  |
+5 - fn dangle() -> &String {
+5 + fn dangle() -> String {
+  |
+
+error[E0515]: cannot return reference to local variable `s`
+ --> src/main.rs:8:5
+  |
+8 |     &s
+  |     ^^ returns a reference to data owned by the current function
+
+Some errors have detailed explanations: E0106, E0515.
+For more information about an error, try `rustc --explain E0106`.
+error: could not compile `ownership` (bin "ownership") due to 2 previous errors
+```
+
+Observe que como s é criado dentro de dangle(), quando o código de dangle() terminar, s será desalocado. Mas tentamos retornar uma referência a ele. Isso significa que essa referência estaria apontando para uma String inválida. Isso não é bom! O Rust não nos permite fazer isso.
+
+A solução aqui seria em vez de retornar uma referência retornar um objeto String, quando teríamos a transferência da propriedade, ou usar lifetimes.
+
+```
+fn no_dangle() -> String {
+    let s = String::from("hello");
+
+    s
+}
+```
+
+O código acima funcionaria beleza pois a propriedade é movida para a função chamadora e nada é desalocado.
+
+## 9. O tipo de dados slice
+
 asd
 
 
@@ -279,4 +515,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20240921
+Última atualização: 20240922
