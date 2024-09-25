@@ -219,8 +219,7 @@ Retornar valores também pode transferir a propriedade.
 
 ```
 fn main() {
-    let s1 = gives_ownership();         // gives_ownership move seu valor de retorno
-                                        // value into s1
+    let s1 = gives_ownership();         // gives_ownership move seu valor de retorno para s1
 
     let s2 = String::from("hello");     // s2 entra no escopo
 
@@ -258,7 +257,7 @@ fn main() {
 
     let (s2, len) = calculate_length(s1);
 
-    println!("The length of '{s2}' is {len}.");
+    println!("O comprimento de '{s2}' é {len}.");
 }
 
 fn calculate_length(s: String) -> (String, usize) {
@@ -272,7 +271,7 @@ Mas nem sempre é isso que queremos. Felizmente para nós, Rust tem um recurso p
 
 ## 7. Referências e empréstimo
 
-Observe que no código da função  calculate_length() temos que retornar a String para que a função chamadora ainda possa usar a String após a chamada a calculate_length(). Isto tem que ser feito porque a String foi movida para dentro calculate_length(). Por isso tivemos que retornar a String e o tamanho da String, os dois valores encapsulados numa tupla.
+Observe que no código da função  calculate_length() temos que retornar a String para que a função chamadora ainda possa usar a String após a chamada. Isto tem que ser feito porque a String foi movida para dentro de calculate_length(). Por isso tivemos que retornar a String e o tamanho da String, os dois valores encapsulados numa tupla.
 
 Em vez disso, podemos fornecer uma referência ao valor da String. Uma referência é como um ponteiro, pois é um endereço de memória que podemos seguir para acessar os dados armazenados naquele endereço; esses dados são de propriedade de alguma outra variável. Ao contrário de um ponteiro, uma referência tem a garantia de apontar para um valor válido de um tipo específico durante a vida útil dessa referência.
 
@@ -284,7 +283,7 @@ fn main() {
 
     let len = calculate_length(&s1);
 
-    println!("The length of '{s1}' is {len}.");
+    println!("O comprimento de '{s1}' é {len}.");
 }
 
 fn calculate_length(s: &String) -> usize {
