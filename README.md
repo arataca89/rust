@@ -1,5 +1,7 @@
 # Programação Rust
 
+[Ownership (propriedade)](https://github.com/arataca89/rust/tree/main/ownership)
+
 [Genéricos](https://github.com/arataca89/rust/tree/main/genericos)
 
 [Traits](https://github.com/arataca89/rust/tree/main/traits)
