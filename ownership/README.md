@@ -20,6 +20,10 @@ Ownership (propriedade) é o recurso do Rust que tem mais implicações profunda
 
 [9. O tipo de dados slice](#9-O-tipo-de-dados-slice)
 
+[10. Slice de string](#10-Slice-de-string)
+
+[11. Literais strings e outros tipos de slices](#11-Literais-strings-e-outros-tipos-de-slices)
+
 ---
 
 ## 1. Entendendo o que é ownership
@@ -501,8 +505,273 @@ O código acima funcionaria beleza pois a propriedade é movida para a função 
 
 ## 9. O tipo de dados slice
 
-asd
+Em Rust, uma slice (fatia) é um tipo de dados que referencia uma sequência contígua de elementos em uma coleção. Uma fatia é um tipo de referência, portanto não possui propriedade.
 
+Aqui está um pequeno problema de programação: escreva uma função que receba uma string de palavras separadas por espaços (uma frase, digamos assim) e retorne a primeira palavra que encontrar nessa string. Se a função não encontrar um espaço na string, a string inteira deve ser uma única palavra, então a string inteira deve ser retornada.
+
+Vamos trabalhar em como escreveríamos a assinatura dessa função sem usar slice, para entender o problema que as slices resolverão: 
+
+```
+fn first_word(s: &String) -> ?
+```
+
+A função ```first_word()``` tem uma ``` &String ``` como parâmetro. Não queremos a propriedade, então isso está correto. Mas o que devemos retornar? Não temos realmente uma maneira de falar sobre parte de uma string. No entanto, poderíamos retornar o índice do final da palavra, indicado por um espaço. Vamos tentar isso. 
+
+```
+fn first_word(s: &String) -> usize {
+    let bytes = s.as_bytes();
+
+    for (i, &item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return i;
+        }
+    }
+
+    s.len()
+}
+```
+
+Como precisamos percorrer o elemento String item por item e verificar se o valor do item é um espaço, convertemos nossa String em um array de bytes usando o método ``` as_bytes() ```.
+
+```
+    let bytes = s.as_bytes();
+```
+
+Em seguida, criamos um iterador sobre o array de bytes usando o método ``` iter() ```:
+
+```
+    for (i, &item) in bytes.iter().enumerate() {
+```
+
+O métoto ``` iter() ``` retorna cada elemento em uma coleção.
+
+O método ``` enumerate() ``` encapsula o resultado de ``` iter() ``` em uma tupla contendo dois elementos, o primeiro elemento é o índice e o segundo elemento é uma referência ao elemento. 
+
+Como ``` enumerate() ``` retorna uma tupla, podemos usar padrões para desestruturar essa tupla. Especificamos um padrão que tem ``` i ``` para o índice na tupla e ``` &item ``` para o único byte na tupla.  Como obtemos uma referência ao elemento de ```  iter().enumerate() ```, usamos ``` & ``` no padrão. 
+
+```
+(i, &item)
+```
+
+Dentro do loop for, procuramos pelo byte que representa o espaço usando a sintaxe literal de byte. Se encontrarmos um espaço, retornamos a posição. Caso contrário, retornamos o comprimento da string usando o método ``` len() ```.
+
+```
+        if item == b' ' {
+            return i;
+        }
+    }
+
+    s.len()
+```
+
+Agora temos uma maneira de descobrir o índice do fim da primeira palavra na string, mas há um problema. Estamos retornando um ```usize``` por si só, mas é apenas um número significativo no contexto do ```&String```. Em outras palavras, porque é um valor separado do objeto String, não há garantia de que ele ainda será válido no futuro. Considere o programa abaixo que usa a função ```first_word()```.
+
+```
+fn main() {
+	let mut s = String::from("hello world");
+
+	let word = first_word(&s); // word receberá o valor 5
+
+	s.clear(); // aqui limpamos a string, fazendo-a igual a ""
+
+	// word ainda terá o valor 5 aqui, mas não existe mais a string
+	// que poderíamos usar com este valor 5. word agora é totalmente
+	// inválido.
+}
+```
+
+Este programa compila sem erros e também o faria se usássemos ```word``` após chamar ```s.clear()```. Porque ```word``` não está conectada ao estado de ```s``` de forma alguma, ```word``` ainda contém o valor 5. Poderíamos usar esse valor 5 com a variável ```s``` para tentar extrair a primeira palavra, mas isso seria um bug porque o conteúdo de ```s``` mudou desde que salvamos 5 em ```word```. 
+
+A preocupação com o índice em ```word``` ficando fora de sincronia com os dados em ```s``` é tedioso e propenso a erros! Gerenciar esses índices é ainda mais frágil se escrevermos uma função ```second_word()```. Sua assinatura teria que ser assim:
+
+```
+fn second_word(s: &String) -> (usize, usize) {
+```
+
+Agora estamos rastreando um índice inicial e um índice final, e temos ainda mais valores que foram calculados a partir de dados em um estado particular, mas não estão vinculados a esse estado. Temos três variáveis ​​não relacionadas flutuando por aí que precisam ser mantidas sincronizadas.
+
+Felizmente, o Rust tem uma solução para esse problema: slices.
+
+## 10. Slice de string
+
+Uma slice de string é uma referência a uma parte de uma string:
+
+```
+    let s = String::from("hello world");
+
+    let hello = &s[0..5];
+    let world = &s[6..11];
+```
+
+No código acima, a variável ```hello``` é uma referência a uma parte da String especificada pelo intervalo ```[0..5]```.
+
+Criamos slices usando a sintaxe de intervalo entre colchetes especificando ```[índice_inicial..índice_final]```, onde ```índice_inicial``` é a primeira posição na string e ```índice_final``` é um a mais que a última posição na string. Ou seja, a slice ```[0..5]``` refere-se ao pedaço da string que inicia no caracete que está na posição 0 e termina no caractere que está na posição 4 ("hello"). 
+
+Com a sintaxe de intervalo ```..``` do Rust, se você quiser começar no índice 0, pode descartar o valor antes dos dois pontos. Em outras palavras, as slices abaixo são iguais: 
+
+```
+let s = String::from("hello");
+
+let slice = &s[0..2];
+let slice = &s[..2];
+```
+
+Da mesma forma, se a slice incluir o último byte da String, você pode descartar o número final. 
+
+```
+let s = String::from("hello");
+
+let len = s.len();
+
+let slice = &s[3..len];
+let slice = &s[3..];
+```
+
+Você também pode descartar ambos os valores para obter uma slice de toda a string. 
+
+```
+let s = String::from("hello");
+
+let len = s.len();
+
+let slice = &s[0..len];
+let slice = &s[..];
+```
+
+OBSERVAÇÃO: Os índices do intervalo da slice de string devem ocorrer em limites de caracteres UTF-8 válidos. Se você tentar criar uma slice de string no meio de um caractere de vários bytes, seu programa será encerrado com um erro. Para fins de introdução as slices de string, estamos assumindo apenas caracteres ASCII nesta seção.
+
+Com todas essas informações em mente, vamos reescrever a função ```first_word()``` para retornar uma slice. O tipo de dados referente a uma slice de string é escrito como ```&str```:
+
+```
+fn first_word(s: &String) -> &str {
+    let bytes = s.as_bytes();
+
+    for (i, &item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return &s[0..i];
+        }
+    }
+
+    &s[..]
+}
+```
+
+Obtemos o índice para o final da palavra da mesma forma que fizemos na implementação anterior, procurando a primeira ocorrência de um espaço. Quando encontramos um espaço, retornamos uma slice de string usando o início da string e o índice do espaço como os índices inicial e final.
+
+Agora, quando chamamos ```first_word()```, recebemos um valor que está ligado aos dados passados como argumento da função.
+
+Retornar uma slice também funcionaria para a função ```second_word()```:
+
+```
+fn second_word(s: &String) -> &str {
+```
+
+Agora temos uma API que é muito mais difícil de bagunçar porque o compilador garantirá que as referências na String permaneçam válidas. 
+No bug da implementação anterior, pegamos o índice da primeira palavra, mas depois limpamos a string, então nosso índice ficou inválido. Esse código estava logicamente incorreto, mas não mostrou nenhum erro de imediato. Os problemas apareceriam mais tarde se continuássemos tentando usar o índice da primeira palavra com uma string vazia.
+
+Slices tornam esse bug impossível e nos avisam que temos um problema com nosso código muito mais cedo. Usar a versão slice de ```first_word()``` lançará um erro de tempo de compilação:
+
+```
+fn main() {
+    let mut s = String::from("hello world");
+
+    let word = first_word(&s);
+
+    s.clear(); // ERRO
+
+    println!("the first word is: {word}");
+}
+```
+
+Abaixo temos o erro emitido ao tentar compilar este código:
+
+```
+$ cargo run
+   Compiling ownership v0.1.0 (file:///projects/ownership)
+error[E0502]: cannot borrow `s` as mutable because it is also borrowed as immutable
+  --> src/main.rs:18:5
+   |
+16 |     let word = first_word(&s);
+   |                           -- immutable borrow occurs here
+17 |
+18 |     s.clear(); // error!
+   |     ^^^^^^^^^ mutable borrow occurs here
+19 |
+20 |     println!("the first word is: {word}");
+   |                                  ------ immutable borrow later used here
+
+For more information about this error, try `rustc --explain E0502`.
+error: could not compile `ownership` (bin "ownership") due to 1 previous error
+```
+
+Lembre-se das regras de empréstimo que se temos uma referência imutável para algo, não podemos também ter uma referência mutável. Como ```clear()``` precisa truncar a String, ele precisa obter uma referência mutável. O ```println!``` após a chamada a ```clear()``` usa a referência em ```word```, então a referência imutável ainda deve estar ativa naquele ponto. Rust não permite que a referência mutável em ```clear()``` e a referência imutável em ```word``` existam ao mesmo tempo, e a compilação falha. Rust não apenas tornou nossa API mais fácil de usar, mas também eliminou uma classe inteira de erros em tempo de compilação!
+
+## 11. Literais strings e outros tipos de slices
+
+As literais de string são armazenadas dentro do binário. Por exemplo:
+
+```
+let s = "Hello, world!";
+```
+
+O tipo de ```s``` aqui é ```&str```: é uma slice que aponta para aquele ponto específico do binário. Esta é também a razão pela qual literais de string são imutáveis; ```&str``` é uma referência imutável.
+
+Com o que aprendemos até agora podemos refatorar a função ```first_word()```; atualmente sua assinatura é:
+
+```
+fn first_word(s: &String) -> &str {
+```
+
+Um programador Rust mais experiente alteraria a assinatura desta função conforme abaixo, pois assim ela permitiria que usássemos a mesma função com valores ```&String``` e ```&str```.
+
+```
+fn first_word(s: &str) -> &str {
+```
+
+Se tivermos um tipo ```&str```, podemos passá-lo diretamente. Se tivermos um tipo ```String```, podemos passar uma slice da String ou uma referência à String pois a linguagem Rust converte um ```&String``` para um ```&str``` implicitamente.
+
+Definir uma função para receber uma slice de string em vez de uma referência a uma String torna nossa API mais geral e útil sem perder nenhuma funcionalidade: 
+
+```
+fn main() {
+    let my_string = String::from("hello world");
+
+	// `first_word` funciona com slices de String, seja parcial ou completa
+    let word = first_word(&my_string[0..6]);
+    let word = first_word(&my_string[..]);
+
+	// `first_word` funciona com referência a String que equivale
+	// a uma slice da String toda.
+    let word = first_word(&my_string);
+
+    let my_string_literal = "hello world";
+
+	// `first_word` funciona com slices de literais string, seja parcial ou completa
+    let word = first_word(&my_string_literal[0..6]);
+    let word = first_word(&my_string_literal[..]);
+
+	// Como literais string já são slices de string isto funciona também, sem a sintaxe de slice
+    let word = first_word(my_string_literal);
+}
+```
+
+Slices podem ser de outros tipos, considere o array abaixo:
+
+```
+let a = [1, 2, 3, 4, 5];
+```
+
+Assim como podemos querer nos referir a parte de uma string, podemos querer nos referir a parte de um array. Faríamos isso assim: 
+
+```
+let a = [1, 2, 3, 4, 5];
+
+let slice = &a[1..3];
+
+assert_eq!(slice, &[2, 3]);
+```
+
+Esta slice é do tipo ``´&[i32]``` e funciona da mesma forma que as slices de string. Você pode usar slices para todos os tipos em outras coleções. 
 
 ---
 ## Referências
@@ -515,4 +784,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20240922
+Última atualização: 20240925
