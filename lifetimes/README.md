@@ -1,8 +1,8 @@
 # Linguagem Rust - Lifetimes
 
-Lifetimes são um recurso da linguagem Rust que garantem que as referências sejam válidas pelo tempo que precisarmos delas. Toda referência em Rust tem um 'lifetime' ou 'lifetime', numa tradução livre. Lifetime refere-se ao escopo onde a referência é válida. Na maioria das vezes, as lifetimes são implícitas e inferidas, assim como na maioria das vezes, os tipos são inferidos. 
+Lifetime(tempo de vida) é um dos recursos da linguagem Rust que garantem que as referências sejam válidas pelo tempo que precisarmos delas. Toda referência em Rust tem um lifetime. Lifetime refere-se ao escopo onde a referência é válida. Na maioria das vezes, os lifetimes são implícitos e inferidos, assim como na maioria das vezes, os tipos são inferidos. 
 
-Devemos anotar tipos apenas quando múltiplos tipos forem possíveis e o Rust não puder inferir. De forma semelhante, devemos anotar lifetimes  quando as lifetimes das referências puderem ser relacionadas de algumas maneiras diferentes de modo que o Rust não possa inferir qual o lifetime correto.
+Devemos anotar tipos apenas quando múltiplos tipos forem possíveis e o Rust não puder inferir. De forma semelhante, devemos anotar lifetimes  quando os lifetimes das referências puderem ser relacionadas de algumas maneiras diferentes de modo que o Rust não possa inferir qual o lifetime correto.
 
 O Rust exige que anotemos as relações usando parâmetros de lifetime genéricos para garantir que as referências atuais usadas em tempo de execução sejam definitivamente válidas. 
 
