@@ -13,7 +13,7 @@ Closures podem capturar valores do ambiente onde foram definidas para uso poster
 
 Para exemplificar o uso deste recurso foi criado um cenário onde uma certa empresa que comercializa camisetas faz a seguinte promoção: será sorteada uma camiseta exclusiva entre as pessoas que se inscreverem na lista para receber emails promocionais da empresa. No momento da inscrição a pessoa pode também declarar sua cor favorita. Se a pessoa sorteada tiver declarado sua cor favorita, ganhará a camiseta dessa cor. Senão ganhará uma camiseta da cor que a empresa mais tenha no momento.
 
-Há muitas maneiras de implementar isso. Para este exemplo, usaremos uma enumeração chamada ```ShirtColor``` que tem as variantes ```Red``` e ```Blue```. Representamos o estoque da empresa com uma estrutura chamada ```Inventory``` que tem um campo chamado ```shirts``` que contém um ```Vec\<ShirtColor\>``` representando as cores das camisas atualmente em estoque. O método ```giveaway()``` definido em ```Inventory``` obtém a preferência de cor de camisa do ganhador da camisa grátis e retorna a cor de camisa que a pessoa receberá.
+Há muitas maneiras de implementar isso. Para este exemplo, usaremos uma enumeração chamada ```ShirtColor``` que tem as variantes ```Red``` e ```Blue```. Representamos o estoque da empresa com uma estrutura chamada ```Inventory``` que tem um campo chamado ```shirts``` que contém um ```Vec<ShirtColor>``` representando as cores das camisas atualmente em estoque. O método ```giveaway()``` definido em ```Inventory``` obtém a preferência de cor de camisa do ganhador da camisa grátis e retorna a cor de camisa que a pessoa receberá.
 
 ```
 #[derive(Debug, PartialEq, Copy, Clone)]
