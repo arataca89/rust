@@ -179,7 +179,7 @@ O borrow checker (verificador de empréstimo) também não consegue determinar i
 
 As anotações de lifetime não alteram quanto tempo qualquer uma das referências vive. Em vez disso, elas descrevem as relações dos tempos de vida de várias referências entre si, sem afetar os tempos de vida. Assim como as funções podem aceitar qualquer tipo quando a assinatura especifica um parâmetro de tipo genérico, as funções podem aceitar referências com qualquer lifetime especificando um parâmetro de lifetime genérico. 
 
-As anotações de lifetime têm uma sintaxe um pouco incomum: os nomes dos parâmetros de lifetime devem começar com um apóstrofo ```( ' )``` e geralmente são todos minúsculos e muito curtos, como tipos genéricos. A maioria das pessoas usa o nome ```'a``` para a primeira anotação de lifetime. Colocamos anotações de parâmetros de lifetime após o ```&``` de uma referência, usando um espaço para separar a anotação do tipo da referência. 
+As anotações de lifetime têm uma sintaxe um pouco incomum: os nomes dos parâmetros de lifetime devem começar com um apóstrofo ```(')``` e geralmente são todos minúsculos e muito curtos, como tipos genéricos. A maioria das pessoas usa o nome ```'a``` para a primeira anotação de lifetime. Colocamos anotações de parâmetros de lifetime após o ```&``` de uma referência, usando um espaço para separar a anotação do tipo da referência. 
 
 Aqui estão alguns exemplos: uma referência a um i32 sem um parâmetro de lifetime, uma referência a um i32 que tem um parâmetro de lifetime chamado 'a, e uma referência mutável a um i32 que também tem o lifetime 'a. 
 
