@@ -264,7 +264,7 @@ For more information about this error, try `rustc --explain E0597`.
 error: could not compile `chapter10` (bin "chapter10") due to 1 previous error
 ```
 
-O erro mostra que para result ser válida para a instrução println!, string2 precisaria ser válida até o final do escopo externo. Rust sabe disso porque anotamos as durações dos parâmetros da função e dos valores de retorno usando o mesmo parâmetro de lifetime 'a'. 
+O erro mostra que para result ser válida para a instrução println!, string2 precisaria ser válida até o final do escopo externo. Rust sabe disso porque anotamos as durações dos parâmetros da função e dos valores de retorno usando o mesmo parâmetro de lifetime 'a. 
 
 ## 6. Pensando em termos de lifetime
 
@@ -359,7 +359,7 @@ Depois de escrever muito código, a equipe do Rust descobriu que os programadore
 
 Esta parte da história do Rust é relevante porque é possível que mais padrões determinísticos surjam e sejam adicionados ao compilador. No futuro, ainda menos anotações de lifetime podem ser necessárias. 
 
-Estes padrões programados na análise de referências do Rust são chamados de  ```regras de elipse de lifetime``` (lifetime elision rules). Essas regras não são para os programadores seguirem; são um conjunto de casos específicos que o compilador considerará, e se seu código se encaixar nesses casos, você não precisará escrever os tempos de vida explicitamente. 
+Estes padrões programados na análise de referências do Rust são chamados de  ```regras de elisão de lifetime``` (lifetime elision rules). Essas regras não são para os programadores seguirem; são um conjunto de casos específicos que o compilador considerará, e se seu código se encaixar nesses casos, você não precisará escrever os tempos de vida explicitamente. 
 
 As regras de elipse não fornecem inferência completa. Se ainda houver ambiguidade quanto às durações de vida das referências depois que o Rust aplicar as regras, o compilador não adivinhará qual deve ser a duração de vida das referências restantes. Em vez de adivinhar, o compilador fornecerá um erro que você pode resolver adicionando as anotações de lifetime. 
 
