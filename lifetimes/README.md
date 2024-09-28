@@ -29,7 +29,7 @@ A sintaxe de lifetime não é um conceito que a maioria das outras linguagens de
 
 [10. O lifetime static](#10-O-lifetime-static)
 
-[11. Genéricos, traits e lifetimes juntos](#11-Genéricos,-traits-e-lifetimes-juntos)
+[11. Genéricos, traits e lifetimes juntos](#11-Genéricos-traits-e-lifetimes-juntos)
 
 ---
 
