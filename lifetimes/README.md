@@ -33,7 +33,7 @@ A sintaxe de lifetime não é um conceito que a maioria das outras linguagens de
 
 ---
 
-## 1. Evitando dangling refeusando lifetimes
+## 1. Evitando dangling references usando lifetimes
 
 'dangling reference' é um termo que refere-se a uma situação onde um ponteiro ou referência aponta para um local de memória que foi desalocado ou liberado. Isso pode acontecer quando um objeto é excluído ou sai do escopo, mas a referência a ele ainda existe e é acessada posteriormente. 
 
