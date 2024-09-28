@@ -361,11 +361,11 @@ Esta parte da história do Rust é relevante porque é possível que mais padrõ
 
 Estes padrões programados na análise de referências do Rust são chamados de  ```regras de elisão de lifetime``` (lifetime elision rules). Essas regras não são para os programadores seguirem; são um conjunto de casos específicos que o compilador considerará, e se seu código se encaixar nesses casos, você não precisará escrever os tempos de vida explicitamente. 
 
-As regras de elipse não fornecem inferência completa. Se ainda houver ambiguidade quanto às durações de vida das referências depois que o Rust aplicar as regras, o compilador não adivinhará qual deve ser a duração de vida das referências restantes. Em vez de adivinhar, o compilador fornecerá um erro que você pode resolver adicionando as anotações de lifetime. 
+As regras de elisão não fornecem inferência completa. Se ainda houver ambiguidade quanto às durações de vida das referências depois que o Rust aplicar as regras, o compilador não adivinhará qual deve ser a duração de vida das referências restantes. Em vez de adivinhar, o compilador fornecerá um erro que você pode resolver adicionando as anotações de lifetime. 
 
 Os lifetimes em parâmetros de função ou método são chamados de ```input lifetimes``` (tempos de vida de entrada), e os lifetimes em valores de retorno são chamadas de ```output lifetimes``` (tempos de vida de saída). 
 
-O compilador usa três regras para descobrir os lifetimes das referências quando não há anotações explícitas. A primeira regra se aplica a lifetimes de entrada, e a segunda e a terceira regras se aplicam a lifetimes de saída. Se o compilador chegar ao final das três regras e ainda houver referências para as quais ele não conseguir descobrir as durações de vida, o compilador interromperá com um erro. Essas regras se aplicam a definições de ```fn```, bem como a blocos ```impl```. 
+O compilador usa três regras para descobrir os lifetimes das referências quando não há anotações explícitas. A primeira regra se aplica a lifetimes de entrada, e a segunda e a terceira regras se aplicam a lifetimes de saída. Se o compilador chegar ao final das três regras e ainda houver referências para as quais ele não conseguiu descobrir as durações de vida, o compilador interromperá com um erro. Essas regras se aplicam a definições de ```fn```, bem como a blocos ```impl```. 
 
 A primeira regra é que o compilador atribui um parâmetro de lifetime a cada parâmetro que é uma referência. Em outras palavras, uma função com um parâmetro recebe um parâmetro de lifetime: 
 
@@ -431,7 +431,7 @@ Quando implementamos métodos em uma struct com lifetimes, usamos a mesma sintax
 
 Nomes de lifetime para campos de struct sempre precisam ser declarados após a palavra-chave ```impl``` e, em seguida, usados após o nome da struct porque esses tempos de vida fazem parte do tipo da struct. 
 
-Nas assinaturas de métodos dentro do bloco ```impl```, as referências podem estar vinculadas à lifetime nos campos da estrutura, ou podem ser independentes. Além disso, as regras de elipse de lifetime geralmente fazem com que as anotações de lifetime não sejam necessárias nas assinaturas de métodos. Vamos ver alguns exemplos usando a estrutura ```ImportantExcerpt```. 
+Nas assinaturas de métodos dentro do bloco ```impl```, as referências podem estar vinculadas à lifetime nos campos da estrutura, ou podem ser independentes. Além disso, as regras de elisão de lifetime geralmente fazem com que as anotações de lifetime não sejam necessárias nas assinaturas de métodos. Vamos ver alguns exemplos usando a estrutura ```ImportantExcerpt```. 
 
 ```
 impl<'a> ImportantExcerpt<'a> {
@@ -441,9 +441,9 @@ impl<'a> ImportantExcerpt<'a> {
 }
 ```
 
-A declaração do parâmetro de lifetime após ```impl``` e seu uso após o nome do tipo são obrigatórios, mas não somos obrigados a anotar o lifetime da referência a ```self``` devido à primeira regra de elipse. 
+A declaração do parâmetro de lifetime após ```impl``` e seu uso após o nome do tipo são obrigatórios, mas não somos obrigados a anotar o lifetime da referência a ```self``` devido à primeira regra de elisão. 
 
-Aqui está um exemplo onde a terceira regra de elipse de lifetime se aplica: 
+Aqui está um exemplo onde a terceira regra de elisão de lifetime se aplica: 
 
 ```
 impl<'a> ImportantExcerpt<'a> {
@@ -454,7 +454,7 @@ impl<'a> ImportantExcerpt<'a> {
 }
 ```
 
-Existem dois lifetimes de entrada, então Rust aplica a primeira regra de elipse e dá a ```&self``` e ```announcement``` seus próprios lifetimes. Então, porque um dos parâmetros é ```&self```, o tipo de retorno recebe a duração de vida de ```&self```, e todos os lifetimes foram contabilizados. 
+Existem dois lifetimes de entrada, então Rust aplica a primeira regra de elisão e dá a ```&self``` e ```announcement``` seus próprios lifetimes. Então, porque um dos parâmetros é ```&self```, o tipo de retorno recebe a duração de vida de ```&self```, e todos os lifetimes foram contabilizados. 
 
 ## 10. O lifetime static
 
