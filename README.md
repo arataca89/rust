@@ -10,7 +10,7 @@
 
 [Escrevendo um programa de linha de comando - minigrep](https://github.com/arataca89/rust/tree/main/minigrep)
 
-
+[Closures](https://github.com/arataca89/rust/tree/main/closures)
 
 ---
 arataca89@gmail.com
