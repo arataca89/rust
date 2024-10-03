@@ -8,7 +8,7 @@ Closures em Rust são funções anônimas que você pode salvar numa variável o
 
 [3. Capturando referências ou movendo propriedade](#3-Capturando-referências-ou-movendo-propriedade)
 
-[4. Movendo valores capturados para fora da closure e traits fn](#4-Movendo-valores-capturados-para-fora-da-closure-e-traits-fn)
+[4. Movendo valores capturados para fora da closure e traits fn](#4-Movendo-valores-capturados-para-fora-da-closure-e-traits-Fn)
 
 ---
 
@@ -242,23 +242,166 @@ fn main() {
 
 Criamos uma nova thread, dando a ela uma closure para ser executada como argumento. O corpo do closure imprime ```list```. Na implementação anterior, a closure apenas capturou ```list``` usando uma referência imutável porque essa é a menor quantidade de acesso a ```list``` necessária para imprimi-la (princípio do menor privilégio). Neste exemplo, mesmo que o corpo da closure ainda precise apenas de uma referência imutável, precisamos especificar que a variável ```list``` deve ser movida para a closure colocando a palavra-chave ```move``` no início da definição da closure. A nova thread pode terminar antes da thread principal, ou a thread principal pode terminar primeiro. Se a thread principal mantivesse a propriedade de ```list```, mas terminasse antes da nova thread e eliminasse ```list```, a referência imutável na thread seria inválida. Portanto, o compilador requer que ```list``` seja movida para a closure de modo que a closure dentro da nova thread tenha sempre uma referência válida. Tente remover a palavra-chave ```move``` ou usar ```list``` na thread principal após a closure ser definida e você receberá erros do compilador.
 
-## 4. Movendo valores capturados para fora da closure e traits fn
+## 4. Movendo valores capturados para fora da closure e traits Fn
 
 Uma vez que a closure tenha capturado uma referência ou a propriedade de um valor do ambiente onde foi definida, o código no corpo da closure define o que acontece com as referências ou valores. A closure pode: mover um valor capturado para fora, alterar o valor capturado, não mover nem mudar o valor ou não capturar nada do ambiente.
 
 A forma como uma closure captura e manipula valores do ambiente afeta quais traits a closure implementa, e traits são como funções e structs podem especificar quais tipos de closures elas podem usar. Closures implementarão automaticamente uma, duas ou todas as três traits Fn, de forma aditiva, dependendo de como o corpo da closure manipula os valores:
 
-* ```FnOnce``` se aplica a closures que podem ser chamadas uma vez. Todas as closures implementam pelo menos essa trait, porque todas as closures podem ser chamados. Uma closure que move valores capturados para fora de seu corpo implementará apenas ```FnOnce``` e nenhuma das outras traits Fn, porque ela só pode ser chamado uma vez.
+* ```FnOnce``` se aplica a closures que podem ser chamadas uma vez. Todas as closures implementam pelo menos essa trait, porque todas as closures podem ser chamadas. Uma closure que move valores capturados para fora de seu corpo implementará apenas ```FnOnce``` e nenhuma das outras traits Fn, porque ela só pode ser chamado uma vez.
 * ```FnMut``` se aplica a closures que não movem valores capturados para fora de seu corpo, mas que podem mudar os valores capturados. Essas closures podem ser chamadas mais de uma vez.
 * ```Fn``` se aplica a closures que não movem valores capturados para fora de seu corpo e que não mudam valores capturados, bem como closures que não capturam nada de seu ambiente. Essas closures podem ser chamadas mais de uma vez sem mudar seu ambiente, o que é importante em casos como chamar uma closure várias vezes concorrentemente (simultaneamente). 
 
 Vamos analisar a definição do método ```unwrap_or_else()``` em ```Option<T>```.
 
- 
+```
+impl<T> Option<T> {
+    pub fn unwrap_or_else<F>(self, f: F) -> T
+    where
+        F: FnOnce() -> T
+    {
+        match self {
+            Some(x) => x,
+            None => f(),
+        }
+    }
+}
+```
 
-asd
+Lembre-se que ```T``` é o tipo genérico que representa o tipo do valor na variante ```Some``` de uma ```Option```. Esse tipo ```T``` também é o tipo de retorno da função ```unwrap_or_else()```: código que chama ```unwrap_or_else()``` em um valor ```Option<String>```, por exemplo, obterá uma ```String```.
+
+Em seguida, note que a função ```unwrap_or_else()``` tem o parâmetro de tipo genérico adicional ```F```. O tipo ```F``` é o tipo do parâmetro chamado ```f```, que é a closure que fornecemos ao chamar ```unwrap_or_else()```.
+
+A trait bound especificada no tipo genérico ```F``` é ```FnOnce() -> T```, o que significa que ```F``` deve ser capaz de ser chamada uma vez, não receber argumentos e retornar um ```T```. Usar ```FnOnce``` na trait bound expressa a restrição de que ```unwrap_or_else()``` só vai chamar ```f``` no máximo uma vez. No corpo de ```unwrap_or_else()```, podemos ver que se a ```Option``` for ```Some```, ```f``` não será chamada. Se a ```Option``` for ```None```, ```f``` será chamada uma vez. Como todas as closures implementam ```FnOnce```, ```unwrap_or_else()``` aceita todos os três tipos de closures e é o mais flexível possível.
+
+Nota: Funções podem implementar todas as três traits Fn também. Se o que queremos fazer não requer a captura de um valor do ambiente, podemos usar o nome de uma função em vez de uma closure onde precisamos de algo que implemente uma das traits Fn. Por exemplo, em um valor ```Option<Vec<T>>```, poderíamos chamar ```unwrap_or_else(Vec::new)``` para obter um novo vetor vazio se o valor for ```None```.
+
+Agora, vamos dar uma olhada no método da biblioteca padrão ```sort_by_key()``` definido em ```slices```, para ver como ele difere de ```unwrap_or_else()``` e por que ```sort_by_key()``` usa a trait bound ```FnMut``` em vez de ```FnOnce```. A closure obtém um argumento na forma de uma referência ao item atual na slice e retorna um valor do tipo ```K``` que pode ser ordenado. Esta função é útil quando você deseja classificar uma slice por um atributo específico de cada item. No exemplo abaixo, temos uma lista de instâncias ```Rectangle``` e usamos ```sort_by_key()``` para ordená-las por seu atributo ```width```:
+
+```
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let mut list = [
+        Rectangle { width: 10, height: 1 },
+        Rectangle { width: 3, height: 5 },
+        Rectangle { width: 7, height: 12 },
+    ];
+
+    list.sort_by_key(|r| r.width);
+    println!("{list:#?}");
+}
+```
+
+Este código exibe na tela:
+
+```
+$ cargo run
+   Compiling rectangles v0.1.0 (file:///projects/rectangles)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.41s
+     Running `target/debug/rectangles`
+[
+    Rectangle {
+        width: 3,
+        height: 5,
+    },
+    Rectangle {
+        width: 7,
+        height: 12,
+    },
+    Rectangle {
+        width: 10,
+        height: 1,
+    },
+]
+```
+
+O motivo pelo qual ```sort_by_key()``` é definido para receber uma closure ```FnMut``` é que ele chama o closure várias vezes: uma vez para cada item na slice. A closure ```|r| r.width``` não captura, altera ou move nada do seu ambiente, então ela atende aos requisitos da trait bound. 
+
+Em contraste, o código abaixo mostra um exemplo de uma closure que implementa apenas a trait ```FnOnce```, porque ela move um valor para fora do ambiente. O compilador não nos permitirá usar esse closure com ```sort_by_key()```:
+
+```
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let mut list = [
+        Rectangle { width: 10, height: 1 },
+        Rectangle { width: 3, height: 5 },
+        Rectangle { width: 7, height: 12 },
+    ];
+
+    let mut sort_operations = vec![];
+    let value = String::from("closure chamada");
+
+    list.sort_by_key(|r| {
+        sort_operations.push(value);
+        r.width
+    });
+    println!("{list:#?}");
+}
+```
+
+Esta é uma maneira artificial e complicada (que não funciona) de tentar contar o número de vezes que ```sort_by_key()``` chama a closure ao classificar a lista. Este código tenta fazer essa contagem enviando ```value``` — uma String do ambiente da closure — para o vetor ```sort_operations```. A closure captura ```value``` e então a move para fora da closure transferindo a propriedade dela para o vetor. Esta closure pode ser chamada uma vez; tentar chamá-la uma segunda vez não funcionaria porque ```value``` não estaria mais no ambiente para ser enviada para ```sort_operations``` novamente! Portanto, esta closure implementa apenas ```FnOnce```. Quando tentamos compilar este código, obtemos o erro abaixo; ele diz que ```value``` não pode ser movida para fora da closure porque a closure deve implementar ```FnMut```:
+
+```
+   Compiling estudo v0.1.0 (C:\Users\arataca89\Documents\rust\packages\estudo)
+error[E0507]: cannot move out of `value`, a captured variable in an `FnMut` closure
+  --> src/main.rs:20:30
+   |
+17 |     let value = String::from("closure chamada");
+   |         ----- captured outer variable
+18 |
+19 |     list.sort_by_key(|r| {
+   |                      --- captured by this `FnMut` closure
+20 |         sort_operations.push(value);
+   |                              ^^^^^ move occurs because `value` has type `String`, which does not implement the `Copy` trait
+   |
+help: consider cloning the value if the performance cost is acceptable
+   |
+20 |         sort_operations.push(value.clone());
+   |                                   ++++++++
+
+For more information about this error, try `rustc --explain E0507`.
+error: could not compile `estudo` (bin "estudo") due to 1 previous error
+```
+
+O erro aponta para a linha no corpo da closure que move o valor para fora do ambiente. Para corrigir isso, precisamos alterar o corpo da closure para que ela não mova valores para fora do ambiente. Para contar o número de vezes que a closure é chamada, manter um contador no ambiente e incrementar seu valor no corpo da closure é uma maneira mais direta de calcular isso. A closure do código abaixo funciona com ```sort_by_key()``` porque ela está apenas capturando uma referência mutável para o contador ```num_sort_operations``` e, portanto, pode ser chamada mais de uma vez:
+
+```
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let mut list = [
+        Rectangle { width: 10, height: 1 },
+        Rectangle { width: 3, height: 5 },
+        Rectangle { width: 7, height: 12 },
+    ];
+
+    let mut num_sort_operations = 0;
+    list.sort_by_key(|r| {
+        num_sort_operations += 1;
+        r.width
+    });
+    println!("{list:#?}, foi ordenada em {num_sort_operations} operações de ordenação");
+}
+```
+
+As traits ```Fn``` são importantes ao definir ou usar funções ou tipos que usam closures. Muitos métodos dos iteradores recebem argumentos que são closures.
 
 ---
+
 ## Referências
 
 [capítulo 13 do "Livro"](https://doc.rust-lang.org/book/ch13-00-functional-features.html)
@@ -267,4 +410,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20241002
+Última atualização: 20241003
