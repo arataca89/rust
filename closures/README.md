@@ -75,13 +75,13 @@ fn main() {
 }
 ```
 
-A variável ```store``` definida na função ```main()``` tem duas camisas azuis)Blue) e uma camisa vermelha(Red) restantes para distribuir nesta promoção de edição limitada. Chamamos o método ```giveway()```para um usuário com preferência por uma camisa vermelha e um usuário sem nenhuma preferência. 
+A variável ```store``` definida na função ```main()``` tem duas camisas azuis(Blue) e uma camisa vermelha(Red) restantes para distribuir nesta promoção de edição limitada. Chamamos o método ```giveway()```para um usuário com preferência por uma camisa vermelha e um usuário sem nenhuma preferência. 
 
 Novamente, esse código pode ser implementado de muitas maneiras, e aqui, para focar em closures, nós nos ativemos aos conceitos que você já aprendeu, exceto pelo corpo do método ```giveaway()``` que usa uma closure.
 
 No método ```giveaway()```, obtemos a preferência do usuário como um parâmetro do tipo ```Option<ShirtColor>```, chamado ```user_preference```, e chamamos o método ```unwrap_or_else()``` a partir deste parâmetro.
 
-O método ```unwrap_or_else()``` em ```Option<T>``` é definido pela biblioteca padrão. Ele recebe um argumento: um closure sem argumentos que retorna um valor ```T``` (o mesmo tipo armazenado na variante ```Some``` de ```Option<T>```, neste caso ```ShirtColor```). Se ```Option<T>``` for a variante ```Some```, ```unwrap_or_else()``` retorna o valor armazenado dentro de ```Some```. Se ```Option<T>``` for a variante ```None```, ```unwrap_or_else()``` chama a closure e retorna o valor retornado pela closure.
+O método ```unwrap_or_else()``` em ```Option<T>``` é definido pela biblioteca padrão. Ele recebe um argumento: uma closure sem argumentos que retorna um valor ```T``` (o mesmo tipo armazenado na variante ```Some``` de ```Option<T>```, neste caso ```ShirtColor```). Se ```Option<T>``` for a variante ```Some```, ```unwrap_or_else()``` retorna o valor armazenado dentro de ```Some```. Se ```Option<T>``` for a variante ```None```, ```unwrap_or_else()``` chama a closure e retorna o valor retornado pela closure.
 
 Especificamos a closure ```|| self.most_stocked()``` como argumento de ```unwrap_or_else()```. Esta closure não recebe nenhum parâmetro (se a closure tivesse parâmetros, eles apareceriam entre as duas barras verticais). O corpo da closure chama ```self.most_stocked()```. Estamos definindo a closure aqui, e a implementação de ```unwrap_or_else()``` avaliará a closure mais tarde se for necessário. 
 
@@ -100,7 +100,7 @@ Um aspecto interessante aqui é que passamos uma closure que chama ```self.most_
 
 ## 2. Inferência de tipos e anotações na closure
 
-Existem mais diferenças entre funções e closures. Closures geralmente não exigem que você anote os tipos dos parâmetros ou o valor de retorno como as funções o fazem. Anotações de tipo são necessárias em funções porque os tipos são parte de uma interface explícita exposta aos seus usuários. Definir essa interface rigidamente é importante para garantir que todos concordem sobre quais tipos de valores uma função usa e retorna. Closures, por outro lado, não são usados ​​em uma interface exposta como esta: elas são armazenadas em variáveis ​​e usadas ​​sem nomeá-las e expô-las aos usuários da nossa biblioteca.
+Existem mais diferenças entre funções e closures. Closures geralmente não exigem que você anote os tipos dos parâmetros ou o valor de retorno como as funções o fazem. Anotações de tipo são necessárias em funções porque os tipos são parte de uma interface explícita exposta aos seus usuários. Definir essa interface rigidamente é importante para garantir que todos concordem sobre quais tipos de valores uma função usa e retorna. Closures, por outro lado, não são usadas ​​em uma interface exposta como esta: elas são armazenadas em variáveis ​​e usadas ​​sem nomeá-las e expô-las aos usuários da nossa biblioteca.
 
 Closures geralmente são curtas e relevantes apenas dentro de um pequeno  contexto, em vez de em qualquer cenário arbitrário. Dentro desses contextos limitados, o compilador pode inferir os tipos dos parâmetros e o tipo de retorno, semelhante a como ele é capaz de inferir os tipos da maioria das variáveis (existem casos raros em que o compilador também precisa de anotações de tipo na closure). 
 
@@ -116,7 +116,7 @@ Assim como fazemos com as variáveis, podemos adicionar anotações de tipo se q
 
 Com anotações de tipo adicionadas, a sintaxe das closures se parece mais com a sintaxe das funções. 
 
-Aqui definimos uma função que adiciona 1 ao seu parâmetro e um closure que tem o mesmo comportamento, para comparação. Adicionamos alguns espaços para alinhar as partes relevantes. Isso ilustra como a sintaxe de closure é semelhante à sintaxe de função, exceto pelo uso de pipes e a quantidade de informação passada que é opcional: 
+Aqui definimos uma função que adiciona 1 ao seu parâmetro e uma closure que tem o mesmo comportamento, para comparação. Adicionamos alguns espaços para alinhar as partes relevantes. Isso ilustra como a sintaxe de closure é semelhante à sintaxe de função, exceto pelo uso de pipes e a quantidade de informação passada que é opcional: 
 
 ```
 fn  add_one_v1   (x: u32) -> u32 { x + 1 }
@@ -125,7 +125,7 @@ let add_one_v3 = |x|             { x + 1 };
 let add_one_v4 = |x|               x + 1  ;
 ```
 
-A primeira linha mostra uma definição de função, e a segunda linha mostra uma definição de closure totalmente anotada. Na terceira linha, removemos as anotações de tipo da definição de closure. Na quarta linha, removemos os colchetes, que são opcionais porque o corpo da closure apenas uma expressão.Todas essas são definições válidas que produzirão o mesmo comportamento quando forem chamadas. As linhas ```add_one_v3``` e ```add_one_v4``` exigem que os fechamentos sejam avaliados para poder compilar porque os tipos serão inferidos de seu uso. Isso é semelhante a ```let v = Vec::new();``` precisando que anotações de tipo ou valores de algum tipo sejam inseridos no ```Vec``` para que o Rust possa inferir o tipo.
+A primeira linha mostra uma definição de função, e a segunda linha mostra uma definição de closure totalmente anotada. Na terceira linha, removemos as anotações de tipo da definição de closure. Na quarta linha, removemos os colchetes, que são opcionais porque o corpo da closure é apenas uma expressão. Todas essas são definições válidas que produzirão o mesmo comportamento quando forem chamadas. As linhas ```add_one_v3``` e ```add_one_v4``` exigem que as closures sejam avaliadas para poder compilar porque os tipos serão inferidos de seu uso. Isso é semelhante a ```let v = Vec::new();``` precisando que anotações de tipo ou valores de algum tipo sejam inseridos no ```Vec``` para que o Rust possa inferir o tipo.
 
 Para definições de closure, o compilador inferirá um tipo concreto para cada um de seus parâmetros e para seu valor de retorno. Por exemplo, o código abaixo mostra a definição de uma closure que apenas retorna o valor que recebe como parâmetro. Esta closure não é muito útil, exceto para os propósitos deste exemplo. Observe que não adicionamos nenhuma anotação de tipo à definição. Como não há anotações de tipo, podemos chamar a closure com qualquer tipo, o que fizemos aqui com String pela primeira vez. Se tentarmos depois chamar ```example_closure``` com um inteiro, obteremos um erro.
 
