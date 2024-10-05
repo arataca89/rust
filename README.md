@@ -12,5 +12,7 @@
 
 [Closures](https://github.com/arataca89/rust/tree/main/closures)
 
+[Iteradores](https://github.com/arataca89/rust/tree/main/iteradores)
+
 ---
 arataca89@gmail.com
