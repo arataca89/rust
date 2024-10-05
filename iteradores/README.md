@@ -34,7 +34,7 @@ Iteradores cuidam de toda essa lógica para você, reduzindo a repetição de c�
 
 [2. Métodos que consomem um iterator](#2-Métodos-que-consomem-um-iterator)
 
-[3. Métodos que produzem outros iteradores](3-Métodos-que-produzem-outros-iteradores)
+[3. Métodos que produzem outros iteradores](3-métodos-que-produzem-outros-iteradores)
 
 [4. Usando closures que capturam seu ambiente](#4-Usando-closures-que-capturam-seu-ambiente)
 
