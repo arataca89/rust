@@ -34,7 +34,7 @@ Iteradores cuidam de toda essa lógica para você, reduzindo a repetição de c�
 
 [2. Métodos que consomem um iterator](#2-Métodos-que-consomem-um-iterator)
 
-[3. Metodos que produzem outros iteradores](3-metodos-que-produzem-outros-iteradores)
+[3. Metodos que produzem outros iteradores](#3-Métodos-que-produzem-outros-iteradores)
 
 [4. Usando closures que capturam seu ambiente](#4-Usando-closures-que-capturam-seu-ambiente)
 
@@ -113,7 +113,7 @@ Métodos que chamam ```next()``` são chamados "consuming adaptors" (adaptadores
 
 Não podemos usar ```v1_iter``` após a chamada a ```sum()``` porque ```sum()``` assume a propriedade do iterador no qual o chamamos. 
 
-## 3. Metodos que produzem outros iteradores
+## 3. Métodos que produzem outros iteradores
 
 Adaptadores de iterador (Iterator adaptors) são métodos definidos na trait ```Iterator``` que não consomem o iterador. Em vez disso, eles produzem iteradores diferentes alterando algum aspecto do iterador original. 
 
