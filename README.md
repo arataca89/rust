@@ -14,5 +14,7 @@
 
 [Iteradores](https://github.com/arataca89/rust/tree/main/iteradores)
 
+[minigrep2 - melhorando o código do minigrep com iterators](https://github.com/arataca89/rust/tree/main/minigrep2)
+
 ---
 arataca89@gmail.com
