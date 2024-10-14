@@ -60,6 +60,8 @@ fn main() {
 }
 ```
 
+[nth()](https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.nth) retorna o enésimo elemento do iterador.
+
 Se você não fornecer argumentos (erro 1) ou se o primeiro argumento não for um inteiro (erro 2), o programa entrará em pânico, como no primeiro exemplo. 
 
 Você pode pensar nesse estilo de tratamento de erros como um touro correndo em uma loja de porcelana. O touro chegará aonde quer, mas causará estrago no processo. 
@@ -459,6 +461,8 @@ asd
 [i32::FromStr](https://doc.rust-lang.org/std/primitive.i32.html#impl-FromStr-for-i32)
 
 [std::num::ParseIntError](https://doc.rust-lang.org/std/num/struct.ParseIntError.html)
+
+[nth()](https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.nth)
 
 ---
 
