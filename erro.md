@@ -107,7 +107,7 @@ fn find_test(){
 }
 ```
 
-Observe que quando esta função encontra um caractere correspondente, ela não retorna apenas o índice do caractere. Em vez disso, ela retorna ```Some(índice)```. ```Some``` é uma variante ou um construtor de valor para o tipo ```Option```. Você pode pensar nisso como uma função com o tipo ```fn<T>(valor: T) -> Option<T>```. Correspondentemente, ```None``` também é um construtor de valor, exceto que não tem argumentos. Você pode pensar em ```None``` como uma função com o tipo ```fn<T>() -> Option<T>```.
+Observe que quando esta função encontra um caractere correspondente ela não retorna apenas o índice do caractere. Em vez disso, ela retorna ```Some(índice)```. ```Some``` é uma variante ou um construtor de valor para o tipo ```Option```. Você pode pensar nisso como uma função com o tipo ```fn<T>(valor: T) -> Option<T>```. Correspondentemente, ```None``` também é um construtor de valor, exceto que não tem argumentos. Você pode pensar em ```None``` como uma função com o tipo ```fn<T>() -> Option<T>```.
 
 Isso pode parecer muito barulho por nada, mas esta é apenas metade da história. A outra metade é usar a função de busca que escrevemos. Vamos tentar usá-la para encontrar a extensão em um nome de arquivo. 
 
@@ -395,7 +395,7 @@ fn main() {
 ```
 
  
-Os métodos normalmente usados com ```Option``` estão todos lá para ```Result```, incluindo [unwrap_or](https://doc.rust-lang.org/std/result/enum.Result.html#method.unwrap_or) e [and_then](https://doc.rust-lang.org/std/result/enum.Result.html#method.and_then). Além disso, como ```Result``` tem um segundo parâmetro de tipo, existem combinadores que afetam apenas o tipo de erro, como [map_err](https://doc.rust-lang.org/std/result/enum.Result.html#method.map_err) (em vez de [map](https://doc.rust-lang.org/std/result/enum.Result.html#method.map) e [or_else](https://doc.rust-lang.org/std/result/enum.Result.html#method.or_else) (em vez de [and_then](https://doc.rust-lang.org/std/result/enum.Result.html#method.and_then)). 
+Os métodos normalmente usados com ```Option``` estão todos lá para ```Result```, incluindo [unwrap_or](https://doc.rust-lang.org/std/result/enum.Result.html#method.unwrap_or) e [and_then](https://doc.rust-lang.org/std/result/enum.Result.html#method.and_then). Além disso, como ```Result``` tem um segundo parâmetro de tipo, existem combinadores que afetam apenas o tipo de erro, como [map_err](https://doc.rust-lang.org/std/result/enum.Result.html#method.map_err) (em vez de [map](https://doc.rust-lang.org/std/result/enum.Result.html#method.map)) e [or_else](https://doc.rust-lang.org/std/result/enum.Result.html#method.or_else) (em vez de [and_then](https://doc.rust-lang.org/std/result/enum.Result.html#method.and_then)). 
 
 ## Definindo alias para Result
 
