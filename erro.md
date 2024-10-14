@@ -92,9 +92,9 @@ O tipo ```Option``` é uma forma de usar o sistema de tipos do Rust para express
 // onde 'n' é o índice do caractere.
 // Se 'agulha' não for encontrado 'None' é retornado.
 fn find(palheiro: &str, agulha: char) -> Option<usize> {
-    for (offset, c) in palheiro.char_indices() {
+    for (i, c) in palheiro.char_indices() {
         if c == agulha {
-            return Some(offset);
+            return Some(i);
         }
     }
     None
