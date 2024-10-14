@@ -10,8 +10,14 @@ Quando feito de forma ingênua, o tratamento de erros em Rust pode ser prolixo e
 	- [Explicando unwrap](#Explicando-unwrap)
 	- [O tipo Option](#O-tipo-Option)
 		- [Valores Option componíveis](#Valores-Option-componíveis)
-* ASD
+	- [O tipo Result](#O-tipo-Result)
+		- [Analisando inteiros](#-Analisando-inteiros)
+		- [Definindo alias para Result](#Definindo-alias-para-Result)
+	- [Quando usar unwrap](#Quando-usar-unwrap)
+* [Trabalhando com múltiplos tipos de erro](#Trabalhando-com-múltiplos-tipos-de-erro)
 	- qwe
+* asdfg
+	- hjklç
 
 
 ## Básico
@@ -165,7 +171,265 @@ fn get_extension_test(){
 
 (Dica profissional: não use este código. Use o método [extension()](https://doc.rust-lang.org/std/path/struct.Path.html#method.extension) da biblioteca padrão.) 
 
+O código permanece simples, mas o importante a notar é que o tipo de retorno da função ```find()```nos força a considerar a possibilidade de ausência. Isso é bom porque significa que o compilador não nos deixará esquecer acidentalmente do caso em que um nome de arquivo não tem uma extensão. Por outro lado, fazer análise de caso explícita toda vez, como fizemos em ```get_extension()```, pode ficar um pouco cansativo. 
 
+Na verdade, a análise de caso em ```get_extension()``` segue um padrão muito comum: mapear uma função para o valor dentro de uma ```Option<T>```, a menos que a opção seja ```None```, nesse caso, retornar ```None```.
+
+Rust tem polimorfismo paramétrico, então é muito fácil definir um combinador que abstrai esse padrão: 
+
+```
+fn map<F, T, A>(option: Option<T>, f: F) -> Option<A> where F: FnOnce(T) -> A {
+    match option {
+        None => None,
+        Some(value) => Some(f(value)),
+    }
+}
+```
+De fato, o método ```map()``` é definido como um método em ```Option<T>``` na biblioteca padrão. Como um método, ele tem uma assinatura ligeiramente diferente: métodos recebem ```self```, ```&self``` ou ```&mut self``` como seu primeiro argumento. 
+
+Armados com nosso novo combinador, podemos reescrever nosso método ```get_extension()``` para nos livrar da análise de casos:
+
+```
+fn get_extension(filename: &str) -> Option<&str> {
+    find(filename, '.').map(|i| &filename[i+1..])
+}
+```
+
+Outro padrão que encontramos com frequência é atribuir um valor padrão ao caso em que um valor ```Option``` é ```None```. Por exemplo, talvez seu programa assuma que a extensão de um arquivo é ```rs``` mesmo que nenhuma extensão esteja presente. Como você pode imaginar, a análise de caso para isso não é específica para extensões de arquivo - pode funcionar com qualquer ```Option<T>```:
+
+```
+fn unwrap_or<T>(option: Option<T>, default: T) -> T {
+    match option {
+        None => default,
+        Some(value) => value,
+    }
+}
+```
+
+Assim como em ```map()``` mostrado acima, a implementação da biblioteca padrão é um método em vez de uma função livre.
+
+O truque aqui é que o valor padrão deve ter o mesmo tipo que o valor que pode estar dentro da ```Option<T>```. Usá-lo é muito simples no nosso caso: 
+
+```
+#[test]
+fn unwrap_or_test(){
+    assert_eq!(get_extension("foobar.csv").unwrap_or("rs"), "csv");
+    assert_eq!(get_extension("foobar").unwrap_or("rs"), "rs");
+}
+```
+
+(Observe que [unwrap_or()](https://doc.rust-lang.org/std/option/enum.Option.html#method.unwrap_or) é definido como um método em ```Option<T>``` na biblioteca padrão, então nós usamos isso aqui em vez da função independente que definimos acima. Não se esqueça de verificar também o método [unwrap_or_else()](https://doc.rust-lang.org/std/option/enum.Option.html#method.unwrap_or_else) mais geral.) 
+
+Existe mais um combinador que acreditamos valer a pena prestar atenção especial: ```and_then```. Ele facilita a composição de computações distintas que admitem a possibilidade de ausência. Por exemplo, muito do código nesta seção trata de encontrar uma extensão dado um nome de arquivo. Para fazer isso, você precisa primeiro do nome do arquivo, que normalmente é extraído de um path. Embora a maioria dos paths tenha um nome de arquivo, nem todos eles têm. Por exemplo, ```.```, ```..``` ou ```/```.
+
+Então, somos encarregados do desafio de encontrar uma extensão dado um path. Vamos começar com a análise de caso explícita: 
+
+```
+fn get_extension_from_path(filepath: &str) -> Option<&str> {
+    match filename(filepath) {
+        None => None,
+        Some(name) => match get_extension(name) {
+            None => None,
+            Some(ext) => Some(ext),
+        }
+    }
+}
+
+fn filename(filepath: &str) -> Option<&str> {
+  // código omitido
+  unimplemented!()
+}
+```
+
+Você pode pensar que poderíamos usar o combinador ```map``` para reduzir a análise de caso, mas neste contexto não se encaixa exatamente... 
+
+```
+fn get_extension_from_path(filepath: &str) -> Option<&str> {
+    filename(filepath).map(|x| get_extension(x)) // Isto provocará um erro de compilação.
+}
+```
+
+A função ```map()``` aqui encapsula o valor retornado pela função ```get_extension()``` dentro de um ```Option<_>``` e, como a própria função ```get_extension()``` retorna um ```Option<&str>```, a expressão ```filename(filepath).map(|x| get_extension(x))``` retorna um ```Option<Option<&str>>```. 
+
+Mas como ```get_extension_from_path()``` retorna apenas ```Option<&str>``` (e não ```Option<Option<&str>>```), obtemos um erro de compilação.
+ 
+O resultado da função recebida por ```map()``` como entrada é sempre reencapsulado com ```Some```. Em vez disso, precisamos de algo como ```map```, mas que permita que o chamador retorne um ```Option<_>``` diretamente sem encapsulá-lo em outro ```Option<_>```.
+
+Sua implementação genérica é ainda mais simples que map:
+
+```
+fn and_then<F, T, A>(option: Option<T>, f: F) -> Option<A>
+        where F: FnOnce(T) -> Option<A> {
+    match option {
+        None => None,
+        Some(value) => f(value),
+    }
+}
+```
+
+Agora podemos reescrever nossa função ```get_extension_from_path()``` sem análise de caso explícita: 
+
+```
+fn get_extension_from_path(filepath: &str) -> Option<&str> {
+    filename(filepath).and_then(get_extension)
+}
+```
+
+Nota lateral: Como o ```and_then``` funciona essencialmente como o ```map```, mas retorna um ```Option<_>``` em vez de um ```Option<Option<_>>```, ele é conhecido como ```flatMap``` em algumas outras linguagens. 
+
+O tipo [Option](https://doc.rust-lang.org/std/option/enum.Option.html) possui muitos outros combinadores definidos na biblioteca padrão. É uma boa ideia dar uma olhada rápida nesta lista e se familiarizar com o que está disponível - eles podem frequentemente reduzir a análise de casos para você. Familiarizar-se com esses combinadores renderá dividendos porque muitos deles também são definidos (com semântica semelhante) para ```Result```, sobre o qual falaremos a seguir. 
+
+Combinadores tornam o uso de tipos como ```Option``` ergonômico porque reduzem a análise de casos explícita. Eles também são compostos porque permitem que o chamador lide com a possibilidade de ausência à sua maneira. Métodos como ```unwrap()``` removem escolhas porque eles entram em pânico se ```Option<T>``` for ```None```.
+
+## O tipo Result
+
+O tipo [Result](https://doc.rust-lang.org/std/result/) também é definido na biblioteca padrão:
+
+```
+enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+```
+
+O tipo ```Result``` é uma versão mais rica de ```Option```. Em vez de expressar a possibilidade de ausência como ```Option``` faz, ```Result``` expressa a possibilidade de erro. Normalmente, o erro é usado para explicar por que a execução de algum processamento falhou. Esta é uma forma estritamente mais geral de ```Option```. Considere o seguinte alias de tipo, que é semanticamente equivalente ao real ```Option<T>``` em todos os sentidos: 
+
+```
+type Option<T> = Result<T, ()>;
+```
+
+Isso corrige o segundo parâmetro de tipo de ```Result``` para ser sempre ```()``` (pronunciado "unidade" ou "tupla vazia"). Exatamente um valor habita o tipo ```()```: ```()```. (Sim, os termos de nível de tipo e valor têm a mesma notação!) 
+
+O tipo ```Result``` é uma forma de representar um dos dois resultados possíveis em um processamento. Por convenção, um resultado é considerado esperado ou "Ok", enquanto o outro resultado é considerado inesperado ou "Err". 
+
+Assim como ```Option```, o tipo ```Result``` também possui um método [unwrap()](https://doc.rust-lang.org/std/result/enum.Result.html#method.unwrap) definido na biblioteca padrão. Vamos defini-lo: 
+
+```
+enum Result<T, E> { Ok(T), Err(E) }
+impl<T, E: ::std::fmt::Debug> Result<T, E> {
+    fn unwrap(self) -> T {
+        match self {
+            Result::Ok(val) => val,
+            Result::Err(err) =>
+              panic!("called `Result::unwrap()` on an `Err` value: {:?}", err),
+        }
+    }
+}
+```
+Isso é efetivamente o mesmo que nossa definição para ```Option::unwrap()```, exceto que inclui o valor de erro na mensagem ```panic!``` Isso torna a depuração mais fácil, mas também exige que adicionemos uma restrição ```Debug``` ao parâmetro de tipo ```E``` (que representa nosso tipo de erro). Como a grande maioria dos tipos deve satisfazer a restrição ```Debug```, isso tende a funcionar na prática. (```Debug``` em um tipo simplesmente significa que existe uma maneira razoável de imprimir uma descrição legível por humanos de valores com esse tipo.) 
+
+Ok, vamos passar para um exemplo. 
+
+## Analisando inteiros
+
+A biblioteca padrão do Rust torna a conversão de strings para inteiros extremamente simples. É tão fácil, na verdade, que é muito tentador escrever algo como o seguinte: 
+
+```
+fn double_number(number_str: &str) -> i32 {
+    2 * number_str.parse::<i32>().unwrap()
+}
+
+fn main() {
+    let n: i32 = double_number("10");
+    assert_eq!(n, 20);
+}
+```
+
+Neste ponto, você deve ser cético em relação à chamada de ```unwrap()```. Por exemplo, se a string não for analisada como um número, você terá um pânico: 
+
+```
+thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value: ParseIntError { kind: InvalidDigit }', /home/rustbuild/src/rust-buildbot/slave/beta-dist-rustc-linux/build/src/libcore/result.rs:729
+```
+
+Isso é bastante feio, e se isso acontecesse dentro de uma biblioteca que você está usando, você poderia ficar compreensivelmente irritado. Em vez disso, devemos tentar lidar com o erro em nossa função e deixar o chamador decidir o que fazer. Isso significa mudar o tipo de retorno de ```double_number()```. Mas para quê? Bem, isso requer olhar para a assinatura do método ```parse()``` na biblioteca padrão: 
+
+```
+impl str {
+    fn parse<F: FromStr>(&self) -> Result<F, F::Err>;
+}
+```
+
+Vemos que precisamos usar um ```Result```. Certamente, é possível que isso pudesse ter retornado uma ```Option```. Afinal, uma string ou é analisada como um número ou não, certo? Essa é certamente uma maneira razoável de fazer isso, mas a implementação distingue internamente por que a string não foi analisada como um inteiro. (Seja uma string vazia, um dígito inválido, muito grande ou muito pequeno.) Portanto, usar um ```Result``` faz sentido porque queremos fornecer mais informações do que simplesmente "ausência". Queremos dizer por que a análise falhou. Você deve tentar emular essa linha de raciocínio quando confrontado com uma escolha entre ```Option``` e ```Result```. Se você puder fornecer informações detalhadas sobre o erro, provavelmente deveria. 
+
+OK, mas como escrevemos nosso tipo de retorno? O método ```parse()``` conforme definido acima é genérico sobre todos os tipos de números definidos na biblioteca padrão. Poderíamos (e provavelmente deveríamos) também tornar nossa função genérica, mas vamos favorecer a explicitude por enquanto. Só nos importamos com [i32](https://doc.rust-lang.org/std/primitive.i32.html), então precisamos encontrar sua implementação de [FromStr](https://doc.rust-lang.org/std/primitive.i32.html#impl-FromStr-for-i32) e olhar para seu tipo associado ```Err```. Fizemos isso para que pudéssemos encontrar o tipo de erro concreto. Neste caso, é [std::num::ParseIntError](https://doc.rust-lang.org/std/num/struct.ParseIntError.html). Finalmente, podemos reescrever nossa função:
+
+```
+use std::num::ParseIntError;
+
+fn double_number(number_str: &str) -> Result<i32, ParseIntError> {
+    match number_str.parse::<i32>() {
+        Ok(n) => Ok(2 * n),
+        Err(err) => Err(err),
+    }
+}
+
+fn main() {
+    match double_number("10") {
+        Ok(n) => assert_eq!(n, 20),
+        Err(err) => println!("Error: {:?}", err),
+    }
+}
+
+```
+
+Isso está um pouco melhor, mas agora escrevemos muito mais código! A análise de casos nos incomodou novamente. 
+
+Combinadores são a solução novamente! Assim como ```Option```, ```Result``` tem muitos combinadores definidos como métodos. Existe uma grande interseção de combinadores comuns entre ```Result``` e ```Option```. Em particular, ```map``` faz parte dessa interseção:
+
+```
+use std::num::ParseIntError;
+
+fn double_number(number_str: &str) -> Result<i32, ParseIntError> {
+    number_str.parse::<i32>().map(|n| 2 * n)
+}
+
+fn main() {
+    match double_number("10") {
+        Ok(n) => assert_eq!(n, 20),
+        Err(err) => println!("Error: {:?}", err),
+    }
+}
+
+```
+
+ 
+Os métodos normalmente usados com ```Option``` estão todos lá para ```Result```, incluindo [unwrap_or](https://doc.rust-lang.org/std/result/enum.Result.html#method.unwrap_or) e [and_then](https://doc.rust-lang.org/std/result/enum.Result.html#method.and_then). Além disso, como ```Result``` tem um segundo parâmetro de tipo, existem combinadores que afetam apenas o tipo de erro, como [map_err](https://doc.rust-lang.org/std/result/enum.Result.html#method.map_err) (em vez de [map](https://doc.rust-lang.org/std/result/enum.Result.html#method.map) e [or_else](https://doc.rust-lang.org/std/result/enum.Result.html#method.or_else) (em vez de [and_then](https://doc.rust-lang.org/std/result/enum.Result.html#method.and_then)). 
+
+## Definindo alias para Result
+
+Na biblioteca padrão, você pode ver frequentemente tipos como ```Result<i32>```. Mas espere, definimos ```Result``` para ter dois parâmetros de tipo. Como podemos especificar apenas um? A chave é definir um alias de tipo ```Result``` que fixa um dos parâmetros de tipo com um tipo específico. Normalmente, o tipo fixo é o tipo de erro. Por exemplo, nosso exemplo anterior de análise de inteiros poderia ser reescrito assim:
+
+```
+use std::num::ParseIntError;
+use std::result;
+
+type Result<T> = result::Result<T, ParseIntError>;
+
+fn double_number(number_str: &str) -> Result<i32> {
+    unimplemented!();
+}
+```
+ 
+Por que faríamos isso? Bem, se tivermos muitas funções que podem retornar ```ParseIntError```, é muito mais conveniente definir um alias que sempre use ```ParseIntError``` para que não precisemos escrevê-lo o tempo todo.
+
+O lugar mais proeminente onde esse idioma é usado na biblioteca padrão é com [io::Result](https://doc.rust-lang.org/std/io/type.Result.html). Normalmente, escreve-se ```io::Result<T>```, o que deixa claro que você está usando o alias de tipo do módulo ```io``` em vez da definição de ```std::result``` (Esse idioma também é usado para [fmt::Result](https://doc.rust-lang.org/std/fmt/type.Result.html)). 
+ 
+## Quando usar unwrap
+
+Você pode ter notado que eu tenho sido bastante rigoroso em relação a chamar métodos como ```unwrap()``` que podem causar pânico e abortar seu programa. De modo geral, este é um bom conselho. 
+
+No entanto, ```unwrap``` ainda pode ser usado com cautela. O que exatamente justifica o uso de ```unwrap``` é um tanto nebuloso e as opiniões podem variar. Vou resumir algumas das minhas opiniões sobre o assunto. 
+
+* **Em exemplos e códigos rápidos**. Às vezes você está escrevendo exemplos ou um programa rápido, e o tratamento de erros simplesmente não é importante. Superar a conveniência de ```unwrap``` pode ser difícil em tais cenários, por isso é muito atraente. 
+* **Quando o pânico indica um bug no programa**. Quando as invariantes do seu código devem impedir que um determinado caso aconteça (como, digamos, remover de uma pilha vazia), então o pânico pode ser permitido. Isso ocorre porque ele expõe um bug no seu programa. Isso pode ser explícito, como um ```assert!``` falhando, ou pode ser porque seu índice em um array estava fora dos limites. 
+
+Esta provavelmente não é uma lista exaustiva. Além disso, ao usar uma ```Option```, geralmente é melhor usar seu método ```expect()```. ```expect()``` faz exatamente a mesma coisa que ```unwrap()```, exceto que imprime uma mensagem que você fornece. Isso torna o pânico resultante um pouco mais agradável de lidar, pois mostrará sua mensagem em vez de “called unwrap on a None value.”.
+
+Meu conselho se resume a isso: use o bom senso. Existe uma razão pela qual as palavras "nunca faça X" ou "Y é considerado prejudicial" não aparecem em meus escritos. Há compensações em todas as coisas, e cabe a você, como programador, determinar o que é aceitável para seus casos de uso. Meu objetivo é apenas ajudá-lo a avaliar as compensações com a maior precisão possível. 
+
+Agora que cobrimos os fundamentos do tratamento de erros em Rust e explicamos o uso de ```unwrap()``` e suas variantes, vamos começar a explorar mais da biblioteca padrão. 
+
+## Trabalhando com múltiplos tipos de erro
 
 asd
 
@@ -178,9 +442,26 @@ asd
 
 [extension()](https://doc.rust-lang.org/std/path/struct.Path.html#method.extension)
 
+[Option](https://doc.rust-lang.org/std/option/enum.Option.html)
+
+[Option::map()](https://doc.rust-lang.org/std/option/enum.Option.html#method.map)
+
+[Option::unwrap_or()](https://doc.rust-lang.org/std/option/enum.Option.html#method.unwrap_or)
+
+[Option::unwrap_or_ele()](https://doc.rust-lang.org/std/option/enum.Option.html#method.unwrap_or_else)
+
+[Result](https://doc.rust-lang.org/std/result/enum.Result.html)
+
+[Result::unwrap()](https://doc.rust-lang.org/std/result/enum.Result.html#method.unwrap)
+
+[i32](https://doc.rust-lang.org/std/primitive.i32.html)
+
+[i32::FromStr](https://doc.rust-lang.org/std/primitive.i32.html#impl-FromStr-for-i32)
+
+[std::num::ParseIntError](https://doc.rust-lang.org/std/num/struct.ParseIntError.html)
 
 ---
 
 arataca89@gmail.com
 
-Última atualização: 20241011
+Última atualização: 20241014
