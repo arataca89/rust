@@ -11,7 +11,7 @@ Quando feito de forma ingênua, o tratamento de erros em Rust pode ser prolixo e
 	- [O tipo Option](#O-tipo-Option)
 		- [Valores Option componíveis](#Valores-Option-componíveis)
 	- [O tipo Result](#O-tipo-Result)
-		- [Analisando inteiros](#-Analisando-inteiros)
+		- [Analisando inteiros](#Analisando-inteiros)
 		- [Definindo alias para Result](#Definindo-alias-para-Result)
 	- [Quando usar unwrap](#Quando-usar-unwrap)
 * [Trabalhando com múltiplos tipos de erro](#Trabalhando-com-múltiplos-tipos-de-erro)
