@@ -18,7 +18,7 @@ Quando feito de forma ingênua, o tratamento de erros em Rust pode ser prolixo e
 	- [Misturando Option e Result](#Misturando-Option-e-Result)
 	- [Os limites dos combinadores](#-Os-limites-dos-combinadores)
 	- [Retorno antecipado](#Retorno-antecipado)
-	- [O operador ?](#O-operador-?)
+	- [O operador ?](#O-operador-)
 	- [Definindo seu próprio tipo de erro](#Definindo-seu-próprio-tipo-de-erro)
 * asdfg
 	- hjklç
