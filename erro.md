@@ -15,7 +15,11 @@ Quando feito de forma ingênua, o tratamento de erros em Rust pode ser prolixo e
 		- [Definindo alias para Result](#Definindo-alias-para-Result)
 	- [Quando usar unwrap](#Quando-usar-unwrap)
 * [Trabalhando com múltiplos tipos de erro](#Trabalhando-com-múltiplos-tipos-de-erro)
-	- qwe
+	- [Misturando Option e Result](#Misturando-Option-e-Result)
+	- [Os limites dos combinadores](#-Os-limites-dos-combinadores)
+	- [Retorno antecipado](#Retorno-antecipado)
+	- [O operador ?](#O-operador-?)
+	- [Definindo seu próprio tipo de erro](#Definindo-seu-próprio-tipo-de-erro)
 * asdfg
 	- hjklç
 
@@ -433,6 +437,217 @@ Agora que cobrimos os fundamentos do tratamento de erros em Rust e explicamos o 
 
 ## Trabalhando com múltiplos tipos de erro
 
+Até agora, analisamos o tratamento de erros onde tudo era ```Option<T>``` ou ```Result<T, SomeError>```. Mas o que acontece quando você tem um tipo ```Option``` e um tipo ```Result```? Ou e se você tiver um ```Result<T, Error1>``` e um ```Result<T, Error2>```? Lidar com a composição de tipos de erros distintos é o próximo desafio que enfrentamos, e será o tema principal ao longo do restante desta seção. 
+
+## Misturando Option e Result
+
+Até agora, falei sobre combinadores definidos para ```Option``` e combinadores definidos para ```Result```. Podemos usar esses combinadores para compor resultados de diferentes computações sem fazer análise de caso explícita. 
+
+Claro, no código real, as coisas nem sempre são tão limpas. Às vezes você tem uma mistura de tipos ```Option``` e ```Result```. Devemos recorrer à análise de casos explícita, ou podemos continuar usando combinadores? 
+
+Por enquanto, vamos revisitar um dos primeiros exemplos desta seção: 
+
+```
+use std::env;
+
+fn main() {
+    let mut argv = env::args();
+    let arg: String = argv.nth(1).unwrap(); // erro 1
+    let n: i32 = arg.parse().unwrap(); // erro 2
+    println!("{}", 2 * n);
+}
+```
+
+Dada a nossa nova compreensão de ```Option```, ```Result``` e seus diversos combinadores, devemos tentar reescrever isso para que os erros sejam tratados adequadamente e o programa não entre em pânico se houver um erro.
+
+O aspecto complicado aqui é que ```argv.nth(1)``` produz um ```Option``` enquanto ```arg.parse()``` produz um ```Result```. Esses não são diretamente componíveis. Quando confrontados com um ```Option``` e um ```Result```, a solução geralmente é converter o ```Option``` para um ```Result```. No nosso caso, a ausência de um parâmetro de linha de comando (de ```env::args()```) significa que o usuário não invocou o programa corretamente. Poderíamos usar uma String para descrever o erro. Vamos tentar:
+
+```
+use std::env;
+
+fn double_arg(mut argv: env::Args) -> Result<i32, String> {
+    argv.nth(1)
+        .ok_or("Por favor passe pelo menos um argumento".to_owned())
+        .and_then(|arg| arg.parse::<i32>().map_err(|err| err.to_string()))
+        .map(|n| 2 * n)
+}
+
+fn main() {
+    match double_arg(env::args()) {
+        Ok(n) => println!("{}", n),
+        Err(err) => println!("Error: {}", err),
+    }
+}
+```
+
+Há algumas coisas novas neste exemplo. A primeira é o uso do combinador ```Option::ok_or()```. Esta é uma forma de converter um ```Option``` em um ```Result```. A conversão exige que você especifique qual erro usar se ```Option``` for ```None```. Como os outros combinadores que vimos, sua definição é muito simples: 
+
+```
+fn ok_or<T, E>(option: Option<T>, err: E) -> Result<T, E> {
+    match option {
+        Some(val) => Ok(val),
+        None => Err(err),
+    }
+}
+```
+
+[to_owned()](https://doc.rust-lang.org/std/borrow/trait.ToOwned.html#tymethod.to_owned) cria dados proprietários a partir de dados emprestados, normalmente por clonagem.
+
+[and_then()](https://doc.rust-lang.org/std/result/enum.Result.html#method.and_then) chama a closure passada como argumento se o ```Result``` for ```Ok```, caso contrário retorna o valor ```Err```. 
+
+O outro novo combinador usado aqui é [Result::map_err()](https://doc.rust-lang.org/std/result/enum.Result.html#method.map_err). Este é como [Result::map()](https://doc.rust-lang.org/std/result/enum.Result.html#method.map), exceto que ele mapeia uma função para a parte de erro de um valor ```Result```. Se o ```Result``` é um valor ```Ok(...)```, então ele é retornado sem modificações. 
+
+Usamos ```map_err()``` aqui porque é necessário que os tipos de erro permaneçam os mesmos (devido ao nosso uso de ```and_then()```. Como escolhemos converter o ```Option<String>``` (de ```argv.nth(1)```) para um ```Result<String, String>```, também devemos converter o ```ParseIntError``` de ```arg.parse()``` para ```String```. 
+
+
+## Os limites dos combinadores
+
+Fazer I/O e analisar entrada é uma tarefa muito comum, e é uma que eu pessoalmente fiz muito em Rust. Portanto, usaremos (e continuaremos a usar) I/O e várias rotinas de análise para exemplificar o tratamento de erros. 
+
+Vamos começar com algo simples. Nossa tarefa é abrir um arquivo, ler todo o seu conteúdo e converter seu conteúdo para um número. Então, multiplicar por 2 e imprimir a saída. 
+
+Embora eu tenha tentado convencê-lo a não usar ```unwrap()```, pode ser útil escrever seu código usando ```unwrap()``` primeiro. Isso permite que você se concentre no seu problema em vez do tratamento de erros, e expõe os pontos onde o tratamento de erros adequado precisa ocorrer. Vamos começar por aí para que possamos ter uma ideia do código e, em seguida, refatorá-lo para usar um tratamento de erros melhor. 
+
+```
+use std::fs::File;
+use std::io::Read;
+use std::path::Path;
+
+fn file_double<P: AsRef<Path>>(file_path: P) -> i32 {
+    let mut file = File::open(file_path).unwrap(); // error 1
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).unwrap(); // error 2
+    let n: i32 = contents.trim().parse().unwrap(); // error 3
+    2 * n
+}
+
+fn main() {
+    let doubled = file_double("foobar");
+    println!("{}", doubled);
+}
+```
+
+OBSERVAÇÃO: ```AsRef<Path>``` é usado porque é o mesmo trait bound usado em [std::fs::File::open()](https://doc.rust-lang.org/std/fs/struct.File.html#method.open). Isso torna ergonômico o uso de qualquer tipo de string como um caminho de arquivo.
+
+Existem três erros diferentes que podem ocorrer aqui: 
+
+* Um problema ao abrir o arquivo.
+* Um problema ao ler dados do arquivo.
+* Um problema ao analisar os dados como um número. 
+
+Os dois primeiros problemas são descritos pelo tipo [std::io::Error](https://doc.rust-lang.org/std/io/struct.Error.html). Sabemos disso por causa dos tipos de retorno de [std::fs::File::open()](https://doc.rust-lang.org/std/fs/struct.File.html#method.open) e [std::io::Read::read_to_string()](https://doc.rust-lang.org/std/io/trait.Read.html#method.read_to_string). (Observe que ambos usam o idioma de alias do tipo ```Result``` descrito anteriormente. Se você clicar no tipo ```Result```, verá o [alias do tipo](https://doc.rust-lang.org/std/io/type.Result.html) e, consequentemente, o tipo subjacente [io::Error](https://doc.rust-lang.org/std/io/struct.Error.html).) O terceiro problema é descrito pelo tipo [std::num::ParseIntError](https://doc.rust-lang.org/std/num/struct.ParseIntError.html). O tipo ```io::Error``` em particular é difundido em toda a biblioteca padrão. Você o verá repetidamente.
+
+Vamos começar o processo de refatoração da função ```file_double()```. Para tornar essa função componível com outros componentes do programa, ela não deve entrar em pânico se alguma das condições de erro acima for atendida. Efetivamente, isso significa que a função deve retornar um erro se alguma de suas operações falhar. Nosso problema é que seu tipo de retorno é ```i32```, o que não nos dá nenhuma maneira útil de relatar um erro. Portanto, devemos começar mudando o tipo de retorno de ```i32``` para algo diferente.
+
+A primeira coisa que precisamos decidir: devemos usar ```Option``` ou ```Result```? Certamente poderíamos usar ```Option``` muito facilmente. Se qualquer um dos três erros ocorrer, poderíamos simplesmente retornar ```None```. Isso funcionará e é melhor do que entrar em pânico, mas podemos fazer muito melhor. Em vez disso, devemos passar alguns detalhes sobre o erro que ocorreu. Como queremos expressar a possibilidade de erro, devemos usar ```Result<i32, E>```. Mas o que ```E``` deve ser? Como dois tipos diferentes de erros podem ocorrer, precisamos convertê-los para um tipo comum. Um desses tipos é ```String```. Vamos ver como isso impacta nosso código: 
+
+```
+use std::fs::File;
+use std::io::Read;
+use std::path::Path;
+
+fn file_double<P: AsRef<Path>>(file_path: P) -> Result<i32, String> {
+    File::open(file_path)
+         .map_err(|err| err.to_string())
+         .and_then(|mut file| {
+              let mut contents = String::new();
+              file.read_to_string(&mut contents)
+                  .map_err(|err| err.to_string())
+                  .map(|_| contents)
+         })
+         .and_then(|contents| {
+              contents.trim().parse::<i32>()
+                      .map_err(|err| err.to_string())
+         })
+         .map(|n| 2 * n)
+}
+
+fn main() {
+    match file_double("foobar") {
+        Ok(n) => println!("{}", n),
+        Err(err) => println!("Error: {}", err),
+    }
+}
+```
+
+Este código parece um pouco complicado. Pode levar algum tempo antes que código como este se torne fácil de escrever. A maneira como o escrevemos é seguindo os tipos. Assim que mudamos o tipo de retorno de ```file_double()``` para ```Result<i32, String>```, tivemos que começar a procurar os combinadores certos. Neste caso, usamos apenas três combinadores diferentes: ```and_then```, ```map``` e ```map_err```.
+
+```and_then``` é usado para encadear múltiplas computações onde cada computação pode retornar um erro. Após abrir o arquivo, há duas outras computações que podem falhar: ler do arquivo e analisar o conteúdo como um número. Correspondentemente, há duas chamadas para ```and_then```. 
+ 
+```map``` é usado para aplicar uma função ao valor ```Ok(...)``` de um ```Result```. Por exemplo, a última chamada a ```map``` multiplica o valor de ```Ok(...)``` (que é um i32) por 2. Se um erro tivesse ocorrido antes desse ponto, essa operação teria sido ignorada devido à forma como o ```map``` é definido.
+
+ 
+```map_err``` é o truque que faz tudo isso funcionar. ```map_err``` é como ```map```, exceto que ele aplica uma função ao valor ```Err(...)``` de um ```Result```. Neste caso, queremos converter todos os nossos erros para um único tipo: ```String```. Como ambos ```io::Error``` e ```num::ParseIntError``` implementam ```ToString```, podemos chamar o método ```to_string()``` para convertê-los.
+ 
+Dito isso, o código ainda é complicado. Dominar o uso de combinadores é importante, mas eles têm seus limites. Vamos tentar uma abordagem diferente: retornos antecipados. 
+
+## Retorno antecipado
+
+Gostaria de pegar o código da seção anterior e reescrevê-lo usando retornos antecipados. Retornos antecipados permitem que você saia da função mais cedo. Não podemos retornar cedo em ```file_double()``` de dentro de outra closure, então precisaremos voltar à análise de caso explícita. 
+
+```
+use std::fs::File;
+use std::io::Read;
+use std::path::Path;
+
+fn file_double<P: AsRef<Path>>(file_path: P) -> Result<i32, String> {
+    let mut file = match File::open(file_path) {
+        Ok(file) => file,
+        Err(err) => return Err(err.to_string()),
+    };
+    let mut contents = String::new();
+    if let Err(err) = file.read_to_string(&mut contents) {
+        return Err(err.to_string());
+    }
+    let n: i32 = match contents.trim().parse() {
+        Ok(n) => n,
+        Err(err) => return Err(err.to_string()),
+    };
+    Ok(2 * n)
+}
+
+fn main() {
+    match file_double("foobar") {
+        Ok(n) => println!("{}", n),
+        Err(err) => println!("Error: {}", err),
+    }
+}
+
+```
+
+Alguns podem discordar sobre se este código é melhor do que o código que usa combinadores, mas se você não está familiarizado com a abordagem do combinador, este código parece mais simples de ler para mim. Ele usa análise de caso explícita com ```match``` e ```if let```. Se um erro ocorrer, ele simplesmente para de executar a função e retorna o erro (convertendo-o para string). 
+
+Mas isso não é um passo para trás? Anteriormente, dissemos que a chave para o tratamento de erros ergonômico é reduzir a análise de casos explícitos, mas voltamos à análise de casos explícitos aqui. Acontece que existem várias maneiras de reduzir a análise de casos explícitos. Combinadores não são a única maneira.
+
+## O operador ?
+
+O operador ```?``` colocado após um valor ```Result``` é definido para funcionar quase da mesma forma que as expressões match. Se o valor do ```Result``` for um ```Ok```, o valor dentro do ```Ok``` será retornado
+dessa expressão e o programa continuará. Se o valor for um ```Err```, o ```Err``` será retornado de toda a função como se tivéssemos usado a palavra-chave ```return```, de modo que o valor de erro seja propagado para o código que chamou.
+ 
+```
+use std::fs::File;
+use std::io::Read;
+use std::path::Path;
+
+fn file_double<P: AsRef<Path>>(file_path: P) -> Result<i32, String> {
+    let mut file = File::open(file_path).map_err(|e| e.to_string())?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).map_err(|e| e.to_string())?;
+    let n = contents.trim().parse::<i32>().map_err(|e| e.to_string())?;
+    Ok(2 * n)
+}
+
+fn main() {
+    match file_double("foobar.txt") {
+        Ok(n) => println!("{}", n),
+        Err(err) => println!("Error: {}", err),
+    }
+}
+```
+
+
+## Definindo seu próprio tipo de erro
+
 asd
 
 
@@ -464,8 +679,26 @@ asd
 
 [nth()](https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.nth)
 
+[to_owned()](https://doc.rust-lang.org/std/borrow/trait.ToOwned.html#tymethod.to_owned)
+
+[Result::map_err()](https://doc.rust-lang.org/std/result/enum.Result.html#method.map_err)
+
+[Result::map()](https://doc.rust-lang.org/std/result/enum.Result.html#method.map)
+
+[Result::and_then()](https://doc.rust-lang.org/std/result/enum.Result.html#method.and_then) 
+
+[File::open()](https://doc.rust-lang.org/std/fs/struct.File.html#method.open)
+
+[std::io::Error](https://doc.rust-lang.org/std/io/struct.Error.html)
+
+[std::io::Read::read_to_string()](https://doc.rust-lang.org/std/io/trait.Read.html#method.read_to_string)
+
+[std::io::Result](https://doc.rust-lang.org/std/io/type.Result.html)
+
+[o operador ?](https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#a-shortcut-for-propagating-errors-the--operator)
+
 ---
 
 arataca89@gmail.com
 
-Última atualização: 20241014
+Última atualização: 20241017
