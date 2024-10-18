@@ -20,6 +20,7 @@ Quando feito de forma ingênua, o tratamento de erros em Rust pode ser prolixo e
 	- [Retorno antecipado](#Retorno-antecipado)
 	- [O operador ?](#O-operador-)
 	- [Definindo seu próprio tipo de erro](#Definindo-seu-próprio-tipo-de-erro)
+* [Traits usadas pela manipulação de erros](#Traits-usadas-pela-manipulação-de-erros)
 * asdfg
 	- hjklç
 
@@ -648,6 +649,73 @@ fn main() {
 
 ## Definindo seu próprio tipo de erro
 
+Antes de mergulharmos em algumas traits de erro da biblioteca padrão, gostaria de finalizar esta seção removendo o uso de ```String``` como nosso tipo de erro nos exemplos anteriores. 
+
+Usar ```String``` como fizemos em nossos exemplos anteriores é conveniente porque é fácil converter erros para strings, ou até mesmo criar seus próprios erros como strings na hora. No entanto, usar ```String``` para seus erros tem algumas desvantagens. 
+
+A primeira desvantagem é que as mensagens de erro tendem a poluir seu código. É possível definir as mensagens de erro em outro lugar, mas, a menos que você seja excepcionalmente disciplinado, é muito tentador incorporar a mensagem de erro em seu código. De fato, fizemos exatamente isso em um exemplo anterior. 
+
+```
+fn double_arg(mut argv: env::Args) -> Result<i32, String> {
+    argv.nth(1)
+        .ok_or("Por favor passe pelo menos um argumento".to_owned())
+        .and_then(|arg| arg.parse::<i32>().map_err(|err| err.to_string()))
+        .map(|n| 2 * n)
+}
+```
+
+A segunda e mais importante desvantagem é que as Strings são pobres em informação de erro. Ou seja, se todos os erros forem convertidos para strings, então os erros que passamos para o chamador se tornam completamente pobres, com pouca informação. A única coisa razoável que o chamador pode fazer com um erro de ```String``` é mostrá-lo ao usuário. Certamente, inspecionar a string para determinar o tipo de erro não é robusto. (É verdade que essa desvantagem é muito mais importante dentro de uma biblioteca do que, digamos, uma aplicação.) 
+
+Por exemplo, o tipo ```io::Error``` incorpora um [io::ErrorKind](https://doc.rust-lang.org/std/io/enum.ErrorKind.html), que é uma estrutura que representa o que deu errado durante uma operação de E/S. Isso é importante porque você pode querer reagir de forma diferente dependendo do erro. (por exemplo, um erro ```BrokenPipe``` pode significar sair do programa graciosamente, enquanto um erro ```NotFound``` pode significar sair com um código de erro e mostrar um erro ao usuário.) Com ```io::ErrorKind```, o chamador pode examinar o tipo de um erro com análise de caso, o que é estritamente superior a tentar extrair os detalhes de um erro dentro de uma ```String```.
+
+Em vez de usar uma ```String``` como um tipo de erro no nosso exemplo anterior de leitura de um inteiro de um arquivo, podemos definir nosso próprio tipo de erro que representa erros com dados numa estrutura, assim como em ```io::ErrorKind```. Nós nos esforçamos para não descartar informações de erros subjacentes caso o chamador queira inspecionar os detalhes. 
+
+A maneira ideal de representar uma de muitas possibilidades é definir nossos próprios tipos de erro usando uma ```enum```. No nosso caso, um erro é ou um ```io::Error``` ou um ```num::ParseIntError```, então uma definição natural surge:
+
+```
+use std::io;
+use std::num;
+
+// Usamos '#[derive(Debug)]' aqui porque todos os tipos devem derivar
+// 'Debug' para que possam se exibidos numa maneira legível para humanos. 
+#[derive(Debug)]
+enum CliError {
+    Io(io::Error),
+    Parse(num::ParseIntError),
+}
+```
+
+Ajustar nosso código é muito fácil. Em vez de converter erros para strings, simplesmente os convertemos para nosso tipo ```CliError``` usando o construtor de valor correspondente:
+
+```
+fn file_double<P: AsRef<Path>>(file_path: P) -> Result<i32, CliError> {
+    let mut file = File::open(file_path).map_err(CliError::Io)?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).map_err(CliError::Io)?;
+    let n = contents.trim().parse::<i32>().map_err(CliError::Parse)?;
+    Ok(2 * n)
+}
+
+fn main() {
+    match file_double("foobar.txt") {
+        Ok(n) => println!("{}", n),
+        Err(err) => println!("Error: {:?}", err),
+    }
+}
+```
+ 
+A única mudança aqui é trocar ```map_err(|e| e.to_string())``` (que converte erros para strings) para ```map_err(CliError::Io)``` ou ```map_err(CliError::Parse)```. O chamador decide o nível de detalhe a ser relatado ao usuário. Na prática, usar uma ```String``` como um tipo de erro remove opções do chamador, enquanto usar um tipo de erro personalizado como ```CliError``` fornece ao chamador todas as conveniências de antes, além de dados estruturados que descrevem o erro. 
+
+Note que para imprimir o erro na tela tivemos que ajustar a linha que exibe o erro usando a implementação ```std::fmt::Debug``` ({:?}).
+
+```
+        Err(err) => println!("Error: {:?}", err),
+```
+
+Uma regra prática é definir seu próprio tipo de erro, mas um tipo de erro ```String``` servirá em um aperto, particularmente se você estiver escrevendo um aplicativo. Se você estiver escrevendo uma biblioteca, definir seu próprio tipo de erro deve ser fortemente preferido para que você não remova opções do chamador desnecessariamente. 
+
+## Traits usadas pela manipulação de erros
+
 asd
 
 
@@ -697,8 +765,11 @@ asd
 
 [o operador ?](https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#a-shortcut-for-propagating-errors-the--operator)
 
+[io::ErrorKind](https://doc.rust-lang.org/std/io/enum.ErrorKind.html)
+
+
 ---
 
 arataca89@gmail.com
 
-Última atualização: 20241017
+Última atualização: 20241018
