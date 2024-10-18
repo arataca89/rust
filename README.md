@@ -16,5 +16,6 @@
 
 [minigrep2 - melhorando o código do minigrep com iterators](https://github.com/arataca89/rust/tree/main/minigrep2)
 
+[Dicas](https://github.com/arataca89/rust/blob/main/dicas.md)
 ---
 arataca89@gmail.com
