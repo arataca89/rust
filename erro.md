@@ -21,6 +21,9 @@ Quando feito de forma ingênua, o tratamento de erros em Rust pode ser prolixo e
 	- [O operador ?](#O-operador-)
 	- [Definindo seu próprio tipo de erro](#Definindo-seu-próprio-tipo-de-erro)
 * [Traits usadas pela manipulação de erros](#Traits-usadas-pela-manipulação-de-erros)
+	- [A trait Error](#A-trait-Error)
+	- [A trait From](#A-trait-From)
+	- [Compondo tipos de erro personalizados](#Compondo-tipos-de-erro-personalizados)
 * asdfg
 	- hjklç
 
@@ -716,6 +719,178 @@ Uma regra prática é definir seu próprio tipo de erro, mas um tipo de erro ```
 
 ## Traits usadas pela manipulação de erros
 
+A biblioteca padrão define duas traits para o tratamento de erros: [std::error::Error](https://doc.rust-lang.org/std/error/trait.Error.html) e [std::convert::From](https://doc.rust-lang.org/std/convert/trait.From.html). Enquanto ```Error``` é projetada especificamente para descrever erros genericamente, a trait ```From``` tem um uso mais geral para converter valores entre dois tipos distintos. 
+
+## A trait Error
+
+A trait [Error](https://doc.rust-lang.org/std/error/trait.Error.html) é definida na biblioteca padrão:
+
+```
+pub trait Error: Debug + Display {
+    // Provided methods
+    fn source(&self) -> Option<&(dyn Error + 'static)> { ... }
+    fn description(&self) -> &str { ... }
+    fn cause(&self) -> Option<&dyn Error> { ... }
+    fn provide<'a>(&'a self, request: &mut Request<'a>) { ... }
+}
+```
+
+Essa trait é super genérica porque é destinada a ser implementada para todos os tipos que representam erros. Isso será útil para escrever código componível, como veremos mais tarde. Esta trait permite que você faça pelo menos o seguinte: 
+
+* Obtenha uma representação ```Debug``` do erro.
+* Obtenha uma representação ```Display``` do erro, voltada para o usuário.
+* Obtenha uma breve descrição do erro (por meio do método de ```description()```).
+* Inspecione a cadeia causal de um erro, se houver (por meio do método de ```cause()```). 
+
+Os dois primeiros são resultado de ```Error``` exigindo a implementação de ```Debug``` e ```Display```. Os dois últimos são de métodos definidos em ```Error```. O poder de ```Error``` vem do fato de que todos os tipos de erro implementam ```Error```, o que significa que os erros podem ser quantificados existencialmente como um objeto trait. Isso se manifesta como ```Box<Error>``` ou ```&Error```. De fato, o método ```cause()``` retorna um ```&Error```, que é em si um objeto trait. Revisaremos a utilidade da trait ```Error``` como um objeto trait mais tarde. 
+
+Por enquanto, basta mostrar um exemplo implementando a trait ```Error```. Vamos usar o tipo de erro que definimos na seção anterior:
+
+```
+use std::io;
+use std::num;
+
+// Usamos '#[derive(Debug)]' aqui porque todos os tipos devem derivar
+// 'Debug' para que possam se exibidos numa maneira legível para humanos. 
+#[derive(Debug)]
+enum CliError {
+    Io(io::Error),
+    Parse(num::ParseIntError),
+}
+``` 
+
+Este tipo de erro específico representa a possibilidade de dois tipos de erros ocorrerem: um erro relacionado a E/S ou um erro convertendo uma string para um número. O erro pode representar tantos tipos de erros quanto você quiser adicionando novas variantes à definição da enumeração. 
+
+Implementar ```Error``` é bem direto. Vai ser basicamente uma análise de caso bem explícita.
+
+```
+use std::error;
+use std::fmt;
+
+impl fmt::Display for CliError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // Ambos os erros subjacentes já implementam 'Display',
+        // então nos referimos às suas implementações.
+        match *self {
+            CliError::Io(ref err) => write!(f, "IO error: {}", err),
+            CliError::Parse(ref err) => write!(f, "Parse error: {}", err),
+        }
+    }
+}
+
+impl error::Error for CliError {
+    fn description(&self) -> &str {
+        // Ambos os erros subjacentes já implementam 'Error',
+        // então nos referimos às suas implementações.
+        match *self {
+            CliError::Io(ref err) => err.description(),
+            CliError::Parse(ref err) => err.description(),
+        }
+    }
+
+    fn cause(&self) -> Option<&error::Error> {
+        // Ambos implicitamente convertem 'err' de seus tipos concretos
+        // (ou '&io::Error' ou '&num::ParseIntError') para um objeto trait `&Error`.
+        // Isso funciona porque ambos os tipos de erro implementam 'Error'.
+        match *self {
+            CliError::Io(ref err) => Some(err),
+            CliError::Parse(ref err) => Some(err),
+        }
+    }
+}
+```
+
+Observamos que esta é uma implementação muito típica de ```Error```: faz correspondência em seus diferentes tipos de erro e satisfaz os contratos definidos para ```description()``` e ```cause()```.
+
+OBSERVAÇÃO: esta implementação carece de análise, visto que o tutorial original foi feito baseado na linguagem Rust versão 1.25.
+
+## A trait From
+
+A trait [std::convert::From](https://doc.rust-lang.org/std/convert/trait.From.html) é definida na biblioteca padrão.
+
+```
+pub trait From<T>: Sized {
+    // Required method
+    fn from(value: T) -> Self;
+}
+```
+
+```From``` é muito útil porque nos dá uma maneira genérica de falar sobre conversão de um tipo particular ```T``` para algum outro tipo (neste caso, "algum outro tipo" é o assunto do ```impl```, ou ```Self```). O cerne de ```From``` é o conjunto de implementações fornecidas pela biblioteca padrão. 
+
+Aqui estão alguns exemplos simples que demonstram como ```From``` funciona: 
+
+```
+fn trait_from_demonstration(){
+	let s = "foo";
+	let string: String = From::from("foo");
+	let bytes: Vec<u8> = From::from("foo");
+	let cow: ::std::borrow::Cow<str> = From::from("foo");
+
+	println!("&str        s: {s}");
+	println!("String string: {string}");
+	println!("Vec<u8> bytes: {:?}",bytes);
+	println!("Cow cow      : {cow}");
+}
+```
+
+O tipo [std::borrow::Cow](https://doc.rust-lang.org/std/borrow/enum.Cow.html) é um ponteiro inteligente que fornece funcionalidade de clonagem em escrita: ele pode encapsular e fornecer acesso imutável a dados emprestados e clonar os dados quando a mutação ou a propriedade forem necessárias. O tipo é projetado para funcionar com dados emprestados gerais por meio da trait ```Borrow```. 
+
+OK, então ```From``` é útil para converter entre strings. Mas e os erros? Acontece que existe uma implementação crítica: 
+
+```
+impl<'a, E: Error + 'a> From<E> for Box<Error + 'a>
+
+```
+
+Esta implementação diz que para qualquer tipo que implemente ```Error```, podemos convertê-lo para um objeto trait ```Box<Error>```. Isso pode não parecer muito surpreendente, mas é útil em um contexto genérico.
+
+Lembre-se dos dois erros com os quais estávamos lidando anteriormente. Especificamente, ```io::Error``` e ```num::ParseIntError```. Como ambos implementam ```Error```, eles funcionam com ```From```:
+
+```
+use std::error::Error;
+use std::fs;
+use std::io;
+use std::num;
+
+fn converte_erro(){
+	// criando valores de erro
+	let io_err: io::Error = io::Error::last_os_error();
+	let parse_err: num::ParseIntError = "not a number".parse::<i32>().unwrap_err();
+
+	// convertendo os valores de erro para um tipo comum
+	let err1: Box<dyn Error> = From::from(io_err);
+	let err2: Box<dyn Error> = From::from(parse_err);
+
+	println!("err1: {:?}",err1);
+	println!("err2: {:?}",err2);
+}
+```
+
+Existe um padrão realmente importante a reconhecer aqui. Tanto ```err1``` quanto ```err2``` têm o mesmo tipo. Isso ocorre porque eles são tipos quantificados existencialmente, ou objetos trait. Em particular, seu tipo subjacente é apagado do conhecimento do compilador, então ele realmente vê ```err1``` e ```err2``` como exatamente iguais. Além disso, construímos ```err1``` e ```err2``` usando exatamente a mesma chamada de função: ```From::from()```. Isso ocorre porque ```From::from()``` é sobrecarregado em seu argumento e seu tipo de retorno. 
+
+Este padrão é importante porque resolve um problema que tínhamos antes: ele nos dá uma maneira confiável de converter erros para o mesmo tipo usando a mesma função. 
+
+Este novo conhecimento nos permitirá remover as chamadas a ```map_err()``` em nossa função ```file_double()```. De fato, tudo o que precisamos fazer é retornar um tipo com o qual ```From``` funciona. Como vimos ```From` ` tem uma implementação que permite converter qualquer tipo de erro em um ```Box<Error>```. Então podemos reescrever nossa função:
+
+```
+use std::fs::File;
+use std::io::Read;
+use std::path::Path;
+use std::error::Error;
+
+fn file_double<P: AsRef<Path>>(file_path: P) -> Result<i32, Box<dyn Error>> {
+    let mut file = File::open(file_path).map_err(CliError::Io)?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).map_err(CliError::Io)?;
+    let n = contents.trim().parse::<i32>().map_err(CliError::Parse)?;
+    Ok(2 * n)
+}
+```
+ 
+Há um pequeno detalhe restante: o tipo ```Box<Error>``` também é opaco. Se retornarmos um ```Box<Error>``` para o chamador, o chamador não pode (facilmente) inspecionar o tipo de erro subjacente. A situação é certamente melhor do que ```String``` porque o chamador pode chamar métodos como ```description()``` e ```cause()```, mas a limitação permanece: ```Box<Error>``` é opaco.
+
+## Compondo tipos de erro personalizados
+
 asd
 
 
@@ -767,9 +942,17 @@ asd
 
 [io::ErrorKind](https://doc.rust-lang.org/std/io/enum.ErrorKind.html)
 
+[std::error::Error](https://doc.rust-lang.org/std/error/trait.Error.html)
+
+[std::convert::From](https://doc.rust-lang.org/std/convert/trait.From.html)
+
+[std::convert::From](https://doc.rust-lang.org/std/convert/trait.From.html)
+
+[std::borrow::Cow](https://doc.rust-lang.org/std/borrow/enum.Cow.html)
+
 
 ---
 
 arataca89@gmail.com
 
-Última atualização: 20241018
+Última atualização: 20241019
