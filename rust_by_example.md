@@ -8,7 +8,7 @@
 * [panic!](#panic)
 * [HashMap](#HashMap)
 * [Chaves em HashMap](#Chaves-em-HashMap)
-
+* [HashSet](#HashSet)
 
 ---
 
@@ -75,6 +75,8 @@ called `Option::unwrap()` on a `None` value
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 error: process didn't exit successfully: `target\debug\rbe_option.exe` (exit code: 101)
 ```
+
+---
 
 ## Result
 
@@ -156,6 +158,8 @@ NegativeSquareRoot
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 error: process didn't exit successfully: `target\debug\rbe_result.exe` (exit code: 101)
 ```
+
+---
 
 ## Operador ?
 
@@ -243,6 +247,8 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 error: process didn't exit successfully: `target\debug\rbe_result.exe` (exit code: 101)
 ```
 
+---
+
 ## panic!
  
 A macro ```panic!``` pode ser usada para gerar um pânico e iniciar a desmontagem da pilha. Durante essa desmontagem todos os recursos de propriedade da thread serão liberados chamando o destrutor de todos os seus objetos. 
@@ -292,6 +298,8 @@ thread '<main>' panicked at 'division by zero', panic.rs:5
 ==4401== For counts of detected and suppressed errors, rerun with: -v
 ==4401== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
 ```
+
+---
 
 ## HashMap
 
@@ -351,8 +359,112 @@ fn main() {
 
 Para mais informações sobre o tipo HashMap consulte [https://doc.rust-lang.org/std/collections/struct.HashMap.html](https://doc.rust-lang.org/std/collections/struct.HashMap.html)
 
+---
+
 ## Chaves em HashMap
 
+Qualquer tipo que implemente as traits ```Eq``` e ```Hash``` pode ser chave de um ```HashMap```. Isso inclui:
+
+* ```bool``` (embora não seja muito útil, pois existem apenas duas chaves possíveis);
+* ```int```, ```uint``` e todas as suas variações;
+* ```String``` e ```&str``` (dica: você pode ter um ```HashMap``` com chave ```String``` e chamar ```get()``` com um ```&str```). 
+
+Observe que ```f32``` e ```f64``` não implementam ```Hash```, provavelmente porque erros de precisão de ponto flutuante tornariam o uso deles como chaves de hashmap terrivelmente propenso a erros.
+
+Os tipos que são coleção implementam ```Eq``` e ```Hash``` se seu tipo contido também implementar ```Eq``` e ```Hash```, respectivamente. Por exemplo, ```Vec<T>``` implementará ```Hash``` se ```T``` implementar ```Hash```. 
+ 
+Você pode facilmente implementar ```Eq``` e ```Hash``` para um tipo personalizado com apenas uma linha:
+
+```
+#[derive(PartialEq, Eq, Hash)]
+```
+
+O compilador fará o resto. Se você quiser mais controle sobre os detalhes, pode implementar ```Eq``` e/ou ```Hash``` você mesmo. Este guia não abordará os detalhes da implementação de ```Hash```.
+
+Para demonstrar o uso de uma ```struct``` em um ```HashMap```, vamos criar um sistema de login de usuário muito simples: 
+ 
+```
+// rbe_hashmap2
+
+use std::collections::HashMap;
+
+// 'Eq' requer que se derive 'PartialEq' também.
+#[derive(PartialEq, Eq, Hash)]
+struct Account<'a>{
+    username: &'a str,
+    password: &'a str,
+}
+
+struct AccountInfo<'a>{
+    name: &'a str,
+    email: &'a str,
+}
+
+type Accounts<'a> = HashMap<Account<'a>, AccountInfo<'a>>;
+
+fn try_logon<'a>(accounts: &Accounts<'a>,
+                 username: &'a str,
+                 password: &'a str){
+    println!("Username: {}", username);
+    println!("Password: {}", password);
+    println!("Tentando fazer login...");
+
+    let logon = Account {
+        username,
+        password,
+    };
+
+    match accounts.get(&logon) {
+        Some(account_info) => {
+            println!("Login bem sucedido!");
+            println!("Nome: {}", account_info.name);
+            println!("Email: {}", account_info.email);
+        },
+        _ => println!("Falha ao tentar fazer Login!"),
+    }
+}
+
+fn main(){
+    let mut accounts: Accounts = HashMap::new();
+
+    let account = Account {
+        username: "j.everyman",
+        password: "password123",
+    };
+
+    let account_info = AccountInfo {
+        name: "John Everyman",
+        email: "j.everyman@email.com",
+    };
+
+    accounts.insert(account, account_info);
+
+    try_logon(&accounts, "j.everyman", "psasword123");
+
+    try_logon(&accounts, "j.everyman", "password123");
+}
+```
+
+Execução:
+
+```
+Username: j.everyman
+Password: psasword123
+Tentando fazer login...
+Falha ao tentar fazer Login!
+Username: j.everyman
+Password: password123
+Tentando fazer login...
+Login bem sucedido!
+Nome: John Everyman
+Email: j.everyman@email.com
+``` 
+
+---
+
+## HashSet
+
+Considere um ```HashSet``` como um ```HashMap``` onde nos importamos apenas com as chaves (```HashSet<T>``` é, na verdade, apenas uma camada em torno de ```HashMap<T, ()>```). 
 
 asd
 
@@ -374,6 +486,7 @@ asd
 
 [RBE - Chaves em HashMap](https://doc.rust-lang.org/rust-by-example/std/hash/alt_key_types.html)
 
+[RBE - HashSet](https://doc.rust-lang.org/rust-by-example/std/hash/hashset.html)
 
 ---
 
