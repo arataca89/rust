@@ -4,9 +4,9 @@
 
 * [Option](#Option)
 * [Result](#Result)
+* [Operador ?](#Operador-?)
 
-
-
+---
 
 ## Option
 
@@ -153,7 +153,94 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 error: process didn't exit successfully: `target\debug\rbe_result.exe` (exit code: 101)
 ```
 
+## Operador ?
+
+Encadear resultados usando match pode ficar confuso. O operador ```?``` pode ser usado para deixar o código mais fácil de entender. O operador ```?``` é usado no final de uma expressão que retorna um ```Result```, e é equivalente a uma expressão ```match```, onde o ramo ```Err(err)``` se expande para ```return Err(From::from(err))```, e o ramo ```Ok(ok)``` se expande para uma expressão ```ok```.
+
+```
+// rbe_opearador_interrogacao
+
+mod checked {
+    // Erros matemáticos que queremos capturar
+    #[derive(Debug)]
+    pub enum MathError {
+        DivisionByZero,
+        NonPositiveLogarithm,
+        NegativeSquareRoot,
+    }
+
+    pub type MathResult = Result<f64, MathError>;
+
+    pub fn div(x: f64, y: f64) -> MathResult {
+        if y == 0.0 {
+            // Esta operação falharia, em vez disso, vamos retornar o motivo da
+            // falha encapsulada em 'Err'
+            Err(MathError::DivisionByZero)
+        } else {
+            // Esta operação é válida, retorna o resultado dentro de um 'Ok'
+            Ok(x / y)
+        }
+    }
+
+    pub fn sqrt(x: f64) -> MathResult {
+        if x < 0.0 {
+            Err(MathError::NegativeSquareRoot)
+        } else {
+            Ok(x.sqrt())
+        }
+    }
+
+    pub fn ln(x: f64) -> MathResult {
+        if x <= 0.0 {
+            Err(MathError::NonPositiveLogarithm)
+        } else {
+            Ok(x.ln())
+        }
+    }
+
+    // Função intermediária
+    fn op_(x: f64, y: f64) -> MathResult {
+        // se 'div()' falhar, 'DivisionByZero' será retornado.
+        let ratio = div(x, y)?;
+
+        // se 'ln()' falhar, 'NonPositiveLogarithm' será retornado.
+        let ln = ln(ratio)?;
+
+        sqrt(ln)
+    }
+
+
+    pub fn op(x: f64, y: f64) {
+        match op_(x, y) {
+            Err(why) => panic!("{}", match why {
+                MathError::NonPositiveLogarithm
+                    => "logarítmo de número negativo",
+                MathError::DivisionByZero
+                    => "divisão por zero",
+                MathError::NegativeSquareRoot
+                    => "raiz quadrada de número negativo",
+            }),
+            Ok(value) => println!("{}", value),
+        }
+    }
+}
+
+fn main() {
+    checked::op(1.0, 10.0);
+}
+```
+
+Execução:
+
+```
+thread 'main' panicked at src/main.rs:55:25:
+raiz quadrada de número negativo
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: process didn't exit successfully: `target\debug\rbe_result.exe` (exit code: 101)
+```
+
 ## asd
+ 
 
 asd
 
@@ -163,8 +250,15 @@ asd
 
 [Rust by Example](https://doc.rust-lang.org/rust-by-example/index.html)
 
+[Option](https://doc.rust-lang.org/rust-by-example/std/option.html)
+
+[Result](https://doc.rust-lang.org/rust-by-example/std/result.html)
+
+[Operador ?](https://doc.rust-lang.org/rust-by-example/std/result/question_mark.html)
+
+
 ---
 
 arataca89@gmail.com
 
-Última atualização: 20241019
+Última atualização: 20241021
