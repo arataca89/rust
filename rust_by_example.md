@@ -248,13 +248,13 @@ asd
 
 ## Referências
 
-[Rust by Example](https://doc.rust-lang.org/rust-by-example/index.html)
+[Rust by Example (RBE)](https://doc.rust-lang.org/rust-by-example/index.html)
 
-[Option](https://doc.rust-lang.org/rust-by-example/std/option.html)
+[RBE - Option](https://doc.rust-lang.org/rust-by-example/std/option.html)
 
-[Result](https://doc.rust-lang.org/rust-by-example/std/result.html)
+[RBE - Result](https://doc.rust-lang.org/rust-by-example/std/result.html)
 
-[Operador ?](https://doc.rust-lang.org/rust-by-example/std/result/question_mark.html)
+[RBE - Operador ?](https://doc.rust-lang.org/rust-by-example/std/result/question_mark.html)
 
 
 ---
