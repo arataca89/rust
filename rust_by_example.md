@@ -6,6 +6,10 @@
 * [Result](#Result)
 * [Operador ?](#Operador-)
 * [panic!](#panic)
+* [HashMap](#HashMap)
+* [Chaves em HashMap](#Chaves-em-HashMap)
+
+
 ---
 
 ## Option
@@ -241,6 +245,115 @@ error: process didn't exit successfully: `target\debug\rbe_result.exe` (exit cod
 
 ## panic!
  
+A macro ```panic!``` pode ser usada para gerar um pânico e iniciar a desmontagem da pilha. Durante essa desmontagem todos os recursos de propriedade da thread serão liberados chamando o destrutor de todos os seus objetos. 
+
+Como estamos lidando com programas com apenas uma thread, ```panic!``` fará com que o programa reporte a mensagem de pânico e saia. 
+
+```
+fn division(dividend: i32, divisor: i32) -> i32 {
+    if divisor == 0 {
+        // Divisão por zero irá gerar pânico
+        panic!("divisão por zero");
+    } else {
+        dividend / divisor
+    }
+}
+
+fn main() {
+    // inteiro alocado na memória heap
+    let _x = Box::new(0i32);
+
+    // Esta operação irá gerar um erro
+    division(3, 0);
+
+    println!("O controle não chega neste ponto!");
+
+    // `_x` será destruído neste ponto
+}
+```
+
+Vamos verificar se ```panic!``` não causa vazamento de memória. 
+
+```
+$ rustc panic.rs && valgrind ./panic
+==4401== Memcheck, a memory error detector
+==4401== Copyright (C) 2002-2013, and GNU GPL'd, by Julian Seward et al.
+==4401== Using Valgrind-3.10.0.SVN and LibVEX; rerun with -h for copyright info
+==4401== Command: ./panic
+==4401== 
+thread '<main>' panicked at 'division by zero', panic.rs:5
+==4401== 
+==4401== HEAP SUMMARY:
+==4401==     in use at exit: 0 bytes in 0 blocks
+==4401==   total heap usage: 18 allocs, 18 frees, 1,648 bytes allocated
+==4401== 
+==4401== All heap blocks were freed -- no leaks are possible
+==4401== 
+==4401== For counts of detected and suppressed errors, rerun with: -v
+==4401== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+```
+
+## HashMap
+
+Enquanto vetores armazenam valores por um índice inteiro, ```HashMaps``` armazenam valores por chave. As chaves de um ```HashMap``` podem ser booleanos, inteiros, strings ou qualquer outro tipo que implemente as traits ```Eq``` e ```Hash```. 
+
+Assim como vetores, HashMaps são expansíveis, mas HashMaps também podem diminuir de tamanho quando têm espaço em excesso. Você pode criar um ```HashMap``` com uma determinada capacidade inicial usando ```HashMap::with_capacity(uint)```, ou usar ```HashMap::new()``` para obter um ```HashMap``` com uma capacidade inicial padrão(recomendado). 
+
+```
+// rbe_hashmap
+
+use std::collections::HashMap;
+
+fn call(number: &str) -> &str {
+    match number {
+        "798-1364" => "Lamentamos, mas a chamada não pode ser completada.
+        Desligue e tente novamente.",
+        "645-7689" => "Olá, aqui é o Mr. Awesome's Pizza. Meu nome é Fred.
+        O que posso fazer por você hoje?",
+        _ => "Olá! Quem é de novo?"
+    }
+}
+
+fn main() { 
+    let mut contacts = HashMap::new();
+
+    contacts.insert("Daniel", "798-1364");
+    contacts.insert("Ashley", "645-7689");
+    contacts.insert("Katie", "435-8291");
+    contacts.insert("Robert", "956-1745");
+
+    // Recebe uma referência e retorna Option<&V>
+    match contacts.get(&"Daniel") {
+        Some(&number) => println!("Chamando Daniel: {}", call(number)),
+        _ => println!("Não tenho o número do Daniel."),
+    }
+
+    // 'HashMap::insert()' retorna 'None' se o valor inserido é novo;
+    // senão retorna 'Some(value)'
+    contacts.insert("Daniel", "164-6743");
+
+    match contacts.get(&"Ashley") {
+        Some(&number) => println!("Chamando Ashley: {}", call(number)),
+        _ => println!("Não tenho o número de Ashley."),
+    }
+
+    contacts.remove(&"Ashley"); 
+
+    // `HashMap::iter()` returns an iterator that yields 
+    // (&'a key, &'a value) pairs in arbitrary order.
+    // 'HashMap::iter()' retorna um iterador que produz pares
+    // (&'a key, &'a value) pem ordem arbitrária.
+    for (contact, &number) in contacts.iter() {
+        println!("Chamando {}: {}", contact, call(number)); 
+    }
+}
+```
+
+Para mais informações sobre o tipo HashMap consulte [https://doc.rust-lang.org/std/collections/struct.HashMap.html](https://doc.rust-lang.org/std/collections/struct.HashMap.html)
+
+## Chaves em HashMap
+
+
 asd
 
 
@@ -256,6 +369,10 @@ asd
 [RBE - Operador ?](https://doc.rust-lang.org/rust-by-example/std/result/question_mark.html)
 
 [RBE - panic!](https://doc.rust-lang.org/rust-by-example/std/panic.html)
+
+[RBE - HashMap](https://doc.rust-lang.org/rust-by-example/std/hash.html)
+
+[RBE - Chaves em HashMap](https://doc.rust-lang.org/rust-by-example/std/hash/alt_key_types.html)
 
 
 ---
