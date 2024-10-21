@@ -5,7 +5,7 @@
 * [Option](#Option)
 * [Result](#Result)
 * [Operador ?](#Operador-)
-* [panic!](#panic-)
+* [panic!](#panic)
 ---
 
 ## Option
