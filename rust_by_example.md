@@ -4,7 +4,7 @@
 
 * [Option](#Option)
 * [Result](#Result)
-* [Operador ?](#Operador-?)
+* [Operador ?](#Operador-)
 
 ---
 
