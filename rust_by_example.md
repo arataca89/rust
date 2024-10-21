@@ -5,7 +5,7 @@
 * [Option](#Option)
 * [Result](#Result)
 * [Operador ?](#Operador-)
-
+* [panic!](#panic-)
 ---
 
 ## Option
@@ -239,9 +239,8 @@ note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 error: process didn't exit successfully: `target\debug\rbe_result.exe` (exit code: 101)
 ```
 
-## asd
+## panic!
  
-
 asd
 
 
@@ -255,6 +254,8 @@ asd
 [RBE - Result](https://doc.rust-lang.org/rust-by-example/std/result.html)
 
 [RBE - Operador ?](https://doc.rust-lang.org/rust-by-example/std/result/question_mark.html)
+
+[RBE - panic!](https://doc.rust-lang.org/rust-by-example/std/panic.html)
 
 
 ---
