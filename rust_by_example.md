@@ -9,6 +9,8 @@
 * [HashMap](#HashMap)
 * [Chaves em HashMap](#Chaves-em-HashMap)
 * [HashSet](#HashSet)
+* [Rc](#Rc)
+* [Arc](#Arc)
 
 ---
 
@@ -466,9 +468,127 @@ Email: j.everyman@email.com
 
 Considere um ```HashSet``` como um ```HashMap``` onde nos importamos apenas com as chaves (```HashSet<T>``` é, na verdade, apenas uma camada em torno de ```HashMap<T, ()>```). 
 
+"Qual o sentido disso?", você pergunta. "Eu poderia simplesmente armazenar as chaves em um ```Vec```."
+
+A característica única de um ```HashSet``` é que ele garante não ter elementos duplicados. Esse é o contrato que qualquer coleção de conjuntos cumpre. ```HashSet``` é apenas uma implementação. (veja também: [BTreeSet](https://doc.rust-lang.org/std/collections/struct.BTreeSet.html)). 
+
+Se você inserir um valor que já está presente no ```HashSet```, (ou seja, o novo valor é igual ao existente e ambos têm o mesmo hash), então o novo valor substituirá o antigo. 
+
+Isso é ótimo para quando você nunca quer mais do que uma unidade de alguma coisa, ou quando você quer saber se já tem alguma coisa. 
+
+Mas conjuntos podem fazer mais do que isso. 
+
+Conjuntos(sets) possuem 4 operações primárias (todas retornam um iterador):
+
+* ```union```(união): obter todos os elementos exclusivos em ambos os conjuntos.
+* ```difference```(diferença): obter todos os elementos que estão no primeiro conjunto, mas não no segundo.
+* ```intersection```(interseção): obter todos os elementos que estão apenas em ambos os conjuntos.
+* ```symmetric_difference```(diferença simétrica): obter todos os elementos que estão em um conjunto ou no outro, mas não em ambos.
+
+```
+// rbe_hashset
+
+use std::collections::HashSet;
+
+fn main() {
+    let mut a: HashSet<i32> = vec![1i32, 2, 3].into_iter().collect();
+    let mut b: HashSet<i32> = vec![2i32, 3, 4].into_iter().collect();
+
+    assert!(a.insert(4));
+    assert!(a.contains(&4));
+
+    // 'HashSet::insert()' retorna 'false' se o valor já existe
+    //assert!(b.insert(4), "O valor 4 já existe em 'b'!");
+    // CORREÇÃO ^ Comente a linha acima
+
+    b.insert(5);
+
+    // Se o tipo de dado do elemento da coleção implementa 'Debug',
+    // então a coleção implementa 'Debug'.
+    // Normalmente os elementos são exibidos no formato '[elem1, elem2, ...]'
+    println!("A: {:?}", a);
+    println!("B: {:?}", b);
+
+    // Exibe [1, 2, 3, 4, 5] em uma ordem arbitrária
+    println!("union: {:?}", a.union(&b).collect::<Vec<&i32>>());
+
+    // Deve exibir [1]
+    println!("difference: {:?}", a.difference(&b).collect::<Vec<&i32>>());
+
+    // Exibe [ 2, 3, 4] em uma ordem arbitrária
+    println!("intersection: {:?}", a.intersection(&b).collect::<Vec<&i32>>());
+
+    // Exibe [1, 5]
+    println!("symmetric Difference: {:?}",
+             a.symmetric_difference(&b).collect::<Vec<&i32>>());
+}
+```
+
+---
+
+## Rc
+
+Quando múltiplas propriedades são necessárias, ```Rc``` ('Reference Counting', ou 'Contagem de Referências' numa tradução livre) pode ser usado. ```Rc``` acompanha o número de referências, o que significa o número de proprietários do valor encapsulado em um ```Rc```.
+
+A contagem de referência de um ```Rc``` aumenta em 1 sempre que um ```Rc``` é clonado e diminui em 1 sempre que um ```Rc``` clonado é destruído (sai do escopo). Quando a contagem de referência de um ```Rc``` se torna zero (o que significa que não há mais proprietários), tanto o ```Rc``` quanto o valor são destruídos.
+
+Clonar um ```Rc``` nunca realiza uma cópia profunda (deep copy). A clonagem cria apenas outro ponteiro para o valor encapsulado e incrementa a contagem. 
+
+```
+ // rbe_rc
+
+use std::rc::Rc;
+
+fn main() {
+    let rc_examples = "Exemplos do uso de Rc".to_string();
+    {
+        println!("--- rc_a é criado ---");
+        
+        let rc_a: Rc<String> = Rc::new(rc_examples);
+        println!("Contagem das referências de rc_a: {}", Rc::strong_count(&rc_a));
+        
+        {
+            println!("--- rc_a é clonado para rc_b ---");
+            
+            let rc_b: Rc<String> = Rc::clone(&rc_a);
+            println!("Contagem das referências de rc_b: {}", Rc::strong_count(&rc_b));
+            println!("Contagem das referências de rc_a: {}", Rc::strong_count(&rc_a));
+            
+            // Duas 'Rc' são iguais se o valor apontado por elas for igual
+            println!("rc_a e rc_b são iguais: {}", rc_a.eq(&rc_b));
+            
+            // Podemos usar métodos do valor apontado diretamente
+            println!("Tamanho do valor apontado por rc_a: {}", rc_a.len());
+            println!("Valor apontado por rc_b: {}", rc_b);
+            
+            println!("--- rc_b sai do escopo e é destruído ---");
+        }
+        
+        println!("Contagem das referências de rc_a: {}", Rc::strong_count(&rc_a));
+        
+        println!("--- rc_a sai do escopo e é destruído ---");
+    }
+    
+    // ERRO! 'rc_examples' foi movido para 'rc_a'
+    // e quanto 'rc_a' foi destruído, 'rc_examples' foi destruído também
+    // println!("rc_examples: {}", rc_examples);
+    // PARA VER O ERRO DESCOMENTE A LINHA ACIMA
+}
+```
+
+Veja também:
+
+[std::rc](https://doc.rust-lang.org/std/rc/index.html)
+[std::sync::arc](https://doc.rust-lang.org/std/sync/struct.Arc.html)
+
+---
+
+## Arc
+
 asd
 
 
+---
 
 ## Referências
 
@@ -488,8 +608,12 @@ asd
 
 [RBE - HashSet](https://doc.rust-lang.org/rust-by-example/std/hash/hashset.html)
 
+[RBE - RC](https://doc.rust-lang.org/rust-by-example/std/rc.html)
+
+[RBE - Arc](https://doc.rust-lang.org/rust-by-example/std/arc.html)
+
 ---
 
 arataca89@gmail.com
 
-Última atualização: 20241021
+Última atualização: 20241023
