@@ -11,7 +11,7 @@
 * [HashSet](#HashSet)
 * [Rc](#Rc)
 * [Arc](#Arc)
-* [Manipulação de erro](https://github.com/arataca89/rust/blob/main/erro.md)
+* [Manipulação de erro](https://github.com/arataca89/rust/blob/main/rbe_erro.md)
   
 ---
 
