@@ -585,8 +585,42 @@ Veja também:
 
 ## Arc
 
-asd
+Quando a propriedade compartilhada entre threads é necessária, ```Arc``` (Atomically Reference Counted) pode ser usado. Esta estrutura, por meio da implementação ```Clone```, pode criar um ponteiro de referência para a localização de um valor na memória heap enquanto aumenta o contador de referência. Como compartilha a propriedade entre threads, quando o último ponteiro de referência para um valor sair do escopo, a variável é descartada.
 
+```
+// rbe_arc
+
+use std::time::Duration;
+use std::sync::Arc;
+use std::thread;
+
+fn main() {
+    // Aqui o valor é especificado
+    let apple = Arc::new("the same apple");
+
+    for _ in 0..10 {
+        // Aqui o valor não é especificado porque é um ponteiro para
+        // uma referência na memória heap.
+        let apple = Arc::clone(&apple);
+
+        thread::spawn(move || {
+            // Como 'Arc' foi usado, threads podem ser criadas usando o valor
+            // usado como variável 'Arc'
+            println!("{:?}", apple);
+        });
+    }
+
+    // Certifique-se de que todas as instâncias do Arc sejam 
+    // impressas a partir das threads gerados.
+    thread::sleep(Duration::from_secs(1));
+}
+```
+
+---
+
+## asd
+
+asd
 
 ---
 
@@ -616,4 +650,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20241023
+Última atualização: 20241024
