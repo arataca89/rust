@@ -20,7 +20,7 @@ pub enum Token {
 
 A estrutura ```Lexer``` representa o próprio lexer. Ela possui um campo de nome ```chars```, do tipo [std::str::Chars](https://doc.rust-lang.org/std/str/struct.Chars.html). , que é um iterador sobre os caracteres da string de entrada.
 
-O tipo ```Chars``` é um iterador sobre os caracteres de uma fatia de string ([str](https://doc.rust-lang.org/std/primitive.str.html)). Um tipo ```Chars``` é criada pelo método [chars()](https://doc.rust-lang.org/std/primitive.str.html#method.chars). 
+O tipo ```Chars``` é um iterador sobre os caracteres de uma fatia de string ([str](https://doc.rust-lang.org/std/primitive.str.html)). Um tipo ```Chars``` é criado pelo método [chars()](https://doc.rust-lang.org/std/primitive.str.html#method.chars). 
  
 ```
 pub struct Lexer<'a> {
