@@ -28,7 +28,7 @@ pub struct Lexer<'a> {
 }
 ```
 
-A lifetime ```'a``` indica que o objeto ```Lexer``` a ser criado irá durar enquanto o iterador ```chars``` durar.
+A lifetime ```'a``` indica que o o iterador ```chars``` deverá ter o mesmo tempo de vida do objeto ```Lexer```
 
 O tipo ```Lexer``` terá três métodos:
 
