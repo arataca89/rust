@@ -18,6 +18,9 @@ Para uma discussão mais rigorosa sobre o tratamento de erros, consulte a seçã
 * [Option e unwrap](#Option-e-unwrap)
 * [Operador interrogação](#Operador-interrogação)
 * [Combinador map](#Combinador-map)
+* [Combindor and_then](#Combindor-and-then)
+* [Diferença entre map e and_then](#Diferença-entre-map-e-and_then)
+* [Opções de desempacotamento de Option e padrões](#Opções-de-desempacotamento-de-Option-e-padrões)
 
 ---
 
@@ -235,7 +238,135 @@ Veja também:
 
 ---
 
+## Combindor and_then
+
+```map()``` foi descrito como uma forma encadeável de simplificar instruções ```match```. No entanto, usar ```map()``` em uma função que retorna um ```Option<T>``` resulta em ```Option<Option<T>>```. Encadear várias chamadas juntas pode então se tornar confuso. É aí que entra outro combinador chamado ```and_then()```, conhecido em algumas linguagens como flatmap.
+
+```and_then()``` chama sua função de entrada com o valor encapsulado e retorna o resultado. Se a Opção for ```None```, então ele retorna ```None```.
+
+No exemplo a seguir, ```cookable_v3()``` resulta em um ```Option<Food>``` . Usar ```map()``` em vez de ```and_then()``` teria dado um ```Option<Option<Food>>```, que é um tipo inválido para ```eat()```.
+
+```
+#![allow(dead_code)]
+
+#[derive(Debug)] enum Comida { Cuzcuz, Tapioca, Sopa }
+#[derive(Debug)] enum Dia { Segunda, Quarta, Sexta }
+
+// Não temos ingredientes para fazer uma Sopa.
+fn ingredientes(comida: Comida) -> Option<Comida> {
+    match comida {
+        Comida::Sopa => None,
+        _            => Some(comida),
+    }
+}
+
+// Temos receita pra tudo menos para Cuzcuz
+fn receita(comida: Comida) -> Option<Comida> {
+    match comida {
+        Comida::Cuzcuz => None,
+        _                => Some(comida),
+    }
+}
+
+// Para fazer a refeição precisamos de receita e dos ingredientes.
+// Podemos representar a lógica usando 'match'
+fn cozinhar_v1(comida: Comida) -> Option<Comida> {
+    match receita(comida) {
+        None       => None,
+        Some(comida) => ingredientes(comida),
+    }
+}
+
+// Isto pode ser refatorado de forma mais compacta usando 'and_then':
+fn cozinhar_v3(comida: Comida) -> Option<Comida> {
+    receita(comida).and_then(ingredientes)
+}
+
+// ou pode-se usar 'flatten()' em 'Option<Option<comida>>'
+// para extrair um 'Option<Comida>':
+fn cozinhar_v2(comida: Comida) -> Option<Comida> {
+    receita(comida).map(ingredientes).flatten()
+}
+
+fn comer(comida: Comida, dia: Dia) {
+    match cozinhar_v3(comida) {
+        Some(comida) => println!("OK! Na {:?} vamos comer {:?}.", dia, comida),
+        None       => println!("Oh não. Não temos nada para comer na {:?}", dia),
+    }
+}
+
+fn main() {
+    let (cuzcuz, tapioca, sopa) = (Comida::Cuzcuz, Comida::Tapioca, Comida::Sopa);
+
+    comer(cuzcuz, Dia::Segunda);
+    comer(tapioca, Dia::Quarta);
+    comer(sopa, Dia::Sexta);
+}
+```
+
+---
+
+## Diferença entre map e and_then
+
+
+Basicamente a diferença está no argumento que você fornece para a closure (ou Fn).
+
+ ```map()``` recebe um ```FnOnce(T) -> U``` enquanto ```and_then()``` recebe um ```FnOnce(T) -> Option<U>```. 
+
+Com ```and_then()``` você pode combinar várias operações que podem falhar individualmente, enquanto ```map()``` aplica uma transformação infalível. 
+
+
+Em Rust, ```and_then()``` e ```map()``` são métodos usados ​​para transformar tipos ```Option``` ou ```Result```, mas eles têm padrões de uso diferentes.
+
+O método ```map``` mapeia um ```Option``` ou ```Result<T, E>``` para um novo ```Option``` ou ```Result<U, E>```, onde a operação descrita na closure é aplicada ao valor contido no ```Option``` ou ```Result```. Se o valor original for ```None``` ou ```Err```, a função de mapeamento não será executada e, em vez disso, um novo ```None``` ou ```Err``` será retornado.
+
+Por exemplo, aqui está um exemplo usando o método ```map``` para dobrar o valor em um ```Option```:
+
+```
+let some_number = Some(5);
+let doubled = some_number.map(|x| x * 2);
+assert_eq!(doubled, Some(10));
+```
+
+O método ```and_then``` é semelhante ao ```map``` em uso, mas seu tipo de retorno é ```Option``` ou ```Result<U, E>``` em vez de `U`. Na closure de ```and_then```, devemos retornar um novo ```Option``` ou ```Result``` em vez de retornar diretamente um valor. Isso significa que ```and_then``` pode ser usado para transformar um ```Option``` ou ```Result``` em outro, ao mesmo tempo em que realiza alguns testes lógicos. 
+
+Por exemplo, aqui está um exemplo usando o método ```and_then``` para multiplicar o valor em um ```Option``` por 3, retornando ```None``` se o valor for menor que 10:
+
+```
+let some_number = Some(5);
+let result = some_number.and_then(|x| {
+    if x < 10 {
+        None
+    } else {
+        Some(x * 3)
+    }
+});
+assert_eq!(result, None);
+
+let some_number = Some(11);
+let result = some_number.and_then(|x| {
+    if x < 10 {
+        None
+    } else {
+        Some(x * 3)
+    }
+});
+assert_eq!(result, Some(33));
+```
+ 
+Portanto, em uso, ```map``` é usado para transformações de valor simples, enquanto ```and_then``` é usado para operações mais complexas e testes lógicos. 
+
+---
+
+## Opções de desempacotamento de Option e padrões
+
+asd
+
+---
+
 ## asd
+
+asd
 
 ---
 
@@ -243,9 +374,13 @@ Veja também:
 
 [RBE - Error handling](https://doc.rust-lang.org/rust-by-example/error.html)
 
+[difference between map and and-then](https://users.rust-lang.org/t/what-is-the-difference-between-map-and-and-then/29108)
+
+[https://davirain.xlog.app/and_then-he-map-zai-shi-yong-shang-you-shen-me-qu-bie?locale=en](https://davirain.xlog.app/and_then-he-map-zai-shi-yong-shang-you-shen-me-qu-bie?locale=en)
+
 
 ---
 
 arataca89@gmail.com
 
-Última atualização: 20241030
+Última atualização: 20241031
