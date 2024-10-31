@@ -18,7 +18,7 @@ Para uma discussão mais rigorosa sobre o tratamento de erros, consulte a seçã
 * [Option e unwrap](#Option-e-unwrap)
 * [Operador interrogação](#Operador-interrogação)
 * [Combinador map](#Combinador-map)
-* [Combindor and_then](#Combindor-and-then)
+* [Combinador and_then](#Combinador-and_then)
 * [Diferença entre map e and_then](#Diferença-entre-map-e-and_then)
 * [Opções de desempacotamento de Option e padrões](#Opções-de-desempacotamento-de-Option-e-padrões)
 
@@ -238,7 +238,7 @@ Veja também:
 
 ---
 
-## Combindor and_then
+## Combinador and_then
 
 ```map()``` foi descrito como uma forma encadeável de simplificar instruções ```match```. No entanto, usar ```map()``` em uma função que retorna um ```Option<T>``` resulta em ```Option<Option<T>>```. Encadear várias chamadas juntas pode então se tornar confuso. É aí que entra outro combinador chamado ```and_then()```, conhecido em algumas linguagens como flatmap.
 
