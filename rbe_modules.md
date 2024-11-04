@@ -8,7 +8,7 @@ Um módulo é uma coleção de itens: funções, structs, traits, blocos impl e 
 * [Visibilidade de struct](#Visibilidade-de-struct)
 * [A declaração use](#A-declaração-use)
 * [super e self](#super-e-self)
-* [Hierarquia de arquivos](#-Hierarquia-de-arquivos)
+* [Hierarquia de arquivos](#Hierarquia-de-arquivos)
 
 ---
 
