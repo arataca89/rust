@@ -12,6 +12,7 @@
 * [Rc](#Rc)
 * [Arc](#Arc)
 * [Manipulação de erro](https://github.com/arataca89/rust/blob/main/rbe_erro.md)
+* [Módulos](https://github.com/arataca89/rust/blob/main/rbe_modules.md)
   
 ---
 
