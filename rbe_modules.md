@@ -403,6 +403,8 @@ Saída ao executar  ```cargo run```:
 
 ---
 
+## Referências
+
 [RBE - Modules](https://doc.rust-lang.org/rust-by-example/mod.html)
 
 ---
