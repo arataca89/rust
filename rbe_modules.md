@@ -403,8 +403,7 @@ Saída ao executar  ```cargo run```:
 
 ---
 
-## Referências
-[https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/book/first-edition/error-handling.html#error-handling](https://web.mit.edu/rust-lang_v1.25/arch/amd64_ubuntu1404/share/doc/rust/html/book/first-edition/error-handling.html#error-handling)
+[RBE - Modules](https://doc.rust-lang.org/rust-by-example/mod.html)
 
 ---
 
