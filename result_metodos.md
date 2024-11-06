@@ -15,16 +15,31 @@ Note que ela trabalha com os tipos genéricos ```T``` e ```E``` o que permite gr
 
 A variante ```Ok``` contém o valor do sucesso ```T```, enquanto a varável ```Err``` contém o valor em caso de falha ```E```.
 
+### Métodos
+
 [is_ok()](#is_ok)
 
 ---
 
 ### is_ok()
 
+Retorna ```true``` se o ```Result``` é um ```Ok```.
 
+```
+fn main() {
+    let x: Result<i32, &str> = Ok(-3);
+    assert_eq!(x.is_ok(), true);
+    
+    let x: Result<i32, &str> = Err("Some error message");
+    assert_eq!(x.is_ok(), false);
+}
+```
 
- 
+---
 
+### asd
+
+asd
 
 ---
 
