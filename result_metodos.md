@@ -15,7 +15,7 @@ Note que ela trabalha com os tipos genéricos ```T``` e ```E``` o que permite gr
 
 A variante ```Ok``` contém o valor do sucesso ```T```, enquanto a varável ```Err``` contém o valor em caso de falha ```E```.
 
-[is_ok()](#is_ok())
+[is_ok()](#is_ok)
 
 ---
 
