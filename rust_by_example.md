@@ -2,6 +2,7 @@
 
 [Rust by Example](https://doc.rust-lang.org/rust-by-example/index.html) (RBE ou Rust através de exemplos, numa tradução livre) é uma coleção de exemplos executáveis que ilustram vários conceitos e bibliotecas padrão do Rust. Este artigo aborda alguns tópicos do RBE .
 
+* [match](#match)
 * [Option](#Option)
 * [Result](#Result)
 * [Operador ?](#Operador-)
@@ -12,8 +13,44 @@
 * [Rc](#Rc)
 * [Arc](#Arc)
 * [Manipulação de erro](https://github.com/arataca89/rust/blob/main/rbe_erro.md)
-* [Módulos](https://github.com/arataca89/rust/blob/main/rbe_modules.md)
   
+---
+
+## match
+
+Rust tem uma construção chamada ```match``` que pode ser usada como um switch da linguagem C. 
+
+```
+fn main() {
+    // Teste diferentes valores para 'number'
+    let number = 1;
+
+    println!("number: {}", number);
+
+    match number {
+        // Compara 'number' com um valor único
+        1 => println!("'number' vale um!"),
+        // Compara com vários valores
+        2 | 3 | 5 | 7 | 11 => println!("'number' é um número primo"),
+        // Compara com os valores do intervalo [18,60]
+        18..=60 => println!("'number' vale a idade de um adulto"),
+        // Trata o resto dos casoss
+        _ => println!("'number' tem qualquer outro valor não tratado por match"),
+    }
+
+    let boolean = true;
+
+    let binary = match boolean {
+        // Os braços de match devem cobrir todos os possíveis valores
+        false => 0,
+        true => 1,
+        // Comente um dos braços e um erro será emitido
+    };
+
+    println!("{} -> {}", boolean, binary);
+}
+```
+
 ---
 
 ## Option
@@ -652,4 +689,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20241024
+Última atualização: 20241106
