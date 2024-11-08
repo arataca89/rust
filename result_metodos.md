@@ -17,27 +17,27 @@ A variante ```Ok``` contém o valor do sucesso ```T```, enquanto a varável ```E
 
 ### Métodos
 
-[is_ok()](#is_ok)
+[>>>](#is_ok) is_ok( ) - retorna ```true``` se é um ```Ok```
 
-[is_ok_and()](#is_ok_and)
+[>>>](#is_ok_and) is_ok_and(closure) - retorna ```true``` se é um ```Ok``` e o valor embutido no ```Ok``` atende a closure
 
-[is_err()](#is_err)
+[>>>](#is_err) is_err( ) - retorna ```true``` se é um ```Err```
 
-[is_err_and()](#is_err_and)
+[>>>](#is_err_and) is_err_and(closure) - retorna ```true``` se é um ```Err``` e o valor embutido no ```Err``` atende a closure
 
-[ok()](#ok)
+[>>>](#ok) Ok( ) - converte um ```Result<T, E>``` em um ```Option<T>```
 
-[err()](#err)
+[>>>](#err) err( ) - converte um ```Result<T, E>``` em um ```Option<E>```.
 
-[as_ref()](#as_ref)
+[>>>](#as_ref) as_ref( ) - converte de ```&Result<T, E>``` para ```Result<&T, &E>```
 
-[as_mut()](#as_mut)
+[>>>](#as_mut) as_mut( ) - converte de ```&mut Result<T, E>``` para ```Result<&mut T, &mut E>```
 
-[map()](#map)
+[>>>)](#map) map(closure) - mapeia de ```Result<T, E>``` para ```Result<U, E>``` aplicando a closure ao valor do ```Ok```
 
-[map_or()](#map_or)
+[>>>](#map_or) map_or(default, closure) - se é um ```Ok```, aplica a closure ao valor do ```Ok```; se é um ```Err```, retorna o valor default 
 
-[map_or_else()](#map_or_else)
+[>>>](#map_or_else) map_or_else(closure_err, closure_ok) - se  é um ```Ok```, aplica closure_ok ao valor de ```Ok```. Se é um ```Err```, aplica closure_err ao valor de ```Err```
 
 
 ---
@@ -198,9 +198,9 @@ for num in line.lines() {
 
 ### map_or()
 
-Se o ```Result``` é um ```Ok```, aplica a closure passada como argumento ao valor de ```Ok```.
+Se o ```Result``` é um ```Ok```, aplica a closure passada como segundo argumento ao valor de ```Ok```.
 
-Se o ```Result``` é um ```Err```, retorna o valor default passado como argumento.
+Se o ```Result``` é um ```Err```, retorna o valor default passado como primeiro argumento.
 
 ```
 let x: Result<_, &str> = Ok("foo");
@@ -249,4 +249,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20241107
+Última atualização: 20241108
