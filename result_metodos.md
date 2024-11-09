@@ -25,7 +25,7 @@ A variante ```Ok``` contém o valor do sucesso ```T```, enquanto a varável ```E
 
 [>>>](#is_err_and) is_err_and(closure) - retorna ```true``` se é um ```Err``` e o valor embutido no ```Err``` atende a closure
 
-[>>>](#ok) Ok( ) - converte um ```Result<T, E>``` em um ```Option<T>```
+[>>>](#ok) ok( ) - converte um ```Result<T, E>``` em um ```Option<T>```
 
 [>>>](#err) err( ) - converte um ```Result<T, E>``` em um ```Option<E>```.
 
@@ -39,10 +39,25 @@ A variante ```Ok``` contém o valor do sucesso ```T```, enquanto a varável ```E
 
 [>>>](#map_or_else) map_or_else(closure_err, closure_ok) - se  é um ```Ok```, aplica closure_ok ao valor de ```Ok```. Se é um ```Err```, aplica closure_err ao valor de ```Err```
 
+[>>>](#map_err) map_err(closure) - mapeia de ```Result<T, E>``` para ```Result<T, F>``` aplicando a closure ao valor de ```Err```
+
+
+[>>>](#inspect) inspect(closure) - aplica a closure ao valor contido no ```Ok``` sem alterar o valor original.
+
+[>>>](#inspect_err) inspect_err(closure) - aplica a closure ao valor contido no ```Err``` sem alterar o valor original.
+
+[>>>](#as_deref) as_deref() - retorna outro ```Result``` com referências aos valores do ```Result``` original
+
+[>>>](#as_deref_mut) as_deref_mut() - retorna outro ```Result``` com referências mutáveis aos valores do ```Result``` original
+
+[>>>](#iter) iter() - retorna um iterador para o valor embutido no ```Result```
+
+[>>>](#expect) expect(&str) - retorna o valor embutido no ```Ok```
+
 
 ---
 
-### is_ok()
+### is_ok( )
 
 Retorna ```true``` se o ```Result``` é um ```Ok```.
 
@@ -58,7 +73,7 @@ fn main() {
 
 ---
 
-### is_ok_and()
+### is_ok_and( )
 
 Retorna ```true``` se o ```Result``` for ```Ok``` e o valor dentro dele corresponder ao predicado passado como argumento.
 
@@ -75,7 +90,7 @@ assert_eq!(x.is_ok_and(|x| x > 1), false);
 
 ---
 
-### is_err() 
+### is_err( ) 
 
 Retorna ```true``` se o ```Result``` é ```Err```.
 
@@ -89,7 +104,7 @@ assert_eq!(x.is_err(), true);
 
 ---
 
-### is_err_and()
+### is_err_and( )
 
 Retorna ```true``` se o ```Result``` é ```Err``` e o valor dentro dele corresponde ao predicado passado como argumento.
 
@@ -108,7 +123,7 @@ assert_eq!(x.is_err_and(|x| x.kind() == ErrorKind::NotFound), false);
 
 ---
 
-### ok() 
+### ok( ) 
 
 Converte um ```Result<T,E>``` em um ```Option<T>```.
 
@@ -124,7 +139,7 @@ assert_eq!(x.ok(), None);
 
 ---
 
-### err() 
+### err( ) 
 
 Converte um ```Result<T, E>``` em um ```Option<E>```.
 
@@ -140,7 +155,7 @@ assert_eq!(x.err(), Some("Nothing here"));
 
 ---
 
-### as_ref()
+### as_ref( )
 
 Converte de ```&Result<T, E>``` para ```Result<&T, &E>```.
 
@@ -156,7 +171,7 @@ assert_eq!(x.as_ref(), Err(&"Error"));
 
 ---
 
-### as_mut()
+### as_mut( )
 
 Converte de ```&mut Result<T, E>``` para ```Result<&mut T, &mut E>```.
 
@@ -179,7 +194,7 @@ assert_eq!(x.unwrap_err(), 0);
 
 ---
 
-### map()
+### map( )
 
 Mapeia um ```Result<T, E>``` para um ```Result<U, E>``` aplicando a closure passada como argumento ao valor contido em ```Ok```, deixando o valor ```Err``` intocado.
 
@@ -196,7 +211,7 @@ for num in line.lines() {
 
 ---
 
-### map_or()
+### map_or( )
 
 Se o ```Result``` é um ```Ok```, aplica a closure passada como segundo argumento ao valor de ```Ok```.
 
@@ -214,7 +229,7 @@ OBSERVAÇÃO: Os argumentos passados para ```map_or()``` são avaliados ativamen
 
 ---
 
-### map_or_else()
+### map_or_else( )
 
 Se o ```Result``` é um ```Ok```, aplica a closure passada como segundo argumento ao valor de ```Ok```.
 
@@ -235,9 +250,155 @@ assert_eq!(x.map_or_else(|e| e.len() + 1, |v| v.len()), 6);
 
 ---
 
-### asd
+### map_err( )
+
+Mapeia um ```Result<T, E>``` para um ```Result<T, F>``` aplicando a closure passada como argumento ao valor contido em ```Err```, deixando o valor ```Ok``` intocado.
+
+Esta função pode ser usada para passar por um ```Result``` bem-sucedido enquanto lida com um erro. 
+
+```
+fn stringify(x: u32) -> String { format!("error code: {x}") }
+
+let x: Result<u32, u32> = Ok(2);
+assert_eq!(x.map_err(stringify), Ok(2));
+
+let x: Result<u32, u32> = Err(13);
+assert_eq!(x.map_err(stringify), Err("error code: 13".to_string()));
+```
+
+---
+
+### inspect( )
+
+Executa uma closure com uma referência ao valor contido no ```Ok```.
+
+Retorna o valor original do ```Result```. 
+
+```
+    let x: u8 = "2"
+        .parse::<u8>()
+        .inspect(|x| println!("valor inicial: {x}"))
+        .map(|x| x.pow(3))
+        .expect("failed to parse number");
+
+    println!("novo valor   : {}", x);
+```
+
+Execução:
+
+```
+valor inicial: 2
+novo valor   : 8
+```
+
+---
+
+### inspect_err( )
+
+Executa uma closure com uma referência ao valor contido no ```Err```.
+
+Retorna o valor original do ```Result```. 
+
+```
+use std::{fs, io};
+
+fn read() -> io::Result<String> {
+    fs::read_to_string("address.txt")
+        .inspect_err(|e| eprintln!("falha ao tentar ler o arquivo: {e}"))
+}
+
+fn main() {
+    let _ = read();
+}
+```
+
+Execução:
+
+```
+falha ao tentar ler o arquivo: O sistema não pode encontrar o arquivo especificado. (os error 2)
+```
+
+---
+
+### as_deref( )
+
+Converte de ```Result<T, E>``` (ou ```&Result<T, E>```) para ```Result<&<T as Deref>::Target, &E>```.
+
+Faz coerção da variante ```Ok``` do ```Result``` original via ```Deref``` e retorna o novo ```Result```.
+
+```
+let x: Result<String, u32> = Ok("hello".to_string());
+let y: Result<&str, &u32> = Ok("hello");
+assert_eq!(x.as_deref(), y);
+
+let x: Result<String, u32> = Err(42);
+let y: Result<&str, &u32> = Err(&42);
+assert_eq!(x.as_deref(), y);
+```
+
+---
+
+### as_deref_mut( ) 
+
+Converte de ```Result<T, E>``` (ou ```&mut Result<T, E>```) para ```Result<&mut <T as DerefMut>::Target, &mut E>```.
+
+Faz coerção da variante ```Ok``` do ```Result``` original via ```DerefMut``` e retorna o novo ```Result```.
+
+```
+let mut s = "HELLO".to_string();
+let mut x: Result<String, u32> = Ok("hello".to_string());
+let y: Result<&mut str, &mut u32> = Ok(&mut s);
+assert_eq!(x.as_deref_mut().map(|x| { x.make_ascii_uppercase(); x }), y);
+
+let mut i = 42;
+let mut x: Result<String, u32> = Err(42);
+let y: Result<&mut str, &mut u32> = Err(&mut i);
+assert_eq!(x.as_deref_mut().map(|x| { x.make_ascii_uppercase(); x }), y);
+```
+
+---
+
+### iter( )
+
+Retorna um iterador sobre o valor possivelmente contido.
+
+O iterador produz um valor se o ```Result``` for um ```Ok```, caso contrário, produz ```None```.
+
+```
+let x: Result<u32, &str> = Ok(7);
+assert_eq!(x.iter().next(), Some(&7));
+
+let x: Result<u32, &str> = Err("nothing!");
+assert_eq!(x.iter().next(), None);
+```
+
+---
+
+### iter_mut( ) 
+
+Retorna um iterador mutável sobre o valor possivelmente contido.
+
+O iterador produz um valor se o ```Result``` for um ```Ok```, caso contrário, produz ```None```.
+
+```
+let mut x: Result<u32, &str> = Ok(7);
+match x.iter_mut().next() {
+    Some(v) => *v = 40,
+    None => {},
+}
+assert_eq!(x, Ok(40));
+
+let mut x: Result<u32, &str> = Err("nothing!");
+assert_eq!(x.iter_mut().next(), None);
+```
+
+---
+
+### expect( )
+
 
 asd
+
 
 ---
 
@@ -249,4 +410,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20241108
+Última atualização: 20241109
