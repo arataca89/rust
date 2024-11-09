@@ -57,7 +57,7 @@ A variante ```Ok``` contém o valor do sucesso ```T```, enquanto a varável ```E
 
 ---
 
-### is_ok( )
+### is_ok()
 
 Retorna ```true``` se o ```Result``` é um ```Ok```.
 
@@ -73,7 +73,7 @@ fn main() {
 
 ---
 
-### is_ok_and( )
+### is_ok_and()
 
 Retorna ```true``` se o ```Result``` for ```Ok``` e o valor dentro dele corresponder ao predicado passado como argumento.
 
@@ -90,7 +90,7 @@ assert_eq!(x.is_ok_and(|x| x > 1), false);
 
 ---
 
-### is_err( ) 
+### is_err() 
 
 Retorna ```true``` se o ```Result``` é ```Err```.
 
@@ -104,7 +104,7 @@ assert_eq!(x.is_err(), true);
 
 ---
 
-### is_err_and( )
+### is_err_and()
 
 Retorna ```true``` se o ```Result``` é ```Err``` e o valor dentro dele corresponde ao predicado passado como argumento.
 
@@ -123,7 +123,7 @@ assert_eq!(x.is_err_and(|x| x.kind() == ErrorKind::NotFound), false);
 
 ---
 
-### ok( ) 
+### ok() 
 
 Converte um ```Result<T,E>``` em um ```Option<T>```.
 
@@ -139,7 +139,7 @@ assert_eq!(x.ok(), None);
 
 ---
 
-### err( ) 
+### err() 
 
 Converte um ```Result<T, E>``` em um ```Option<E>```.
 
@@ -155,7 +155,7 @@ assert_eq!(x.err(), Some("Nothing here"));
 
 ---
 
-### as_ref( )
+### as_ref()
 
 Converte de ```&Result<T, E>``` para ```Result<&T, &E>```.
 
@@ -171,7 +171,7 @@ assert_eq!(x.as_ref(), Err(&"Error"));
 
 ---
 
-### as_mut( )
+### as_mut()
 
 Converte de ```&mut Result<T, E>``` para ```Result<&mut T, &mut E>```.
 
@@ -194,7 +194,7 @@ assert_eq!(x.unwrap_err(), 0);
 
 ---
 
-### map( )
+### map()
 
 Mapeia um ```Result<T, E>``` para um ```Result<U, E>``` aplicando a closure passada como argumento ao valor contido em ```Ok```, deixando o valor ```Err``` intocado.
 
@@ -211,7 +211,7 @@ for num in line.lines() {
 
 ---
 
-### map_or( )
+### map_or()
 
 Se o ```Result``` é um ```Ok```, aplica a closure passada como segundo argumento ao valor de ```Ok```.
 
@@ -229,7 +229,7 @@ OBSERVAÇÃO: Os argumentos passados para ```map_or()``` são avaliados ativamen
 
 ---
 
-### map_or_else( )
+### map_or_else()
 
 Se o ```Result``` é um ```Ok```, aplica a closure passada como segundo argumento ao valor de ```Ok```.
 
@@ -250,7 +250,7 @@ assert_eq!(x.map_or_else(|e| e.len() + 1, |v| v.len()), 6);
 
 ---
 
-### map_err( )
+### map_err()
 
 Mapeia um ```Result<T, E>``` para um ```Result<T, F>``` aplicando a closure passada como argumento ao valor contido em ```Err```, deixando o valor ```Ok``` intocado.
 
@@ -268,7 +268,7 @@ assert_eq!(x.map_err(stringify), Err("error code: 13".to_string()));
 
 ---
 
-### inspect( )
+### inspect()
 
 Executa uma closure com uma referência ao valor contido no ```Ok```.
 
@@ -293,7 +293,7 @@ novo valor   : 8
 
 ---
 
-### inspect_err( )
+### inspect_err()
 
 Executa uma closure com uma referência ao valor contido no ```Err```.
 
@@ -320,7 +320,7 @@ falha ao tentar ler o arquivo: O sistema não pode encontrar o arquivo especific
 
 ---
 
-### as_deref( )
+### as_deref()
 
 Converte de ```Result<T, E>``` (ou ```&Result<T, E>```) para ```Result<&<T as Deref>::Target, &E>```.
 
@@ -338,7 +338,7 @@ assert_eq!(x.as_deref(), y);
 
 ---
 
-### as_deref_mut( ) 
+### as_deref_mut() 
 
 Converte de ```Result<T, E>``` (ou ```&mut Result<T, E>```) para ```Result<&mut <T as DerefMut>::Target, &mut E>```.
 
@@ -358,7 +358,7 @@ assert_eq!(x.as_deref_mut().map(|x| { x.make_ascii_uppercase(); x }), y);
 
 ---
 
-### iter( )
+### iter()
 
 Retorna um iterador sobre o valor possivelmente contido.
 
@@ -374,7 +374,7 @@ assert_eq!(x.iter().next(), None);
 
 ---
 
-### iter_mut( ) 
+### iter_mut() 
 
 Retorna um iterador mutável sobre o valor possivelmente contido.
 
@@ -394,7 +394,7 @@ assert_eq!(x.iter_mut().next(), None);
 
 ---
 
-### expect( )
+### expect()
 
 
 asd
