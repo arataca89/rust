@@ -52,7 +52,15 @@ A variante ```Ok``` contém o valor do sucesso ```T```, enquanto a varável ```E
 
 [>>>](#iter) iter() - retorna um iterador para o valor embutido no ```Result```
 
-[>>>](#expect) expect(&str) - retorna o valor embutido no ```Ok```
+[>>>](#expect) expect(&str) - retorna o valor embutido no ```Ok```. Em caso de erro chama ```panic!``` com a ```&str``` passada como argumento como mensagem de erro.
+
+[>>>](#unwrap) unwrap() - retorna o valor embutido no ```Ok```. Em caso de erro chama ```panic!``` com as mensagens padrão.
+
+[>>>](#unwrap_or_default) unwrap_or_default() - retorna o valor embutido no ```Ok`` ou o valor default para o tipo de dados em questão.
+
+[>>>](#expect_err) expect_err(&str) - retorna o valor embutido no ```Err```. Se o valor é um ```Ok```, gera pânico com uma mensagem que tem o argumento ```&str``` e o valor do ```Ok```.
+
+[>>>](#unwrap_err) unwrap_err() - retorna o valor embutido no ```Err```. Se o valor é um ```Ok```, gera pânico com uma mensagem de pânico fornecida pelo valor do ```Ok```. 
 
 
 ---
@@ -396,9 +404,130 @@ assert_eq!(x.iter_mut().next(), None);
 
 ### expect()
 
+Retorna o valor embutido no ```Ok```, consumindo ```self```.
+
+Como essa função pode causar pânico, seu uso é geralmente desencorajado. Em vez disso, prefira usar correspondência de padrões (```match```) e lidar com o caso ```Err``` explicitamente, ou chamar ```unwrap_or()```, ```unwrap_or_else()``` ou ```unwrap_or_default()```.
+
+Se o valor for um ```Err```, lança um pânico com uma mensagem incluindo a mensagem passada como argumento e o conteúdo do ```Err```. 
+
+```
+let x: Result<u32, &str> = Err("emergency failure");
+x.expect("Testing expect"); // panics with `Testing expect: emergency failure`
+```
+
+Recomenda-se que a mensagem passada como argumento seja usada para descrever o motivo pelo qual você espera que o ```Result``` seja ```Ok```. 
+
+```
+let path = std::env::var("IMPORTANT_PATH")
+    .expect("env variable `IMPORTANT_PATH` should be set by `wrapper_script.sh`");
+```
+
+---
+
+### unwrap()
+
+Retorna o valor embutido no ```Ok```, consumindo ```self```.
+
+Como essa função pode causar pânico, seu uso é geralmente desencorajado. Em vez disso, prefira usar correspondência de padrões (```match```) e lidar com o caso ```Err``` explicitamente, ou chamar ```unwrap_or()```, ```unwrap_or_else()``` ou ```unwrap_or_default()```.
+
+Se o valor for um ```Err```, lança um pânico com uma mensagem fornecida pelo valor do ```Err```.
+
+```
+let x: Result<u32, &str> = Ok(2);
+assert_eq!(x.unwrap(), 2);
+```
+
+```
+let x: Result<u32, &str> = Err("emergency failure");
+x.unwrap(); // panics with `emergency failure`
+```
+
+---
+
+### unwrap_or_default()
+
+Retorna o valor embutido no ```Ok``` ou o valor padrão para o tipo.
+
+Consome ```self``` e, se for um ```Ok```, retorna o valor contido, caso contrário, se for um ```Err```, retorna o valor padrão para esse tipo.
+
+```
+let good_year_from_input = "1909";
+let bad_year_from_input = "190blarg";
+let good_year = good_year_from_input.parse().unwrap_or_default();
+let bad_year = bad_year_from_input.parse().unwrap_or_default();
+
+assert_eq!(1909, good_year);
+assert_eq!(0, bad_year); // 0 é o valor default para inteiros
+```
+
+---
+
+### expect_err()
+
+Retorna o valor embutido no ```Err```, consumindo o valor ```self```.
+
+Se o valor é um ```Ok```, gera pânico com uma mensagem que inclui a ```&str``` passada como argumento e o conteúdo do ```Ok```.
+
+```
+let x: Result<u32, &str> = Ok(10);
+x.expect_err("Testing expect_err"); // panics with `Testing expect_err: 10`
+```
+
+---
+
+### unwrap_err()
+
+Retorna o valor embutido no ```Err```, consumindo o valor ```self```.
+
+Se o valor é um ```Ok```, gera pânico com uma mensagem de pânico fornecida pelo valor do ```Ok```. 
+
+```
+let x: Result<u32, &str> = Ok(2);
+x.unwrap_err(); // panics with `2`
+```
+
+```
+let x: Result<u32, &str> = Err("emergency failure");
+assert_eq!(x.unwrap_err(), "emergency failure");
+```
+
+---
+
+### and_then()
+ 
+Se for ```Ok```, chama a closure passada como argumento. Caso contrário retorna o valor ```Err``` de ```self```.
+
+Esta função pode ser usada para controle de fluxo baseado em valores do  ```Result```.
+
+```
+fn sq_then_to_string(x: u32) -> Result<String, &'static str> {
+    x.checked_mul(x).map(|sq| sq.to_string()).ok_or("overflowed")
+}
+
+assert_eq!(Ok(2).and_then(sq_then_to_string), Ok(4.to_string()));
+assert_eq!(Ok(1_000_000).and_then(sq_then_to_string), Err("overflowed"));
+assert_eq!(Err("not a number").and_then(sq_then_to_string), Err("not a number"));
+```
+
+Frequentemente usado para encadear operações falíveis que podem retornar ```Err```.
+
+```
+use std::{io::ErrorKind, path::Path};
+
+// Note: on Windows "/" maps to "C:\"
+let root_modified_time = Path::new("/").metadata().and_then(|md| md.modified());
+assert!(root_modified_time.is_ok());
+
+let should_fail = Path::new("/bad/path").metadata().and_then(|md| md.modified());
+assert!(should_fail.is_err());
+assert_eq!(should_fail.unwrap_err().kind(), ErrorKind::NotFound);
+```
+
+---
+
+### asd
 
 asd
-
 
 ---
 
@@ -410,4 +539,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20241109
+Última atualização: 20241110
