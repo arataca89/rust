@@ -62,6 +62,14 @@ A variante ```Ok``` contém o valor do sucesso ```T```, enquanto a varável ```E
 
 [>>>](#unwrap_err) unwrap_err() - retorna o valor embutido no ```Err```. Se o valor é um ```Ok```, gera pânico com uma mensagem de pânico fornecida pelo valor do ```Ok```. 
 
+[>>>](#and) and() - retorna ```res``` se o resultado for ```Ok```, caso contrário retorna o valor ```Err``` de self.)
+
+[>>>](#and_then) and_then(closure) - se for ```Ok```, chama a closure passada como argumento. Caso contrário retorna o valor ```Err``` de ```self```.
+
+[>>>](#or) or() - retorna ```res``` se o resultado for ```Err```, caso contrário retorna o valor ```Ok``` de self.
+
+[>>>](#or_else) or_else(closure) - se for ```Err```, chama a closure passada como argumento com o valoor de ```Err```. Caso contrário retorna o valor ```Ok``` de self.
+
 
 ---
 
@@ -493,6 +501,32 @@ assert_eq!(x.unwrap_err(), "emergency failure");
 
 ---
 
+### and()
+
+Retorna ```res``` se o resultado for ```Ok```, caso contrário retorna o valor ```Err``` de self.
+
+Argumentos passados para ```and``` são avaliados ativamente; se você estiver passando o resultado de uma chamada de função, é recomendável usar ```and_then```.
+
+```
+let x: Result<u32, &str> = Ok(2);
+let y: Result<&str, &str> = Err("late error");
+assert_eq!(x.and(y), Err("late error"));
+
+let x: Result<u32, &str> = Err("early error");
+let y: Result<&str, &str> = Ok("foo");
+assert_eq!(x.and(y), Err("early error"));
+
+let x: Result<u32, &str> = Err("not a 2");
+let y: Result<&str, &str> = Err("late error");
+assert_eq!(x.and(y), Err("not a 2"));
+
+let x: Result<u32, &str> = Ok(2);
+let y: Result<&str, &str> = Ok("different result type");
+assert_eq!(x.and(y), Ok("different result type"));
+```
+
+---
+
 ### and_then()
  
 Se for ```Ok```, chama a closure passada como argumento. Caso contrário retorna o valor ```Err``` de ```self```.
@@ -525,6 +559,48 @@ assert_eq!(should_fail.unwrap_err().kind(), ErrorKind::NotFound);
 
 ---
 
+### or()
+
+Retorna ```res``` se o resultado for ```Err```, caso contrário retorna o valor ```Ok``` de self.
+
+Argumentos passados para ```or``` são avaliados ativamente; se você estiver passando o resultado de uma chamada de função, é recomendável usar ```or_else```. 
+
+```
+let x: Result<u32, &str> = Ok(2);
+let y: Result<u32, &str> = Err("late error");
+assert_eq!(x.or(y), Ok(2));
+
+let x: Result<u32, &str> = Err("early error");
+let y: Result<u32, &str> = Ok(2);
+assert_eq!(x.or(y), Ok(2));
+
+let x: Result<u32, &str> = Err("not a 2");
+let y: Result<u32, &str> = Err("late error");
+assert_eq!(x.or(y), Err("late error"));
+
+let x: Result<u32, &str> = Ok(2);
+let y: Result<u32, &str> = Ok(100);
+assert_eq!(x.or(y), Ok(2));
+```
+
+---
+
+### or_else()
+
+Se for ```Err```, chama a closure passada como argumento com o valoor de ```Err```. Caso contrário retorna o valor ```Ok``` de self.
+
+Esta função pode ser usada para controle de fluxo baseado em valores do ```Result```.
+
+```
+fn sq(x: u32) -> Result<u32, u32> { Ok(x * x) }
+fn err(x: u32) -> Result<u32, u32> { Err(x) }
+
+assert_eq!(Ok(2).or_else(sq).or_else(sq), Ok(2));
+assert_eq!(Ok(2).or_else(err).or_else(sq), Ok(2));
+assert_eq!(Err(3).or_else(sq).or_else(err), Ok(9));
+assert_eq!(Err(3).or_else(err).or_else(err), Err(3));
+```
+
 ### asd
 
 asd
@@ -539,4 +615,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20241110
+Última atualização: 20241111
