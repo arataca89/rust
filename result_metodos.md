@@ -70,6 +70,25 @@ A variante ```Ok``` contém o valor do sucesso ```T```, enquanto a varável ```E
 
 [>>>](#or_else) or_else(closure) - se for ```Err```, chama a closure passada como argumento com o valoor de ```Err```. Caso contrário retorna o valor ```Ok``` de self.
 
+[>>>](#unwrap_or) unwrap_or(default) - retorna o valor ```Ok``` contido ou o valor default fornecido.
+
+[>>>](#unwrap_or_else) unwrap_or_else(closure) - retorna o valor ```Ok``` contido ou o calcula a partir da closure passada como argumento.
+
+[>>>](#unwrap_unchecked) unwrap_unchecked() - retorna o valor ```Ok``` contido, consumindo ```self```, sem verificar se o valor não é um ```Err```.
+
+[>>>](#unwrap_err_unchecked) unwrap_err_unchecked() - retorna o valor ```Err``` contido, consumindo ```self```, sem verificar se o valor não é um ```Ok```.
+
+[>>>](#copied) copied() - mapeia um ```Result<&T, E>``` para um ```Result<T, E>``` copiando o conteúdo da parte ```Ok```.
+
+[>>>](#cloned) cloned() - mapeia um ```Result<&T, E>``` para um ```Result<T, E>``` clonando o conteúdo da parte ```Ok```.
+
+[>>>](#copied) copied() - mapeia um ```Result<&mut T, E>``` para um ```Result<T, E>``` copiando o conteúdo da parte ```Ok```.
+
+[>>>](#cloned) cloned() - mapeia um ```Result<&mut T, E>``` para um ```Result<T, E>``` clonando o conteúdo da parte ```Ok```.
+
+[>>>](#transpose) transpose() - transpõe de um ```Result``` com um ```Option``` para um ```Option``` com um ```Result```.
+
+[>>>]
 
 ---
 
@@ -601,9 +620,150 @@ assert_eq!(Err(3).or_else(sq).or_else(err), Ok(9));
 assert_eq!(Err(3).or_else(err).or_else(err), Err(3));
 ```
 
-### asd
+---
 
-asd
+### unwrap_or()
+
+Retorna o valor ```Ok``` contido ou o valor default fornecido.
+
+Argumentos passados para ```unwrap_or``` são avaliados ativamente; se você estiver passando o resultado de uma chamada de função, é recomendável usar ```unwrap_or_else```. 
+
+```
+let default = 2;
+let x: Result<u32, &str> = Ok(9);
+assert_eq!(x.unwrap_or(default), 9);
+
+let x: Result<u32, &str> = Err("error");
+assert_eq!(x.unwrap_or(default), default);
+```
+
+---
+
+### unwrap_or_else()
+
+Retorna o valor ```Ok``` contido ou o calcula a partir da closure passada como argumento.
+
+```
+fn count(x: &str) -> usize { x.len() }
+
+assert_eq!(Ok(2).unwrap_or_else(count), 2);
+assert_eq!(Err("foo").unwrap_or_else(count), 3);
+```
+
+---
+
+### unwrap_unchecked()
+
+Retorna o valor ```Ok``` contido, consumindo ```self```, sem verificar se o valor não é um ```Err```.
+
+Segurança: Chamar este método em um ```Err``` provoca um comportamento indefinido. 
+
+```
+let x: Result<u32, &str> = Ok(2);
+assert_eq!(unsafe { x.unwrap_unchecked() }, 2);
+```
+
+```
+let x: Result<u32, &str> = Err("emergency failure");
+unsafe { x.unwrap_unchecked(); } // Undefined behavior!
+```
+
+---
+
+### unwrap_err_unchecked()
+
+Retorna o valor ```Err``` contido, consumindo ```self```, sem verificar se o valor não é um ```Ok```.
+
+Segurança: Chamar este método em um ```Ok``` provoca um comportamento indefinido. 
+
+```
+let x: Result<u32, &str> = Ok(2);
+unsafe { x.unwrap_err_unchecked() }; // Undefined behavior!
+```
+
+```
+let x: Result<u32, &str> = Err("emergency failure");
+assert_eq!(unsafe { x.unwrap_err_unchecked() }, "emergency failure");
+```
+
+---
+
+### copied()
+
+Mapeia um ```Result<&T, E>``` para um ```Result<T, E>``` copiando o conteúdo da parte ```Ok```.
+
+```
+let val = 12;
+let x: Result<&i32, i32> = Ok(&val);
+assert_eq!(x, Ok(&12));
+let copied = x.copied();
+assert_eq!(copied, Ok(12));
+```
+
+---
+
+### cloned()
+
+Mapeia um ```Result<&T, E>``` para um ```Result<T, E>``` clonando o conteúdo da parte ```Ok```.
+
+```
+let val = 12;
+let x: Result<&i32, i32> = Ok(&val);
+assert_eq!(x, Ok(&12));
+let cloned = x.cloned();
+assert_eq!(cloned, Ok(12));
+```
+
+---
+
+### copied()
+
+Mapeia um ```Result<&mut T, E>``` para um ```Result<T, E>``` copiando o conteúdo da parte ```Ok```.
+
+```
+let mut val = 12;
+let x: Result<&mut i32, i32> = Ok(&mut val);
+assert_eq!(x, Ok(&mut 12));
+let copied = x.copied();
+assert_eq!(copied, Ok(12));
+```
+
+---
+
+### cloned()
+
+Mapeia um ```Result<&mut T, E>``` para um ```Result<T, E>``` clonando o conteúdo da parte ```Ok```.
+
+```
+let mut val = 12;
+let x: Result<&mut i32, i32> = Ok(&mut val);
+assert_eq!(x, Ok(&mut 12));
+let cloned = x.cloned();
+assert_eq!(cloned, Ok(12));
+```
+
+---
+
+### transpose()
+
+Transpõe de um ```Result``` com um ```Option``` para um ```Option``` com um ```Result```.
+
+```Ok(None)``` será mapeado para ```None```. ```Ok(Some(_))``` e ```Err(_)``` serão mapeados para ```Some(Ok(_))``` e ```Some(Err(_)```).
+
+```
+#[derive(Debug, Eq, PartialEq)]
+struct SomeErr;
+
+let x: Result<Option<i32>, SomeErr> = Ok(Some(5));
+let y: Option<Result<i32, SomeErr>> = Some(Ok(5));
+assert_eq!(x.transpose(), y);
+```
+
+---
+
+### asd 
+
+
 
 ---
 
@@ -615,4 +775,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20241111
+Última atualização: 20241112
