@@ -88,8 +88,6 @@ A variante ```Ok``` contém o valor do sucesso ```T```, enquanto a varável ```E
 
 [>>>](#transpose) transpose() - transpõe de um ```Result``` com um ```Option``` para um ```Option``` com um ```Result```.
 
-[>>>]
-
 ---
 
 ### is_ok()
