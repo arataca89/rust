@@ -761,12 +761,6 @@ assert_eq!(x.transpose(), y);
 
 ---
 
-### asd 
-
-
-
----
-
 ## Referências
 
 [Result](https://doc.rust-lang.org/std/result/enum.Result.html#)
@@ -775,4 +769,4 @@ assert_eq!(x.transpose(), y);
 
 arataca89@gmail.com
 
-Última atualização: 20241112
+Última atualização: 20241113
