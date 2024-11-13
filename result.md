@@ -2,12 +2,43 @@
 
 ```std::result::Result``` é uma enumeração definida na biblioteca padrão da linguagem Rust.
 
+```Result<T, E>``` é o tipo usado para retornar e propagar erros. É uma enumeração com as variantes, ```Ok(T)```, representando sucesso e contendo um valor, e ```Err(E)```, representando erro e contendo um valor de erro. 
+
+
 ```
 pub enum Result<T, E> {
     Ok(T),
     Err(E),
 }
 ```
+
+As funções retornam ```Result``` sempre que erros são esperados e recuperáveis. No crate ```std```, ```Result``` é usado principalmente para I/O. 
+
+Uma função simples que retorna ```Result``` pode ser definida e usada da seguinte forma:
+
+```
+#[derive(Debug)]
+enum Version { Version1, Version2 }
+
+fn parse_version(header: &[u8]) -> Result<Version, &'static str> {
+    match header.get(0) {
+        None => Err("invalid header length"),
+        Some(&1) => Ok(Version::Version1),
+        Some(&2) => Ok(Version::Version2),
+        Some(_) => Err("invalid version"),
+    }
+}
+
+let version = parse_version(&[1, 2, 3, 4]);
+match version {
+    Ok(v) => println!("working with version: {v:?}"),
+    Err(e) => println!("error parsing header: {e:?}"),
+}
+```
+
+A correspondência de padrões usando ```Result``` é clara e direta para casos simples, mas ```Result``` vem com alguns métodos que tornam o trabalho com ele mais sucinto. 
+ 
+
 
 Note que ela trabalha com os tipos genéricos ```T``` e ```E``` o que permite grande flexibilidade de uso com diversos tipos.
 
@@ -762,6 +793,8 @@ assert_eq!(x.transpose(), y);
 ## Referências
 
 [Result](https://doc.rust-lang.org/stable/std/result/enum.Result.html)
+
+[Módulo std::result](https://doc.rust-lang.org/stable/std/result/index.html)
 
 ---
 
