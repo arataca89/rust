@@ -1,4 +1,4 @@
-# Métodos de Result
+# Result
 
 ```std::result::Result``` é uma enumeração definida na biblioteca padrão da linguagem Rust.
 
