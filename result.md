@@ -37,14 +37,6 @@ match version {
 ```
 
 A correspondência de padrões usando ```Result``` é clara e direta para casos simples, mas ```Result``` vem com alguns métodos que tornam o trabalho com ele mais sucinto. 
- 
-
-
-Note que ela trabalha com os tipos genéricos ```T``` e ```E``` o que permite grande flexibilidade de uso com diversos tipos.
-
-```Result``` é um tipo que representa sucesso (```Ok```) ou falha (```Err```).
-
-A variante ```Ok``` contém o valor do sucesso ```T```, enquanto a varável ```Err``` contém o valor em caso de falha ```E```.
 
 ### Métodos
 
