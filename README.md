@@ -2,7 +2,7 @@
 
 [Ownership (propriedade)](https://github.com/arataca89/rust/tree/main/ownership)
 
-[Result](https://github.com/arataca89/rust/blob/main/result_metodos.md)
+[Result](https://github.com/arataca89/rust/blob/main/result.md)
 
 [Genéricos](https://github.com/arataca89/rust/tree/main/genericos)
 
