@@ -67,6 +67,10 @@ match result {
 
 [>>>](#as_mut_slice) as_mut_slice() - retorna uma slice mutável do valor contido, se houver. Se este for ```None```, uma slice vazia é retornada.
 
+[>>>](#expect) expect(&str) - retorna o valor contido em ```Some```, consumindo ```self```. Se o valor for ```None``` emite ```panic!``` com a mensagem passada como argumento.
+
+[>>>](#unwrap) unwrap() - retorna o valor contido em ```Some```, consumindo ```self```. Caso o valor seja ```None``` emite ```panic!```.
+
 [>>>]
 
 ---
@@ -240,6 +244,66 @@ assert_eq!(Some(123).as_mut_slice().first_mut(), Some(&mut 123))
 
 ### expect()
 
+Retorna o valor contido em ```Some```, consumindo ```self```.
+
+Emite um pânico se o valor for ```None``` com uma mensagem de pânico personalizada fornecida pelo argumento passado.
+
+```
+let x = Some("value");
+assert_eq!(x.expect("fruits are healthy"), "value");
+```
+
+```
+let x: Option<&str> = None;
+x.expect("fruits are healthy"); // emite um pânico com a mensagem `fruits are healthy`
+```
+
+Recomenda-se que as mensagens passadas como argumento sejam usadas para descrever o motivo pelo qual você espera que a ```Option``` seja ```Some```.
+
+```
+let item = slice.get(0)
+    .expect("a slice não deve ser vazia"); 
+```
+
+Dica: Se você tiver problemas para criar mensagens de erro significativas, lembre-se de focar na palavra "deve", como em "a variável de ambiente deve ser definida por blah" ou "o binário fornecido deve estar disponível e executável pelo usuário atual". 
+
+Para mais detalhes sobre os estilos de mensagens esperados e o raciocínio por trás de nossa recomendação, consulte a seção [Common Message Styles](https://doc.rust-lang.org/stable/std/error/index.html#common-message-styles) na documentação do módulo [std::error](https://doc.rust-lang.org/stable/std/error/index.html).
+
+---
+
+### unwrap()
+
+Retorna o valor contido em ```Some```, consumindo ```self```. Caso o valor seja ```None``` emite ```panic!```.
+
+Como essa função pode causar pânico, seu uso é geralmente desencorajado. Em vez disso, prefira usar correspondência de padrões (```match```) e lidar com o caso ```None``` explicitamente, ou chamar ```unwrap_or```, ```unwrap_or_else``` ou ```unwrap_or_default```.
+
+```
+let x = Some("air");
+assert_eq!(x.unwrap(), "air");
+```
+
+```
+let x: Option<&str> = None;
+assert_eq!(x.unwrap(), "air"); // lança panic!
+```
+
+---
+
+### unwrap_or
+
+Retorna o valor contido em ```Some``` ou o valor default fornecido.
+
+Argumentos passados para ```unwrap_or``` são avaliados ativamente; se você estiver passando o resultado de uma chamada de função, é recomendável usar ```unwrap_or_else```. 
+
+```
+assert_eq!(Some("car").unwrap_or("bike"), "car");
+assert_eq!(None.unwrap_or("bike"), "bike");
+```
+
+---
+
+### unwrap_or_else
+
 asd
 
 ---
@@ -254,4 +318,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20241118
+Última atualização: 20241119
