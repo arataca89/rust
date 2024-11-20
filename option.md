@@ -71,7 +71,16 @@ match result {
 
 [>>>](#unwrap) unwrap() - retorna o valor contido em ```Some```, consumindo ```self```. Caso o valor seja ```None``` emite ```panic!```.
 
+[>>>](#unwrap_or_else) unwrap_or_else(closure) - retorna o valor contido em ```Some``` ou, em caso de ```None```, calcula o valor a partir da closure passada como argumento.
+
+[>>>](#unwrap_or_default) unwrap_or_default() - retorna o valor contido em ```Some``` ou o valor default para o tipo de dados em questão.
+
+[>>>](#unwrap_unchecked) unwrap_unchecked() - retorna o valor contido em ```Some```, consumindo ```self```, sem verificar se o valor não é ```None```.
+
+[>>>](#map) map(closure) - mapeia ```Option<T>``` para ```Option<U>``` aplicando a closure passada como argumento ao valor contido (se ```Some```) ou retorna ```None``` (se ```None```).
+
 [>>>]
+
 
 ---
 
@@ -289,7 +298,7 @@ assert_eq!(x.unwrap(), "air"); // lança panic!
 
 ---
 
-### unwrap_or
+### unwrap_or()
 
 Retorna o valor contido em ```Some``` ou o valor default fornecido.
 
@@ -302,7 +311,74 @@ assert_eq!(None.unwrap_or("bike"), "bike");
 
 ---
 
-### unwrap_or_else
+### unwrap_or_else()
+
+Retorna o valor contido em ```Some``` ou, em caso de ```None```, calcula o valor a partir da closure passada como argumento.
+
+```
+let k = 10;
+assert_eq!(Some(4).unwrap_or_else(|| 2 * k), 4);
+assert_eq!(None.unwrap_or_else(|| 2 * k), 20);
+```
+
+---
+
+### unwrap_or_default()
+
+Retorna o valor contido em ```Some``` ou o valor default para o tipo de dados em questão.
+
+Consome ```self``` e, se for um ```Some```, retorna o valor contido, caso contrário, se for um ```None```, retorna o valor default para esse tipo.
+
+```
+let x: Option<u32> = None;
+let y: Option<u32> = Some(12);
+
+assert_eq!(x.unwrap_or_default(), 0);
+assert_eq!(y.unwrap_or_default(), 12);
+```
+
+---
+
+### unwrap_unchecked()
+
+Retorna o valor contido em ```Some```, consumindo ```self```, sem verificar se o valor não é ```None```.
+
+
+Chamar este método em um ```None``` provoca um comportamento indefinido. 
+
+```
+let x = Some("air");
+assert_eq!(unsafe { x.unwrap_unchecked() }, "air");
+```
+
+```
+let x: Option<&str> = None;
+assert_eq!(unsafe { x.unwrap_unchecked() }, "air"); // comportamento indefinido
+```
+
+---
+
+### map()
+
+Mapeia ```Option<T>``` para ```Option<U>``` aplicando a closure passada como argumento ao valor contido (se ```Some```) ou retorna ```None``` (se ```None```).
+
+Exemplo:
+
+Calcula o comprimento de um ```Option<String>``` como um ```Option<usize>```, consumindo o original: 
+
+```
+let maybe_some_string = Some(String::from("Hello, World!"));
+// `Option::map` pega `self` por valor, consumindo `maybe_some_string`
+let maybe_some_len = maybe_some_string.map(|s| s.len());
+assert_eq!(maybe_some_len, Some(13));
+
+let x: Option<&str> = None;
+assert_eq!(x.map(|s| s.len()), None);
+```
+
+---
+
+### inspect()
 
 asd
 
@@ -318,4 +394,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20241119
+Última atualização: 20241120
