@@ -79,8 +79,17 @@ match result {
 
 [>>>](#map) map(closure) - mapeia ```Option<T>``` para ```Option<U>``` aplicando a closure passada como argumento ao valor contido (se ```Some```) ou retorna ```None``` (se ```None```).
 
-[>>>]
+[>>>](#inspect) inspect(closure) - executa a closure passada como argumento com uma referência ao valor contido em ```Some```, se houver. Retorna a ```Option``` original.
 
+[>>>](#map_or) map_or(default, closure) - se a ```Option``` for ```None``` retorna o valor default fornecido como primeiro argumento. Se a ```Option``` for ```Some``` executa a closure passada como segundo argumento com o valor dentro de ```Some```.
+
+[>>>](#map_or_else) map_or_else(closure1, closure2) - se a ```Option``` for ```None``` executa a closure1 passada como primeiro argumento. Se a ```Option``` for ```Some``` executa a closure2 passada como segundo argumento com o valor dentro de ```Some```.
+
+[>>>](#ok_or) ok_or() - transforma um ```Option<T>``` em um ```Result<T, E>```, mapeando ```Some(v)``` para ```Ok(v)``` e ```None``` para ```Err(err)```.
+
+[>>>](#ok_or_else) ok_or_else(closure) - transforma um ```Option<T>``` em um ```Result<T, E>```, mapeando ```Some(v)``` para ```Ok(v)``` e ```None``` para ```Err(err())```, onde ```err()``` é a closure passada como argumento.
+
+[>>>]
 
 ---
 
@@ -380,6 +389,102 @@ assert_eq!(x.map(|s| s.len()), None);
 
 ### inspect()
 
+Executa a closure passada como argumento com uma referência ao valor contido em ```Some```, se houver. Retorna a ```Option``` original.
+
+```
+let list = vec![1, 2, 3];
+
+// exibe na tela "got: 2"
+let x = list
+    .get(1)
+    .inspect(|x| println!("got: {x}"))
+    .expect("list should be long enough");
+
+// não exibe nada
+list.get(5).inspect(|x| println!("got: {x}"));
+```
+
+---
+
+### map_or()
+
+Se a ```Option``` for ```None``` retorna o valor default fornecido como primeiro argumento. Se a ```Option``` for ```Some``` executa a closure passada como segundo argumento com o valor dentro de ```Some```.
+
+Argumentos passados para ```map_or()``` são avaliados ativamente; se você estiver passando o resultado de uma chamada de função, é recomendável usar ```map_or_else```.
+
+```
+let x = Some("foo");
+assert_eq!(x.map_or(42, |v| v.len()), 3);
+
+let x: Option<&str> = None;
+assert_eq!(x.map_or(42, |v| v.len()), 42);
+```
+
+---
+
+###  map_or_else()
+
+Se a ```Option``` for ```None``` executa a closure passada como primeiro argumento. Se a ```Option``` for ```Some``` executa a closure passada como segundo argumento com o valor dentro de ```Some```.
+
+```
+let k = 21;
+
+let x = Some("foo");
+assert_eq!(x.map_or_else(|| 2 * k, |v| v.len()), 3);
+
+let x: Option<&str> = None;
+assert_eq!(x.map_or_else(|| 2 * k, |v| v.len()), 42);
+```
+
+Lidando com um "plano B" baseado em ```Result```
+
+Uma ocorrência um tanto comum ao lidar com valores opcionais em combinação com ```Result<T, E>``` é o caso em que se deseja invocar um "plano B" se a opção não estiver presente. Este exemplo analisa um argumento de linha de comando (se presente) ou o conteúdo de um arquivo para um inteiro. No entanto, ao contrário de acessar o argumento da linha de comando, a leitura do arquivo é falível, portanto, deve ser encapsulada em um ```Ok```. 
+
+```
+#![allow(unused)]
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let v: u64 = std::env::args()
+       .nth(1)
+       .map_or_else(|| std::fs::read_to_string("/etc/someconfig.conf"), Ok)?
+       .parse()?;
+      Ok(())
+}
+```
+
+---
+
+### ok_or()
+
+Transforma um ```Option<T>``` em um ```Result<T, E>```, mapeando ```Some(v)``` para ```Ok(v)``` e ```None``` para ```Err(err)```.
+
+Argumentos passados para ```ok_or()``` são avaliados ativamente; se você estiver passando o resultado de uma chamada de função, é recomendável usar ```ok_or_else()```.
+
+```
+let x = Some("foo");
+assert_eq!(x.ok_or(0), Ok("foo"));
+
+let x: Option<&str> = None;
+assert_eq!(x.ok_or(0), Err(0));
+```
+
+---
+
+### ok_or_else()
+
+Transforma um ```Option<T>``` em um ```Result<T, E>```, mapeando ```Some(v)``` para ```Ok(v)``` e ```None``` para ```Err(err())```, onde ```err()``` é a closure passada como argumento.
+
+```
+let x = Some("foo");
+assert_eq!(x.ok_or_else(|| 0), Ok("foo"));
+
+let x: Option<&str> = None;
+assert_eq!(x.ok_or_else(|| 0), Err(0));
+```
+
+---
+
+### as_deref()
+
 asd
 
 ---
@@ -394,4 +499,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20241120
+Última atualização: 20241121
