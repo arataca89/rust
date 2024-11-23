@@ -103,7 +103,37 @@ match result {
 
 [>>>](#or) or(option) - retorna a ```Option``` se ela contém um valor, caso contrário retorna a opcão passada como argumento (```option```).
 
-[>>>]
+[>>>](#or_else) or_else(closure) - retorna a ```Option``` se ela contém um valor, caso contrário chama a closure passada como argumenmto e retorna o resultado.
+
+[>>>](#xor) xor(option) - retorna ```Some``` se um dos dois: ```self``` ou a opção passada como argumento(```option```) for ```Some```, somente um dos dois; caso contrário retorna ```None```.
+
+[>>>](#insert) insert(value) - insere um valor na ```Option``` e, em seguida, retorna uma referência mutável para ele. Se a ```Option``` já contém um valor, o valor antigo é descartado.
+
+[>>>](#get_or_insert) get_or_insert(value) - insere um valor na ```Option``` se ela for ```None```, então retorna uma referência mutável para o valor contido.
+
+[>>>](#get_or_insert_with) get_or_insert_with(closure) - se a ```Option``` for ```None```, insere o valor calculado a partir da closure passada como argumento e retorna uma referência mutável para o valor.
+
+[>>>](#take) take() - move o valor da ```Option``` deixando ```None``` em seu lugar.
+
+[>>>](#take_if) take_if(closure) - se a closure predicado passada como argumento for ```true```, move o valor da ```Option``` deixando ```None``` em seu lugar.
+
+[>>>](#replace) replace(value) - substitui o valor atual da ```Option``` retornando o valor antigo se presente.
+
+[>>>](#zip) zip(Option) - combina ```self``` com outra ```Option```.
+
+[>>>](#unzip) unzip() - descompacta uma ```Option``` contendo uma tupla de duas ```Option```.
+
+[>>>](#copied) copied() - mapeia um ```Option<&T>``` para um ```Option<T>``` copiando o conteúdo da opção.
+
+[>>>](#cloned) cloned() - mapeia um ```Option<&T>``` para um ```Option<T>``` clonando o conteúdo da opção.
+
+[>>>](#copied) copied() - mapeia um ```Option<&mut T>``` para um ```Option<T>``` copiando o conteúdo da opção.
+
+[>>>](#cloned) cloned() - mapeia um ```Option<&mut T>``` para um ```Option<T>``` clonando o conteúdo da opção.
+
+[>>>](#transpose) transpose() - transpõe uma ```Option``` contendo um ```Result``` para um ```Result``` contendo uma ```Option```.
+
+[>>>](#flatten) flatten() - converte de ```Option<Option<T>>``` para ```Option<T>```.
 
 ---
 
@@ -668,7 +698,291 @@ assert_eq!(x.or(y), None);
 
 ### or_else()
 
-asd
+Retorna a ```Option``` se ela contém um valor, caso contrário chama a closure passada como argumenmto e retorna o resultado.
+
+```
+fn nobody() -> Option<&'static str> { None }
+fn vikings() -> Option<&'static str> { Some("vikings") }
+
+assert_eq!(Some("barbarians").or_else(vikings), Some("barbarians"));
+assert_eq!(None.or_else(vikings), Some("vikings"));
+assert_eq!(None.or_else(nobody), None);
+```
+
+---
+
+### xor()
+
+Retorna ```Some``` se um dos dois: ```self``` ou a opção passada como argumento for ```Some```, somente um dos dois; caso contrário retorna ```None```.
+
+```
+let x = Some(2);
+let y: Option<u32> = None;
+assert_eq!(x.xor(y), Some(2));
+
+let x: Option<u32> = None;
+let y = Some(2);
+assert_eq!(x.xor(y), Some(2));
+
+let x = Some(2);
+let y = Some(2);
+assert_eq!(x.xor(y), None);
+
+let x: Option<u32> = None;
+let y: Option<u32> = None;
+assert_eq!(x.xor(y), None);
+```
+
+---
+
+### insert()
+
+Insere um valor na ```Option``` e, em seguida, retorna uma referência mutável para ele.
+
+Se a ```Option``` já contém um valor, o valor antigo é descartado.
+
+Veja também ```Option::get_or_insert()```, que não atualiza o valor se a opção já contém ```Some```.
+
+```
+let mut opt = None;
+let val = opt.insert(1);
+assert_eq!(*val, 1);
+assert_eq!(opt.unwrap(), 1);
+let val = opt.insert(2);
+assert_eq!(*val, 2);
+*val = 3;
+assert_eq!(opt.unwrap(), 3);
+```
+
+---
+
+### get_or_insert()
+
+Insere um valor na ```Option``` se ela for ```None```, então retorna uma referência mutável para o valor contido.
+
+Veja também ```Option::insert()```, que atualiza o valor mesmo que a opção já contenha ```Some```.
+
+```
+let mut x = None;
+
+{
+    let y: &mut u32 = x.get_or_insert(5);
+    assert_eq!(y, &5);
+
+    *y = 7;
+}
+
+assert_eq!(x, Some(7));
+```
+
+---
+
+### get_or_insert_with()
+
+Se a ```Option``` for ```None```, insere o valor calculado a partir da closure passada como argumento e retorna uma referência mutável para o valor.
+
+```
+let mut x = None;
+
+{
+    let y: &mut u32 = x.get_or_insert_with(|| 5);
+    assert_eq!(y, &5);
+
+    *y = 7;
+}
+
+assert_eq!(x, Some(7));
+```
+
+---
+
+### take()
+
+Move o valor da ```Option``` deixando ```None``` em seu lugar.
+
+```
+let mut x = Some(2);
+let y = x.take();
+assert_eq!(x, None);
+assert_eq!(y, Some(2));
+
+let mut x: Option<u32> = None;
+let y = x.take();
+assert_eq!(x, None);
+assert_eq!(y, None);
+```
+
+---
+
+### take_if()
+
+Se a closure predicado passada como argumento for ```true```, move o valor da ```Option``` deixando ```None``` em seu lugar.
+
+```
+let mut x = Some(42);
+
+let prev = x.take_if(|v| if *v == 42 {
+    *v += 1;
+    false
+} else {
+    false
+});
+assert_eq!(x, Some(43));
+assert_eq!(prev, None);
+
+let prev = x.take_if(|v| *v == 43);
+assert_eq!(x, None);
+assert_eq!(prev, Some(43));
+```
+
+---
+
+### replace()
+
+Substitui o valor atual da ```Option``` retornando o valor antigo se presente.
+
+```
+let mut x = Some(2);
+let old = x.replace(5);
+assert_eq!(x, Some(5));
+assert_eq!(old, Some(2));
+
+let mut x = None;
+let old = x.replace(3);
+assert_eq!(x, Some(3));
+assert_eq!(old, None);
+```
+
+---
+
+### zip()
+
+Combina ```self``` com outra ```Option```.
+
+Se ```self``` é ```Some(s)``` e o argumento passado é ```Some(o)```, este método retorna ```Some((s, o))```. Caso contrário, ```None``` é retornado.
+
+```
+let x = Some(1);
+let y = Some("hi");
+let z = None::<u8>;
+
+assert_eq!(x.zip(y), Some((1, "hi")));
+assert_eq!(x.zip(z), None);
+```
+
+---
+
+### unzip()
+
+Descompacta uma ```Option``` contendo uma tupla de duas ```Option```.
+
+Se ```self``` for ```Some((a, b))```, este método retorna ```(Some(a), Some(b))```. Caso contrário, ```(None, None)``` é retornado.
+
+```
+let x = Some((1, "hi"));
+let y = None::<(u8, u32)>;
+
+assert_eq!(x.unzip(), (Some(1), Some("hi")));
+assert_eq!(y.unzip(), (None, None));
+```
+
+---
+
+### copied()
+
+Mapeia um ```Option<&T>``` para um ```Option<T>``` copiando o conteúdo da opção. 
+
+```
+let x = 12;
+let opt_x = Some(&x);
+assert_eq!(opt_x, Some(&12));
+let copied = opt_x.copied();
+assert_eq!(copied, Some(12));
+```
+
+---
+
+### cloned()
+
+Mapeia um ```Option<&T>``` para um ```Option<T>``` clonando o conteúdo da opção.
+
+```
+let x = 12;
+let opt_x = Some(&x);
+assert_eq!(opt_x, Some(&12));
+let cloned = opt_x.cloned();
+assert_eq!(cloned, Some(12));
+```
+
+---
+
+### copied()
+
+Mapeia um ```Option<&mut T>``` para um ```Option<T>``` copiando o conteúdo da opção.
+
+```
+let mut x = 12;
+let opt_x = Some(&mut x);
+assert_eq!(opt_x, Some(&mut 12));
+let copied = opt_x.copied();
+assert_eq!(copied, Some(12));
+```
+
+---
+
+### cloned()
+
+Mapeia um ```Option<&mut T>``` para um ```Option<T>``` clonando o conteúdo da opção.
+
+```
+let mut x = 12;
+let opt_x = Some(&mut x);
+assert_eq!(opt_x, Some(&mut 12));
+let cloned = opt_x.cloned();
+assert_eq!(cloned, Some(12));
+```
+
+---
+
+### transpose()
+
+Transpõe uma ```Option``` contendo um ```Result``` para um ```Result``` contendo uma ```Option```.
+
+```None``` será mapeado para ```Ok(None)```. ```Some(Ok(_))``` e ```Some(Err(_))``` serão mapeados para ```Ok(Some(_))``` e ```Err(_)```.
+
+```
+#[derive(Debug, Eq, PartialEq)]
+struct SomeErr;
+
+let x: Result<Option<i32>, SomeErr> = Ok(Some(5));
+let y: Option<Result<i32, SomeErr>> = Some(Ok(5));
+assert_eq!(x, y.transpose());
+```
+
+---
+
+### flatten
+
+Converte de ```Option<Option<T>>``` para ```Option<T>```.
+
+```
+let x: Option<Option<u32>> = Some(Some(6));
+assert_eq!(Some(6), x.flatten());
+
+let x: Option<Option<u32>> = Some(None);
+assert_eq!(None, x.flatten());
+
+let x: Option<Option<u32>> = None;
+assert_eq!(None, x.flatten());
+```
+
+```flatten()``` remove apenas um nível de aninhamento por vez:
+
+```
+let x: Option<Option<Option<u32>>> = Some(Some(Some(6)));
+assert_eq!(Some(Some(6)), x.flatten());
+assert_eq!(Some(6), x.flatten().flatten());
+```
 
 ---
 
@@ -682,4 +996,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20241122
+Última atualização: 20241123
