@@ -8,6 +8,11 @@ Uma ```struct```, ou estrutura, é um tipo de dado criado pelo programador que p
 
 * [Criando instâncias a partir de outras instâncias](#criando-instâncias-a-partir-de-outras-instâncias)
 
+* [Estruturas de tupla](#estruturas-de-tupla)
+
+* [Estruturas sem campos](#estruturas-sem-campos)
+
+
 ---
 
 ## Definindo e instanciando estruturas
@@ -97,15 +102,63 @@ Aqui, estamos criando uma nova instância da estrutura ```User```, que possui um
 
 ## Criando instâncias a partir de outras instâncias 
 
-asd 
- 
- 
+É frequentemente útil criar uma nova instância de uma ```struct``` que use alguns dos valores de outra instância. Você pode fazer isso usando a sintaxe de atualização de ```struct```.
 
- 
+Primeiro, mostramos como criar uma nova instância de ```User``` em ```user2``` sem a sintaxe de atualização. Definimos um novo valor para email e nos outros campos usamos os valores de ```user1```.
 
- 
+```
+fn main() {
+    // --snip--
 
+    let user2 = User {
+        active: user1.active,
+        username: user1.username,
+        email: String::from("another@example.com"),
+        sign_in_count: user1.sign_in_count,
+    };
+}
+```
 
+Usando a sintaxe de atualização de ```struct```, podemos alcançar o mesmo efeito com menos código. A sintaxe ```..``` (dois pontos seguidos) especifica que os campos restantes não definidos explicitamente devem ter o mesmo valor que os campos da instância fornecida. 
+
+```
+fn main() {
+    // --snip--
+
+    let user2 = User {
+        email: String::from("another@example.com"),
+        ..user1
+    };
+}
+```
+
+Este código também cria uma instância em ```user2``` que possui um valor diferente para email, mas possui os mesmos valores para os campos username, active e sign_in_count de ```user1```. O ```..user1``` deve vir por último para especificar que quaisquer campos restantes devem receber seus valores dos campos correspondentes em ```user1```, mas podemos escolher especificar valores para quantos campos quisermos em qualquer ordem, independentemente da ordem dos campos na definição da estrutura. 
+
+Observe que a sintaxe de atualização de ```struct``` usa ```=``` (o caractere de igualdade) como operador de atribuição; isso ocorre porque ele move os dados. Neste exemplo, não podemos mais usar ```user1``` como um todo após criar ```user2``` porque a ```String``` no campo ```username``` de ```user1``` foi movida para ```user2```. Se tivéssemos dado a ```user2``` novos valores ```String``` para ```email``` e ```username```, e assim usado apenas os valores ```active``` e ```sign_in_count``` de ```user1```, então ```user1``` ainda seria válido após criar ```user2```. Ambos ```active``` e ```sign_in_count``` são tipos que implementam a trait ```Copy```, então os dados seriam copiados em vez de movidos.
+
+## Estruturas de tupla 
+
+Rust também suporta estruturas que se parecem com tuplas, chamadas de structs de tupla. Structs de tupla têm o significado adicional que o nome da struct fornece, mas não têm nomes associados a seus campos; em vez disso, eles apenas têm os tipos dos campos. Structs de tupla são úteis quando você deseja dar à tupla inteira um nome e fazer a tupla ser um tipo diferente de outras tuplas, e quando nomear cada campo como em uma struct regular seria verboso ou redundante. 
+
+Para definir uma estrutura de tupla, comece com a palavra-chave ```struct``` e o nome da estrutura seguido pelos tipos na tupla. Por exemplo, aqui definimos e usamos duas estruturas de tupla chamadas ```Color``` e ```Point```:
+
+```
+struct Color(i32, i32, i32);
+struct Point(i32, i32, i32);
+
+fn main() {
+    let black = Color(0, 0, 0);
+    let origin = Point(0, 0, 0);
+}
+```
+
+Note que os valores ```black``` e ```origin``` são tipos diferentes porque são instâncias de diferentes structs de tupla. Cada ```struct``` que você define é seu próprio tipo, mesmo que os campos dentro da struct possam ter os mesmos tipos. Por exemplo, uma função que recebe um parâmetro do tipo ```Color``` não pode receber um ```Point``` como argumento, mesmo que ambos os tipos sejam compostos de três valores ```i32```. 
+
+As instâncias de struct de tupla são semelhantes às tuplas, pois você pode desestruturá-las em suas partes individuais e pode usar um ```.``` (ponto) seguido pelo índice para acessar um valor individual. 
+
+## Estruturas sem campos
+
+asd
 
 ---
 
@@ -116,4 +169,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20241126
+Última atualização: 20241127
