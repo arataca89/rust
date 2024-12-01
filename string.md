@@ -5,6 +5,7 @@
 
 * [Exemplos](#exemplos)
 * [UFT8](#utf8)
+* [Deref](#deref)
 
 
 ---
@@ -106,11 +107,13 @@ println!("A primeira letra de s é {}", s[0]);
 </td>
 </tr></table>
  
- 
- 
- 
+No entanto, é mais claro como ```&s[i..j]``` deve funcionar (ou seja, indexação com um intervalo). Ele deve aceitar índices de bytes (para ser de tempo constante) e retornar um ```&str``` que é codificado em UTF-8. Isso também é chamado de "slice de string" ou "fatiamento de string". Observe que isso causará pânico se os índices de bytes fornecidos não forem limites de caracteres - consulte ```is_char_boundary``` para mais detalhes. Consulte as implementações para ```SliceIndex<str>``` para mais detalhes sobre o fatiamento de string. Para uma versão não panicante do fatiamento de string, consulte ```get```.
 
+Os métodos ```bytes()``` e ```chars()``` retornam iteradores sobre os bytes e pontos de código da string, respectivamente. Para iterar sobre pontos de código juntamente com índices de bytes, use ```char_indices()```. 
 
+## Deref
+
+asd
 
 ---
 
