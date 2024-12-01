@@ -95,7 +95,7 @@ assert_eq!(s.as_bytes()[0], 240);
 Devido a essas ambiguidades/restrições, a indexação com um ```usize``` é simplesmente proibida:
 
 <table><tr>
-<td><img src="images/error.png" width="48"></td>
+<td><img src="images/error.png" width="48" alt="ERROR"></td>
 <td>
 <pre>
 let s = "hello";
