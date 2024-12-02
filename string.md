@@ -6,7 +6,9 @@
 * [Exemplos](#exemplos)
 * [UFT8](#utf8)
 * [Deref](#deref)
-
+* [Representação](#representação)
+* [Métodos](#métodos)
+	- [new()](#new) - Cria uma nova ```String``` vazia.
 
 ---
 
@@ -113,7 +115,152 @@ Os métodos ```bytes()``` e ```chars()``` retornam iteradores sobre os bytes e p
 
 ## Deref
 
-asd
+```String``` implementa ```Deref<Target = str>```, e portanto herda todos os métodos de ```str```. Além disso, isso significa que você pode passar uma ```String``` para uma função que recebe um ```&str``` usando um e comercial (```&```):
+
+```
+fn takes_str(s: &str) { }
+
+let s = String::from("Hello");
+
+takes_str(&s);
+```
+
+Isso criará uma ```&str``` a partir da ```String``` e a passará. Essa conversão é muito barata, então, geralmente, as funções aceitarão ```&str``` como argumento, a menos que precisem de uma ```String``` por algum motivo específico. 
+
+Em certos casos, o Rust não tem informações suficientes para fazer essa conversão, conhecida como coerção Deref. No exemplo a seguir, uma slice de string ```&'a str``` implementa a trait ```TraitExample```, e a função ```example_func()``` recebe qualquer coisa que implemente esta trait. Nesse caso, o Rust precisaria fazer duas conversões implícitas, o que o Rust não tem meios de fazer. Por esse motivo, o exemplo a seguir não compilará.
+
+<table><tr>
+<td><img src="images/error.png" width="48" alt="ERROR"></td>
+<td>
+<pre>
+trait TraitExample {}
+
+impl<'a> TraitExample for &'a str {}
+
+fn example_func<A: TraitExample>(example_arg: A) {}
+
+let example_string = String::from("example_string");
+example_func(&example_string);
+</pre>
+</td>
+</tr></table>
+
+Existem duas opções que funcionariam em vez disso. A primeira seria alterar a linha ```example_func(&example_string);``` para ```example_func(example_string.as_str());```, usando o método ```as_str()``` para extrair explicitamente a slice de string que contém a string. A segunda maneira altera ```example_func(&example_string);``` para ```example_func(&*example_string);```. Neste caso, estamos desreferenciando uma ```String``` para uma ```str```, então referenciando a ```str``` de volta para ```&str```. A segunda maneira é mais idiomática, no entanto, ambas funcionam para fazer a conversão explicitamente em vez de depender da conversão implícita.
+
+Em programação, idiomático significa código que segue as convenções e melhores práticas de uma linguagem de programação ou framework específico. É considerado natural ou intuitivo por programadores experientes.
+
+## Representação
+ 
+Uma ```String``` possui três componentes: um ponteiro para os bytes, um comprimento e uma capacidade. O ponteiro aponta para o buffer interno que a ```String``` usa para armazenar seus dados. O comprimento é o número de bytes atualmente armazenados no buffer, e a capacidade é o tamanho do buffer em bytes. O comprimento sempre será menor ou igual à capacidade.
+
+Este buffer é sempre armazenado na memória heap.
+
+Você pode ver esses componentes com os métodos ```as_ptr()```, ```len()``` e ```capacity()```:
+
+```
+use std::mem;
+
+let story = String::from("Once upon a time...");
+
+// Evita que os dados da String sejam dropados automaticamente
+let mut story = mem::ManuallyDrop::new(story);
+
+let ptr = story.as_mut_ptr();
+let len = story.len();
+let capacity = story.capacity();
+
+// story tem dezenove bytes
+assert_eq!(19, len);
+
+// We can re-build a String out of ptr, len, and capacity. This is all
+// unsafe because we are responsible for making sure the components are
+// valid:
+
+// Podemos reconstruir uma String a partir de ptr, len e capacity. Tudo isso é
+// inseguro porque somos responsáveis ​​por garantir que os componentes sejam
+// válidos:
+let s = unsafe { String::from_raw_parts(ptr, len, capacity) } ;
+
+assert_eq!(String::from("Once upon a time..."), s);
+```
+
+Se uma ```String``` tiver capacidade suficiente, adicionar elementos a ela não realocará. Por exemplo, considere este programa:
+
+```
+let mut s = String::new();
+
+println!("{}", s.capacity());
+
+for _ in 0..5 {
+    s.push_str("hello");
+    println!("{}", s.capacity());
+}
+```
+
+Isso irá gerar o seguinte:
+
+```
+0
+8
+16
+16
+32
+32
+```
+
+Inicialmente, não temos nenhuma memória alocada, mas à medida que anexamos à string, ela aumenta sua capacidade de forma apropriada. Se, em vez disso, usarmos o método ```with_capacity()``` para alocar a capacidade correta inicialmente:
+
+```
+let mut s = String::with_capacity(25);
+
+println!("{}", s.capacity());
+
+for _ in 0..5 {
+    s.push_str("hello");
+    println!("{}", s.capacity());
+}
+```
+
+Acabamos com uma saída diferente:
+
+```
+25
+25
+25
+25
+25
+25
+```
+
+Aqui, não há necessidade de alocar mais memória dentro do loop. 
+
+### Métodos
+
+#### new()
+```
+new() -> String
+```
+
+
+Cria uma nova ```String``` vazia.
+
+Dado que a ```String``` está vazia, isso não alocará nenhum buffer inicial. Embora isso signifique que esta operação inicial é muito barata, pode causar alocação excessiva mais tarde quando você adicionar dados. Se você tiver uma ideia de quanta informação a ```String``` irá conter, considere o método ```with_capacity()``` para evitar re-alocação excessiva.
+
+Exemplo:
+
+```
+let s = String::new();
+```
+
+### with_capacity()
+```
+with_capacity(capacity: usize) -> String
+```
+
+
+
+
+
 
 ---
 
@@ -125,4 +272,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20241019
+Última atualização: 20241202
