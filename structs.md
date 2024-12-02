@@ -12,6 +12,9 @@ Uma ```struct```, ou estrutura, é um tipo de dado criado pelo programador que p
 
 * [Estruturas sem campos](#estruturas-sem-campos)
 
+* [Propriedade dos dados da struct](#propriedade-dos-dados-da-struct)
+
+* [Exemplo do uso de struct](#exemplo-do-uso-de-struct)
 
 ---
 
@@ -158,7 +161,98 @@ As instâncias de struct de tupla são semelhantes às tuplas, pois você pode d
 
 ## Estruturas sem campos
 
+Você também pode definir structs que não possuem nenhum campo! Essas são chamadas de structs de tipo unitário porque se comportam de forma semelhante a ```()```, o tipo unitário. Structs de tipo unitário podem ser úteis quando você precisa implementar uma trait em algum tipo, mas não possui nenhum dado que deseja armazenar no próprio tipo. Aqui está um exemplo de declaração e instanciação de uma struct unitária chamada ```AlwaysEqual```:
+
+```
+struct AlwaysEqual;
+
+fn main() {
+    let subject = AlwaysEqual;
+}
+```
+
+Para definir ```AlwaysEqual```, usamos a palavra-chave ```struct```, o nome que queremos e, em seguida, um ponto e vírgula. Não há necessidade de chaves ou parênteses! Então, podemos obter uma instância de ```AlwaysEqual``` na variável ```subject``` de forma semelhante: usando o nome que definimos, sem chaves ou parênteses. Imagine que mais tarde implementaremos um comportamento para esse tipo de forma que cada instância de ```AlwaysEqual``` seja sempre igual a cada instância de qualquer outro tipo, talvez para ter um resultado conhecido para fins de teste. Não precisaríamos de nenhum dado para implementar esse comportamento! 
+
+## Propriedade dos dados da struct
+
+Na definição da estrutura ```User``` .....
+
+```
+struct User {
+    active: bool,
+    username: String,
+    email: String,
+    sign_in_count: u64,
+}
+```
+
+..... usamos o tipo ```String``` proprietário em vez do tipo slice de string ```&str```. Esta é uma escolha deliberada porque queremos que cada instância desta estrutura possua todos os seus dados e que esses dados sejam válidos por todo o tempo em que a estrutura inteira for válida.
+
+Também é possível que structs armazenem referências a dados de propriedade de outra coisa, mas para fazer isso é necessário o uso de lifetimes. Lifetimes garantem que os dados referenciados por uma struct sejam válidos por tempo indeterminado. Digamos que você tente armazenar uma referência em uma struct sem especificar lifetimes, como o seguinte; isso não funcionará:
+
+<table><tr>
+<td><img src="images/error.png" width="48" alt="ERROR"></td>
+<td>
+<pre>
+struct User {
+    active: bool,
+    username: &str,
+    email: &str,
+    sign_in_count: u64,
+}
+<br>
+fn main() {
+    let user1 = User {
+        active: true,
+        username: "someusername123",
+        email: "someone@example.com",
+        sign_in_count: 1,
+    };
+}
+</pre>
+</td>
+</tr></table> 
+ 
+O compilador reclamará que ele precisa de especificadores de lifetime:
+
+```
+$ cargo run
+   Compiling structs v0.1.0 (file:///projects/structs)
+error[E0106]: missing lifetime specifier
+ --> src/main.rs:3:15
+  |
+3 |     username: &str,
+  |               ^ expected named lifetime parameter
+  |
+help: consider introducing a named lifetime parameter
+  |
+1 ~ struct User<'a> {
+2 |     active: bool,
+3 ~     username: &'a str,
+  |
+
+error[E0106]: missing lifetime specifier
+ --> src/main.rs:4:12
+  |
+4 |     email: &str,
+  |            ^ expected named lifetime parameter
+  |
+help: consider introducing a named lifetime parameter
+  |
+1 ~ struct User<'a> {
+2 |     active: bool,
+3 |     username: &str,
+4 ~     email: &'a str,
+  |
+
+For more information about this error, try `rustc --explain E0106`.
+error: could not compile `structs` (bin "structs") due to 2 previous errors
+```
+
+## Exemplo do uso de struct 
+
 asd
+
 
 ---
 
@@ -169,4 +263,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20241127
+Última atualização: 20241202
