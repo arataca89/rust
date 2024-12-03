@@ -9,6 +9,8 @@
 * [Representação](#representação)
 * [Métodos](#métodos)
 	- [new()](#new) - Cria uma nova ```String``` vazia.
+	- [with_capacity()](#with_capacity) - Cria uma nova ```String``` vazia com a capacidade especificada. 
+	- [from_utf8()](#from_utf8) - Converte um vetor de bytes em uma ```String```.
 
 ---
 
@@ -257,8 +259,80 @@ let s = String::new();
 with_capacity(capacity: usize) -> String
 ```
 
+Cria uma nova ```String``` vazia com pelo menos a capacidade especificada. 
 
+As strings possuem um buffer interno para armazenar seus dados. A capacidade é o comprimento desse buffer e pode ser consultada com o método ```capacity()```. Este método cria uma string vazia, mas com um buffer inicial que pode conter pelo menos ```capacity``` bytes. Isso é útil quando você pode estar anexando muitos dados à string, reduzindo o número de realocações que ela precisa fazer.
 
+Se a capacidade fornecida for 0, nenhuma alocação ocorrerá e este método será idêntico ao método ```new()```.
+
+```
+let mut s = String::with_capacity(10);
+
+// A String não contém caracteres, embora tenha capacidade para mais
+assert_eq!(s.len(), 0);
+
+// Tudo isso é feito sem realocação...
+let cap = s.capacity();
+for _ in 0..10 {
+    s.push('a');
+}
+
+assert_eq!(s.capacity(), cap);
+
+// ...mas isso pode fazer com que a string seja realocada
+s.push('a'); 
+```
+
+## from_utf8()
+
+```
+from_utf8(vec: Vec<u8>) -> Result<String, FromUtf8Error>
+```
+
+Converte um vetor de bytes em uma ```String```.
+
+Uma string (```String```) é feita de bytes (```u8```), e um vetor de bytes (```Vec<u8>```) é feito de bytes, então esta função converte entre os dois. No entanto, nem todas as fatias de bytes são ```Strings``` válidas: ```String``` requer que seja UTF-8 válido. ```from_utf8()``` verifica para garantir que os bytes sejam UTF-8 válidos e, em seguida, faz a conversão.
+
+Se você tem certeza de que a fatia de bytes é UTF-8 válido e não quer incorrer na sobrecarga da verificação de validade, há uma versão não segura desta função, ```from_utf8_unchecked()```, que tem o mesmo comportamento, mas ignora a verificação.
+
+Este método tomará cuidado para não copiar o vetor, por uma questão de eficiência.
+
+Se você precisa de uma ```&str``` em vez de uma ```String```, considere ```str::from_utf8()```.
+
+O inverso deste método é ```into_bytes()```.
+
+### Erros
+
+Retorna ```Err``` se a slice não for UTF-8 com uma descrição do motivo pelo qual os bytes fornecidos não são UTF-8. O vetor que você moveu também está incluído.
+
+### Exemplos:
+
+Uso básico:
+
+```
+// alguns bytes, em um vetor
+let sparkle_heart = vec![240, 159, 146, 150];
+
+// Sabemos que esses bytes são válidos, então usaremos `unwrap()`.
+let sparkle_heart = String::from_utf8(sparkle_heart).unwrap();
+
+assert_eq!("💖", sparkle_heart); 
+```
+
+bytes incorretos:
+
+```
+// alguns bytes inválidos, em um vetor
+let sparkle_heart = vec![0, 159, 146, 150];
+
+assert!(String::from_utf8(sparkle_heart).is_err());
+```
+
+Veja a documentação para ```FromUtf8Error``` para mais detalhes sobre o que você pode fazer com esse erro.
+
+## from_utf8_lossy()
+
+asd
 
 
 
@@ -272,4 +346,4 @@ with_capacity(capacity: usize) -> String
 
 arataca89@gmail.com
 
-Última atualização: 20241202
+Última atualização: 20241203
