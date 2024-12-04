@@ -21,6 +21,27 @@
 	- [as_mut_str()](#as_mut_str) - Converte uma ```String``` em uma slice de string mutável.
 	- [push_str()](#push_str) - Anexa uma slice de string ao final da ```String```.
 	- [reserve()](#reserve) - Aumenta a capacidade da ```String```.
+	- [reserve_exact()](#reserve_exact) - Aumenta a capacidade da ```String```.
+	- [try_reserve()](#try_reserve) - Aumenta a capacidade da ```String```.
+	- [try_reserve_exact()](#try_reserve_exact) - Aumenta a capacidade da ```String```.
+	- [shrink_to_fit()](#shrink_to_fit) - Reduz a capacidade da ```String``` para corresponder ao seu comprimento.
+	- [shrink_to()](#shrink_to) - Reduz a capacidade da ```String```.
+	- [push()](#push) - Adiciona um ```char``` ao final da ```String```.
+	- [as_bytes()](#as_bytes) - Retorna uma slice de bytes do conteúdo da ```String```.
+	- [truncate()](#truncate) - Trunca a string.
+	- [pop()](#pop) - Remove o último caractere da string e o retorna.
+	- [remove()](#remove) - Remove o caractere de determinada posição e o retorna.
+	- [retain()](#retain) - Mantém apenas os caracteres especificados pelo predicado.
+	- [insert()](#insert) - Insere um caractere em determinada posição.
+	- [insert_str()](#insert_str) - Insere uma ```&str``` numa determinada posição.
+	- [as_mut_vec()](#as_mut_vec) - Retorna uma referência mutável para o conteúdo da ```String``` (<font color="red">unsafe</font>).
+	- [len()](#len) - Retorna o comprimento da ```String```.
+	- [is_empty()](#is_empty) - Retorna ```true``` se a ```String``` tem o comprimento zero, senão retorna ```false```.
+	- [split_off()](#split_off) - Divide a string em duas.
+	- [clear()](#clear) - Limpa a string, apaga todo o conteúdo.
+	- [drain()](#drain) - Remove um intervalo de caracteres, retornando todos os caracteres removidos como um iterador.
+	- [replace_range()](#replace_range) - Remove o intervalo especificado e o substitui pela string fornecida. 
+	- [into_boxed_str()](#into_boxed_str) - Converte a String em um ```Box<str>```.
 	
 
 ---
@@ -617,10 +638,515 @@ assert_eq!(capacity, s.capacity());
 reserve_exact(&mut self, additional: usize)
 ```
 
+Reserva a capacidade mínima para pelo menos mais ```additional``` bytes do que o comprimento atual. Ao contrário de ```reserve()```, não alocará deliberadamente mais do que o necessário para evitar alocações frequentes especulativas. Após chamar ```reserve_exact()```, a capacidade será maior ou igual a ```self.len() + additional```. Não faz nada se a capacidade já for suficiente.
+
+### Pânico
+
+Entra em pânico se a nova capacidade exceder ```usize```.
+
+### Exemplos
+
+Uso básico:
+
+```
+let mut s = String::new();
+
+s.reserve_exact(10);
+
+assert!(s.capacity() >= 10);
+```
+
+Isso pode não aumentar realmente a capacidade: 
+
+```
+let mut s = String::with_capacity(10);
+s.push('a');
+s.push('b');
+
+// s agora tem um comprimento de 2 e uma capacidade de pelo menos 10
+let capacity = s.capacity();
+assert_eq!(2, s.len());
+assert!(capacity >= 10);
+
+// Como já temos pelo menos 8 de capacidade extra, chamar isso ...
+s.reserve_exact(8);
+
+// ... na verdade não aumenta.
+assert_eq!(capacity, s.capacity());
+```
+
+## try_reserve()
+
+```
+try_reserve(&mut self, additional: usize) -> Result<(), TryReserveError>
+```
+
+Tenta reservar capacidade para pelo menos mais ```additional``` bytes do que o comprimento atual. O alocador pode reservar mais espaço para evitar alocações frequentes especulativamente. Após chamar ```try_reserve()```, a capacidade será maior ou igual a ```self.len() + additional``` se retornar ```Ok(())```. Não faz nada se a capacidade já for suficiente. Este método preserva o conteúdo mesmo que ocorra um erro.
+
+### Erro
+
+Se a capacidade transbordar ou o alocador relatar uma falha, um erro será retornado. 
+
+```
+use std::collections::TryReserveError;
+
+fn process_data(data: &str) -> Result<String, TryReserveError> {
+    let mut output = String::new();
+
+    // Tenta reservar mais memória, saindo se não conseguir
+    output.try_reserve(data.len())?;
+
+    // Sucesso na reserva de memória, então o trabalho continua...
+    output.push_str(data);
+
+    Ok(output)
+}
+```
+
+## try_reserve_exact()
+
+```
+try_reserve_exact(
+    &mut self,
+    additional: usize,
+) -> Result<(), TryReserveError>
+```
+
+Tenta reservar a capacidade mínima para pelo menos ```additional``` bytes a mais do que o comprimento atual. Ao contrário de ```try_reserve()```, não alocará deliberadamente a mais para evitar alocações frequentes. Após chamar ```try_reserve_exact()```, a capacidade será maior ou igual a ```self.len() + additional``` se retornar ```Ok(())```. Não faz nada se a capacidade já for suficiente.
+
+Observe que o alocador pode dar à coleção mais espaço do que solicita. Portanto, não se pode confiar que a capacidade seja precisamente mínima. Prefira ```try_reserve()``` se inserções futuras forem esperadas.
+
+### Erro
+
+Se a capacidade transbordar ou o alocador relatar uma falha, um erro será retornado. 
+
+```
+use std::collections::TryReserveError;
+
+fn process_data(data: &str) -> Result<String, TryReserveError> {
+    let mut output = String::new();
+
+    // Tenta reservar mais memória, saindo se não conseguir
+    output.try_reserve_exact(data.len())?;
+
+    // Sucesso na reserva de memória, então o trabalho continua...
+    output.push_str(data);
+
+    Ok(output)
+}
+```
+
+## shrink_to_fit()
+
+```
+shrink_to_fit(&mut self)
+```
+
+Reduz a capacidade da ```String``` para corresponder ao seu comprimento.
+
+```
+let mut s = String::from("foo");
+
+s.reserve(100);
+assert!(s.capacity() >= 100);
+
+s.shrink_to_fit();
+assert_eq!(3, s.capacity());
+```
+
+## shrink_to()
+
+```
+shrink_to(&mut self, min_capacity: usize)
+```
+
+Reduz a capacidade da ```String``` para ```min_capacity```.
+
+```min_capacity``` deve ser maior que o comprimento atual.
+
+Se ```min_capacity``` for menor que o comprimento atual, não terá  efeito.
+
+```
+let mut s = String::from("foo");
+
+s.reserve(100);
+assert!(s.capacity() >= 100);
+
+s.shrink_to(10);
+assert!(s.capacity() >= 10);
+s.shrink_to(0);
+assert!(s.capacity() >= 3);
+```
+
+## push()
+
+```
+push(&mut self, ch: char)
+```
+
+Adiciona um ```char``` ao final da ```String```.
+
+```
+let mut s = String::from("abc");
+
+s.push('1');
+s.push('2');
+s.push('3');
+
+assert_eq!("abc123", s);
+```
+
+## as_bytes()
+
+```
+as_bytes(&self) -> &[u8]
+```
+
+Retorna uma slice de bytes do conteúdo da ```String```.
+
+O inverso deste método é ```from_utf8()```.
+
+```
+let s = String::from("hello");
+
+assert_eq!(&[104, 101, 108, 108, 111], s.as_bytes());
+```
+
+## truncate()
+
+```
+truncate(&mut self, new_len: usize)
+```
+
+Trunca a String para o comprimento especificado por ```new_len```.
+
+Se ```new_len``` for maior ou igual ao comprimento atual da string, não terá efeito.
+
+Observe que este método não tem efeito na capacidade alocada da string. 
+
+### Pânico
+
+Entra em pânico se ```new_len``` não estiver nos limites do tipo ```char```. 
 
 
+```
+let mut s = String::from("hello");
 
+s.truncate(2);
 
+assert_eq!("he", s);
+```
+
+## pop()
+
+```
+pop(&mut self) -> Option<char>
+```
+
+Remove o último caractere da string e o retorna.
+
+Retorna ```None``` se a ```String``` estiver vazia.
+
+```
+let mut s = String::from("abč");
+
+assert_eq!(s.pop(), Some('č'));
+assert_eq!(s.pop(), Some('b'));
+assert_eq!(s.pop(), Some('a'));
+
+assert_eq!(s.pop(), None);
+```
+
+## remove()
+
+```
+remove(&mut self, idx: usize) -> char
+```
+
+Remove o caractere da posição ```idx``` e o retorna.
+
+Esta é uma operação O(n), pois requer a cópia de cada elemento no buffer.
+
+### Pânico
+
+Emite pânico se ```idx``` for maior ou igual ao comprimento da ```String```, ou se não estiver nos limites do tipo ```char```.
+
+```
+let mut s = String::from("abç");
+
+assert_eq!(s.remove(0), 'a');
+assert_eq!(s.remove(1), 'ç');
+assert_eq!(s.remove(0), 'b');
+```
+
+## retain()
+
+```
+retain<F>(&mut self, f: F)
+where
+    F: FnMut(char) -> bool,
+```
+
+Mantém apenas os caracteres especificados pelo predicado.
+
+Em outras palavras, remove todos os caracteres ```c``` tais que ```f(c)``` retorne ```false```. Este método opera no local, visitando cada caractere exatamente uma vez na ordem original, e preserva a ordem dos caracteres retidos.
+
+```
+let mut s = String::from("f_o_ob_ar");
+
+s.retain(|c| c != '_');
+
+assert_eq!(s, "foobar");
+```
+
+Como os elementos são visitados exatamente uma vez na ordem original, o estado externo pode ser usado para decidir quais elementos manter. 
+
+```
+let mut s = String::from("abcde");
+let keep = [false, true, true, false, true];
+let mut iter = keep.iter();
+s.retain(|_| *iter.next().unwrap());
+assert_eq!(s, "bce");
+```
+
+## insert()
+
+```
+insert(&mut self, idx: usize, ch: char)
+```
+
+Insere o caractere ```ch``` na posição ```idx```.
+
+Esta é uma operação O(n) pois requer a cópia de cada elemento do buffer.
+
+### Pânico
+
+Emite pânico se ```idx``` for maior ou igual ao comprimento da ```String```, ou se não estiver nos limites do tipo ```char```.
+
+```
+let mut s = String::with_capacity(3);
+
+s.insert(0, 'f');
+s.insert(1, 'o');
+s.insert(2, 'o');
+
+assert_eq!("foo", s);
+```
+
+## insert_str()
+
+```
+insert_str(&mut self, idx: usize, string: &str)
+```
+
+Insere a slice de string ```string``` na posição ```idx```.
+
+Esta é uma operação O(n) pois requer a cópia de cada elemento no buffer.
+
+### Pânico
+
+Emite pânico se ```idx``` for maior ou igual ao comprimento da ```String```, ou se não estiver nos limites do tipo ```char```.
+
+```
+let mut s = String::from("bar");
+
+s.insert_str(0, "foo");
+
+assert_eq!("foobar", s);
+```
+
+## as_mut_vec()
+
+<img src="images/warning_unsafe.png" width="100" alt="UNSAFE">
+
+```
+as_mut_vec(&mut self) -> &mut Vec<u8>
+```
+
+Retorna uma referência mutável para o conteúdo da ```String```.
+
+### Segurança
+
+Esta função é insegura porque o ```&mut Vec``` retornado permite a escrita de bytes que não são UTF-8 válidos. Se esta restrição for violada, usar a ```String``` original após o ```&mut Vec``` ser dropado, pode violar a segurança da memória, pois o restante da biblioteca padrão assume que as Strings são UTF-8 válidas.
+
+```
+let mut s = String::from("hello");
+
+unsafe {
+    let vec = s.as_mut_vec();
+    assert_eq!(&[104, 101, 108, 108, 111][..], &vec[..]);
+
+    vec.reverse();
+}
+assert_eq!(s, "olleh");
+```
+
+## len()
+
+```
+len(&self) -> usize
+```
+
+Retorna o comprimento da ```String```, em bytes, não em caracteres ou grafemas. Em outras palavras, pode não ser o que um humano considera o comprimento da string.
+
+```
+let a = String::from("foo");
+assert_eq!(a.len(), 3);
+
+let fancy_f = String::from("ƒoo");
+assert_eq!(fancy_f.len(), 4);
+assert_eq!(fancy_f.chars().count(), 3);
+```
+
+## is_empty()
+
+```
+is_empty(&self) -> bool
+```
+
+Retorna ```true``` se a ```String``` tem o comprimento zero, senão retorna ```false```. 
+
+```
+let mut v = String::new();
+assert!(v.is_empty());
+
+v.push('a');
+assert!(!v.is_empty());
+```
+
+## split_off()
+
+```
+split_off(&mut self, at: usize) -> String
+```
+
+Divide a string em duas partes no índice ```at``` fornecido.
+
+Retorna uma nova string alocada. ```self``` contém os bytes ```[0, at)```, e a string retornada contém os bytes ```[at, len)```. ```at``` deve estar nos limites UTF-8.
+
+Observe que a capacidade de ```self``` não muda.
+
+### Pânico
+
+Entra em pânico se ```at``` não estiver em um limite de ponto de código UTF-8 ou se estiver além do último ponto de código da string.
+
+```
+let mut hello = String::from("Hello, World!");
+let world = hello.split_off(7);
+assert_eq!(hello, "Hello, ");
+assert_eq!(world, "World!");
+```
+
+## clear()
+
+```
+clear(&mut self)
+```
+ 
+Trunca a ```String```, removendo todo o conteúdo.
+
+Embora isso signifique que a ```String``` terá o comprimento zero, não afeta sua capacidade.
+
+```
+let mut s = String::from("foo");
+
+s.clear();
+
+assert!(s.is_empty());
+assert_eq!(0, s.len());
+assert_eq!(3, s.capacity());
+```
+
+## drain()
+
+```
+drain<R>(&mut self, range: R) -> Drain<'_> ⓘ
+where
+    R: RangeBounds<usize>,
+```
+
+Remove um intervalo de caracteres, retornando todos os caracteres removidos como um iterador.
+
+O iterador retornado mantém um empréstimo mutável da string para otimizar sua implementação.
+
+### Pânico
+
+Entra em pânico se o início ou o fim do intervalo não estiverem nos  limites do tipo ```char```, ou se estiverem fora dos limites da string.
+
+### Fraqueza
+
+Se o iterador retornado sair do escopo sem ser dropado (devido a ```core::mem::forget```, por exemplo), a string ainda pode conter uma cópia de quaisquer caracteres drenados, ou pode ter perdido caracteres arbitrariamente, incluindo caracteres fora do intervalo.
+
+```
+let mut s = String::from("α is alpha, β is beta");
+let beta_offset = s.find('β').unwrap_or(s.len());
+
+// Remova o intervalo do início até o β
+let t: String = s.drain(..beta_offset).collect();
+assert_eq!(t, "α is alpha, ");
+assert_eq!(s, "β is beta");
+
+// Um ​​intervalo completo, do ínicio ao fim, limpa a string, como `clear()` faz
+s.drain(..);
+assert_eq!(s, "");
+```
+
+## replace_range()
+
+```
+replace_range<R>(&mut self, range: R, replace_with: &str)
+where
+    R: RangeBounds<usize>,
+```
+
+Remove o intervalo especificado e o substitui pela string fornecida. A string fornecida não precisa ter o mesmo comprimento que o intervalo.
+
+### Pânico
+
+Entra em pânico se o início ou o fim do intervalo não estiverem nos  limites do tipo ```char```, ou se estiverem fora dos limites da string.
+
+```
+let mut s = String::from("α is alpha, β is beta");
+let beta_offset = s.find('β').unwrap_or(s.len());
+
+// Substitui os caracteres do início até o β
+s.replace_range(..beta_offset, "Α is capital alpha; ");
+assert_eq!(s, "Α is capital alpha; β is beta");
+```
+
+## into_boxed_str()
+
+```
+into_boxed_str(self) -> Box<str>
+```
+
+Converte a String em um ```Box<str>```.
+
+Antes de fazer a conversão, este método descarta o excesso de capacidade como ```shrink_to_fit()```. Observe que esta chamada pode realocar e copiar os bytes da string.
+
+```
+let s = String::from("hello");
+
+let b = s.into_boxed_str();
+```
+
+## leak()
+
+```
+leak<'a>(self) -> &'a mut str
+```
+
+Consome e vaza a String, retornando uma referência mutável ao conteúdo, ```&'a mut str```.
+
+O chamador tem livre escolha sobre o tempo de vida retornado, incluindo ```'static```. De fato, essa função é idealmente usada para dados que vivem pelo restante da vida do programa, pois a eliminação da referência retornada causará um vazamento de memória.
+
+Ela não realoca ou encolhe a String, então a alocação vazada pode incluir capacidade não utilizada que não faz parte da slice retornada. Se você quiser descartar o excesso de capacidade, chame ```into_boxed_str()``` e, em seguida, ```Box::leak()```. No entanto, tenha em mente que cortar a capacidade pode resultar em uma realocação e cópia.
+
+```
+let x = String::from("bucket");
+let static_ref: &'static mut str = x.leak();
+assert_eq!(static_ref, "bucket");
+```
 
 ---
 
@@ -632,4 +1158,4 @@ reserve_exact(&mut self, additional: usize)
 
 arataca89@gmail.com
 
-Última atualização: 20241203
+Última atualização: 20241204
