@@ -1,5 +1,7 @@
 # Programação Rust
 
+[String](https://github.com/arataca89/rust/blob/main/string.md)
+
 [Ownership (propriedade)](https://github.com/arataca89/rust/tree/main/ownership)
 
 [Result](https://github.com/arataca89/rust/blob/main/result.md)
