@@ -14,7 +14,7 @@
 	- [from_utf8_lossy()](#from_utf8_lossy) - Converte uma slice de bytes em uma string, incluindo caracteres inválidos.
 	- [from_utf16()](#from_utf16) - Decodifica um vetor v codificado em UTF-16 para uma ```String```, retornando ```Err``` se v contiver dados inválidos. 
 	- [from_utf16_lossy()](#from_utf16_lossy) - Decodifica uma slice v codificada em UTF-16 em uma ```String```, substituindo dados inválidos pelo caractere de substituição (U+FFFD).
-	- [from_raw_parts()](#from_raw_parts) - Cria uma nova String a partir de um ponteiro, um comprimento e uma capacidade (<code style="color:red">unsafe</code>).
+	- [from_raw_parts()](#from_raw_parts) - Cria uma nova String a partir de um ponteiro, um comprimento e uma capacidade (<code style="color : red">unsafe</code>).
 	- [from_utf8_unchecked()](#from_utf8_unchecked) - Converte um vetor de bytes para uma ```String``` sem verificar se a string contém UTF-8 válido. (<font color="red">unsafe</font>).
 	- [into_bytes()](#into_bytes) - Converte uma ```String``` em um vetor de bytes.
 	- [as_str()](#as_str) - Extrai uma slice de string contendo toda a ```String```.
