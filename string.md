@@ -268,9 +268,9 @@ Acabamos com uma saída diferente:
 
 Aqui, não há necessidade de alocar mais memória dentro do loop. 
 
-### Métodos
+## Métodos
 
-#### new()
+## new()
 ```
 new() -> String
 ```
@@ -286,7 +286,7 @@ Exemplo:
 let s = String::new();
 ```
 
-### with_capacity()
+## with_capacity()
 ```
 with_capacity(capacity: usize) -> String
 ```
@@ -1158,4 +1158,4 @@ assert_eq!(static_ref, "bucket");
 
 arataca89@gmail.com
 
-Última atualização: 20241204
+Última atualização: 20241205
