@@ -34,8 +34,19 @@ O tipo ```str```, também chamado de "slice de string", é o tipo de string mais
    - [ends_with()](#ends_with) - Retorna ```true``` se o padrão passado como argumento corresponde a um sufixo da ```str```.
    - [find()](#find) - Retorna o índice de byte do primeiro caractere que corresponde ao padrão passado como argumento.
    - [rfind()](#rfind) - Retorna o índice de byte para o primeiro caractere da última correspondência do padrão passado como argumento.
-   - [split()](#split) - separa a ```str``` em subslices conforme o padrão passado como argumento.
-
+   - [split()](#split) - Separa a ```str``` em subslices conforme o padrão passado como argumento.
+   - [split_inclusive()](#split_inclusive) - Separa a ```str``` em subslices conforme o padrão passado como argumento; insere o padrão no final da subslice.
+	- [rsplit()](#rsplit) - Separa a ```str``` em subslices conforme o padrão passado como argumento. Itera pelas subslices retornadas na ordem inversa, de trás pra frente, da direita para a esquerda.
+	- [split_terminator()](#split_terminator) - Equivalente a ```split()```, exceto que a substring final é ignorada se estiver vazia.
+	- [rsplit_terminator()](#rsplit_terminator) - Equivalente a ```split()```, exceto que a substring final é ignorada se estiver vazia.  Itera pelas subslices retornadas na ordem inversa, de trás pra frente, da direita para a esquerda.
+	- [splitn()](#splitn) - Retorna um iterador sobre as substrings da slice de string fornecida, separadas por um padrão, restrito a retornar no máximo ```n``` itens.
+	- [rsplitn()](#rsplitn) - Retorna um iterador sobre as substrings da slice de string fornecida, separadas por um padrão, iniciando no final da slice de string, restrito a retornar no máximo ```n``` itens.
+	- [split_once()](#split_once) - Divide a ``str``` na primeira ocorrência do delimitador especificado e retorna o prefixo antes do delimitador e o sufixo após o delimitador.
+	- [rsplit_once()](#rsplit_once) - Divide a ``str``` na última ocorrência do delimitador especificado e retorna o prefixo antes do delimitador e o sufixo após o delimitador.
+	- [matches()](#matches) - Retorna um iterador sobre as subslices que correspondem ao padrão passado como argumento.
+	- [rmatches()](#rmatches) - Retorna um iterador sobre as subslices que correspondem ao padrão passado como argumento, iniciando no final da ```str```.
+	- [match_indices()](#match_indices) - Retorna um iterador sobre as subslices que correspondem ao padrão passado como argumento, assim como seus índices.
+	- [rmatch_indices()](#rmatch_indices) - Retorna um iterador sobre as subslices que correspondem ao padrão passado como argumento, assim como seus índices, em ordem reversa.
 
 ---
 
@@ -1022,6 +1033,391 @@ where
     P: Pattern,
 ```
 
+Retorna um iterador sobre as substrings desta slice de string, separadas por caracteres correspondentes ao padrão passado como argumento (```pat```).
+
+Difere do iterador produzido por ```split()``` no sentido em que ```split_inclusive()``` deixa a parte correspondente como o terminador da substring.
+
+O padrão pode ser uma ```&str```, um ```char```, uma fatia de chars ou uma função ou closure que determina se um caractere corresponde.
+
+### Exemplos
+
+```
+let v: Vec<&str> = "Mary had a little lamb\nlittle lamb\nlittle lamb."
+    .split_inclusive('\n').collect();
+assert_eq!(v, ["Mary had a little lamb\n", "little lamb\n", "little lamb."]);
+```
+
+Se o último elemento da string for correspondido, esse elemento será considerado o terminador da substring precedente. Essa substring será o último item retornado pelo iterador. 
+
+```
+let v: Vec<&str> = "Mary had a little lamb\nlittle lamb\nlittle lamb.\n"
+    .split_inclusive('\n').collect();
+assert_eq!(v, ["Mary had a little lamb\n", "little lamb\n", "little lamb.\n"]);
+```
+
+## rsplit()
+
+```
+rsplit<P>(&self, pat: P) -> RSplit<'_, P> ⓘ
+where
+    P: Pattern,
+    <P as Pattern>::Searcher<'a>: for<'a> ReverseSearcher<'a>,
+```
+
+Retorna um iterador sobre as substrings da slice de string fornecida, separadas por caracteres correspondentes ao um padrão passado como argumento (```pat```) e produzidas em ordem inversa.
+
+O padrão pode ser uma ```&str```, um ```char```, uma fatia de chars ou uma função ou closure que determina se um caractere corresponde.
+
+### Comportamento do iterador
+
+O iterador retornado exige que o padrão suporte uma pesquisa reversa, e será um ```DoubleEndedIterator``` se uma pesquisa para frente/trás gerar os mesmos elementos.
+
+Para iterar a partir do início, o método ```split()``` pode ser usado.
+
+### Exemplos
+
+Padrão simples:
+
+```
+let v: Vec<&str> = "Mary had a little lamb".rsplit(' ').collect();
+assert_eq!(v, ["lamb", "little", "a", "had", "Mary"]);
+
+let v: Vec<&str> = "".rsplit('X').collect();
+assert_eq!(v, [""]);
+
+let v: Vec<&str> = "lionXXtigerXleopard".rsplit('X').collect();
+assert_eq!(v, ["leopard", "tiger", "", "lion"]);
+
+let v: Vec<&str> = "lion::tiger::leopard".rsplit("::").collect();
+assert_eq!(v, ["leopard", "tiger", "lion"]);
+```
+
+Um padrão mais complexo, usando uma closure:
+
+```
+let v: Vec<&str> = "abc1defXghi".rsplit(|c| c == '1' || c == 'X').collect();
+assert_eq!(v, ["ghi", "def", "abc"]);
+```
+
+## split_terminator()
+
+```
+split_terminator<P>(&self, pat: P) -> SplitTerminator<'_, P> ⓘ
+where
+    P: Pattern,
+``` 
+ 
+Retorna um iterador sobre as substrings da slice de string fornecida, separadas por caracteres correspondentes ao padrão passado como argumento (```pat```).
+
+O padrão pode ser uma ```&str```, um ```char```, uma fatia de chars ou uma função ou closure que determina se um caractere corresponde.
+
+Equivalente a ```split()```, exceto que a substring final é ignorada se estiver vazia.
+
+Este método pode ser usado para dados de string que são terminados, em vez de separados por um padrão. 
+ 
+### Comportamento do iterador 
+
+O iterador retornado será um ```DoubleEndedIterator``` se o padrão permitir uma pesquisa reversa e a pesquisa para frente/trás gerar os mesmos elementos. Isso é verdade para, por exemplo, ```char```, mas não para ```&str```.
+
+Se o padrão permitir uma pesquisa reversa, mas seus resultados puderem diferir de uma pesquisa para frente, o método ```rsplit_terminator()``` pode ser usado. 
+
+```
+let v: Vec<&str> = "A.B.".split_terminator('.').collect();
+assert_eq!(v, ["A", "B"]);
+
+let v: Vec<&str> = "A..B..".split_terminator(".").collect();
+assert_eq!(v, ["A", "", "B", ""]);
+
+let v: Vec<&str> = "A.B:C.D".split_terminator(&['.', ':'][..]).collect();
+assert_eq!(v, ["A", "B", "C", "D"]);
+```
+
+## rsplit_terminator()
+
+```
+rsplit_terminator<P>(&self, pat: P) -> RSplitTerminator<'_, P> ⓘ
+where
+    P: Pattern,
+    <P as Pattern>::Searcher<'a>: for<'a> ReverseSearcher<'a>,
+```
+
+Retorna um iterador sobre as substrings de si mesmo, separadas por caracteres correspondidos pelo padrão passado como argumento (```pat```) e produzidos em ordem inversa.
+
+O padrão pode ser uma ```&str```, um ```char```, uma fatia de chars ou uma função ou closure que determina se um caractere corresponde.
+
+Equivalente a ```split()```, exceto que a substring final é ignorada se estiver vazia.
+
+Este método pode ser usado para dados de string que são terminados, em vez de separados por um padrão.
+
+### Comportamento do iterador
+
+O iterador retornado exige que o padrão suporte uma pesquisa reversa, e será de dupla extremidade se uma pesquisa para frente/trás produzir os mesmos elementos.
+
+Para iterar a partir do início, o método ```split_terminator()``` pode ser usado.
+
+```
+let v: Vec<&str> = "A.B.".rsplit_terminator('.').collect();
+assert_eq!(v, ["B", "A"]);
+
+let v: Vec<&str> = "A..B..".rsplit_terminator(".").collect();
+assert_eq!(v, ["", "B", "", "A"]);
+
+let v: Vec<&str> = "A.B:C.D".rsplit_terminator(&['.', ':'][..]).collect();
+assert_eq!(v, ["D", "C", "B", "A"]);
+```
+
+## splitn()
+
+```
+splitn<P>(&self, n: usize, pat: P) -> SplitN<'_, P> ⓘ
+where
+    P: Pattern,
+```
+
+Retorna um iterador sobre as substrings da slice de string fornecida, separadas por um padrão, restrito a retornar no máximo ```n``` itens.
+
+Se ```n``` substrings forem retornadas, a última substring (a n-ésima substring) conterá o restante da string.
+
+O padrão pode ser uma ```&str```, um ```char```, uma fatia de chars ou uma função ou closure que determina se um caractere corresponde.
+
+### Comportamento do iterador
+
+O iterador retornado não será de duas extremidades, pois não é eficiente para suportar.
+
+Se o padrão permitir uma pesquisa reversa, o método ```rsplitn()``` pode ser usado.
+
+### Exemplos
+
+Padrão simples:
+
+```
+let v: Vec<&str> = "Mary had a little lambda".splitn(3, ' ').collect();
+assert_eq!(v, ["Mary", "had", "a little lambda"]);
+
+let v: Vec<&str> = "lionXXtigerXleopard".splitn(3, "X").collect();
+assert_eq!(v, ["lion", "", "tigerXleopard"]);
+
+let v: Vec<&str> = "abcXdef".splitn(1, 'X').collect();
+assert_eq!(v, ["abcXdef"]);
+
+let v: Vec<&str> = "".splitn(1, 'X').collect();
+assert_eq!(v, [""]);
+```
+
+Um padrão mais complexo, usando uma closure:
+
+```
+let v: Vec<&str> = "abc1defXghi".splitn(2, |c| c == '1' || c == 'X').collect();
+assert_eq!(v, ["abc", "defXghi"]);
+```
+
+## rsplitn()
+
+```
+rsplitn<P>(&self, n: usize, pat: P) -> RSplitN<'_, P> ⓘ
+where
+    P: Pattern,
+    <P as Pattern>::Searcher<'a>: for<'a> ReverseSearcher<'a>,
+```
+
+Retorna um iterador sobre as substrings da slice de string fornecida, separadas por um padrão, iniciando no final da slice de string, restrito a retornar no máximo ```n``` itens.
+
+Se ```n``` substrings forem retornadas, a última substring (a n-ésima substring) conterá o restante da string.
+
+O padrão pode ser uma ```&str```, um ```char```, uma fatia de chars ou uma função ou closure que determina se um caractere corresponde.
+
+### Comportamento do iterador
+
+O iterador retornado não será de duas extremidades, pois não é eficiente para suportar.
+
+Se separar a slice de string a partir do início, o método ```splitn()``` pode ser usado.
+
+### Exemplos
+
+Padrão simples:
+
+```
+let v: Vec<&str> = "Mary had a little lamb".rsplitn(3, ' ').collect();
+assert_eq!(v, ["lamb", "little", "Mary had a"]);
+
+let v: Vec<&str> = "lionXXtigerXleopard".rsplitn(3, 'X').collect();
+assert_eq!(v, ["leopard", "tiger", "lionX"]);
+
+let v: Vec<&str> = "lion::tiger::leopard".rsplitn(2, "::").collect();
+assert_eq!(v, ["leopard", "lion::tiger"]);
+```
+
+Um padrão mais complexo, usando uma closure:
+
+```
+let v: Vec<&str> = "abc1defXghi".rsplitn(2, |c| c == '1' || c == 'X').collect();
+assert_eq!(v, ["ghi", "abc1def"]);
+```
+
+## split_once()
+
+```
+split_once<P>(&self, delimiter: P) -> Option<(&str, &str)>
+where
+    P: Pattern,
+```
+
+Divide a ```str``` na primeira ocorrência do delimitador especificado e retorna o prefixo antes do delimitador e o sufixo após o delimitador. 
+
+```
+assert_eq!("cfg".split_once('='), None);
+assert_eq!("cfg=".split_once('='), Some(("cfg", "")));
+assert_eq!("cfg=foo".split_once('='), Some(("cfg", "foo")));
+assert_eq!("cfg=foo=bar".split_once('='), Some(("cfg", "foo=bar")));
+```
+
+## rsplit_once()
+
+```
+rsplit_once<P>(&self, delimiter: P) -> Option<(&str, &str)>
+where
+    P: Pattern,
+    <P as Pattern>::Searcher<'a>: for<'a> ReverseSearcher<'a>,
+```
+
+Divide a ```str``` na última ocorrência do delimitador especificado e retorna o prefixo antes do delimitador e o sufixo após o delimitador.
+
+```
+assert_eq!("cfg".rsplit_once('='), None);
+assert_eq!("cfg=foo".rsplit_once('='), Some(("cfg", "foo")));
+assert_eq!("cfg=foo=bar".rsplit_once('='), Some(("cfg=foo", "bar")));
+```
+
+## matches()
+
+```
+matches<P>(&self, pat: P) -> Matches<'_, P> ⓘ
+where
+    P: Pattern,
+```
+
+Retorna um iterador sobre as subslices que correspondem ao padrão passado como argumento (```pat```).
+
+O padrão pode ser uma ```&str```, um ```char```, uma slice de chars ou uma função ou closure que determina se um caractere corresponde. 
+
+### Comportamento do iterador
+
+O iterador retornado será um ```DoubleEndedIterator``` se o padrão permitir uma pesquisa reversa e a pesquisa para frente/trás gerar os mesmos elementos. Isso é verdade para, por exemplo, ```char```, mas não para ```&str```.
+
+Se o padrão permitir uma pesquisa reversa, mas seus resultados puderem diferir de uma pesquisa para frente, o método ```rmatches()``` pode ser usado.
+
+```
+let v: Vec<&str> = "abcXXXabcYYYabc".matches("abc").collect();
+assert_eq!(v, ["abc", "abc", "abc"]);
+
+let v: Vec<&str> = "1abc2abc3".matches(char::is_numeric).collect();
+assert_eq!(v, ["1", "2", "3"]);
+```
+
+## rmatches()
+
+```
+rmatches<P>(&self, pat: P) -> RMatches<'_, P> ⓘ
+where
+    P: Pattern,
+    <P as Pattern>::Searcher<'a>: for<'a> ReverseSearcher<'a>,
+```
+
+Retorna um iterador sobre as subslices que correspondem ao padrão passado como argumento (```pat```), iniciando no final da ```str```.
+
+O padrão pode ser uma ```&str```, um ```char```, uma slice de chars ou uma função ou closure que determina se um caractere corresponde. 
+
+### Comportamento do iterador
+
+O iterador retornado será um ```DoubleEndedIterator``` se o padrão permitir uma pesquisa reversa e a pesquisa para frente/trás gerar os mesmos elementos. Isso é verdade para, por exemplo, ```char```, mas não para ```&str```.
+
+Se o padrão permitir uma pesquisa reversa, mas seus resultados puderem diferir de uma pesquisa para frente, o método ```rmatches()``` pode ser usado.
+
+Para iterar a partir do ínicio da ```str```, o método ```matches()``` pode ser usado.
+
+```
+let v: Vec<&str> = "abcXXXabcYYYabc".rmatches("abc").collect();
+assert_eq!(v, ["abc", "abc", "abc"]);
+
+let v: Vec<&str> = "1abc2abc3".rmatches(char::is_numeric).collect();
+assert_eq!(v, ["3", "2", "1"]);
+```
+
+## match_indices()
+
+```
+match_indices<P>(&self, pat: P) -> MatchIndices<'_, P> ⓘ
+where
+    P: Pattern,
+```
+
+Retorna um iterador sobre as subslices que correspondem ao padrão passado como argumento (```pat```), assim como seus índices.
+
+Para correspondências que se sobrepõe, apenas a primeira ocorrência será retornada.
+
+O padrão pode ser uma ```&str```, um ```char```, uma slice de chars ou uma função ou closure que determina se um caractere corresponde.
+
+### Comportamento do iterador
+
+O iterador retornado será um ```DoubleEndedIterator``` se o padrão permitir uma pesquisa reversa e a pesquisa para frente/trás gerar os mesmos elementos. Isso é verdade para, por exemplo, ```char```, mas não para ```&str```.
+
+Se o padrão permitir uma pesquisa reversa, mas seus resultados puderem diferir de uma pesquisa direta, o método ```rmatch_indices()``` pode ser usado.
+
+```
+    let v: Vec<_> = "abcXXXabcYYYabc".match_indices("abc").collect();
+    assert_eq!(v, [(0, "abc"), (6, "abc"), (12, "abc")]);
+    
+    let v: Vec<_> = "1abcabc2".match_indices("abc").collect();
+    assert_eq!(v, [(1, "abc"), (4, "abc")]);
+    
+    let v: Vec<_> = "ababa".match_indices("aba").collect();
+    assert_eq!(v, [(0, "aba")]); // only the first `aba`
+
+    let v: Vec<_> = "1abc2abc3".match_indices(char::is_numeric).collect();
+    assert_eq!(v, [(0,"1"),(4,"2"),(8,"3")]);
+```
+
+## rmatch_indices()
+
+```
+rmatch_indices<P>(&self, pat: P) -> RMatchIndices<'_, P> ⓘ
+where
+    P: Pattern,
+    <P as Pattern>::Searcher<'a>: for<'a> ReverseSearcher<'a>,
+```` 
+
+Retorna um iterador sobre as subslices que correspondem ao padrão passado como argumento (```pat```), assim como seus índices, em ordem reversa.
+
+Para correspondências que se sobrepõe, apenas a primeira ocorrência será retornada.
+
+O padrão pode ser uma ```&str```, um ```char```, uma slice de chars ou uma função ou closure que determina se um caractere corresponde.
+
+### Comportamento do iterador
+
+O iterador retornado exige que o padrão suporte uma pesquisa reversa, e será um ```DoubleEndedIterator``` se uma pesquisa para frente/trás gerar os mesmos elementos.
+
+Para iterar a partir do início, o método ```match_indices()``` pode ser usado.
+
+```
+    let v: Vec<_> = "abcXXXabcYYYabc".rmatch_indices("abc").collect();
+    assert_eq!(v, [(12, "abc"), (6, "abc"), (0, "abc")]);
+    
+    let v: Vec<_> = "1abcabc2".rmatch_indices("abc").collect();
+    assert_eq!(v, [(4, "abc"), (1, "abc")]);
+    
+    let v: Vec<_> = "ababa".rmatch_indices("aba").collect();
+    assert_eq!(v, [(2, "aba")]); // only the last `aba`
+
+    let v: Vec<_> = "1abc2abc3".rmatch_indices(char::is_numeric).collect();
+    assert_eq!(v, [(8,"3"),(4,"2"),(0,"1")]);
+```
+
+## trim()
+
+```
+trim(&self) -> &str
+```
+
 asd
 
 ---
@@ -1051,4 +1447,4 @@ println!("A primeira letra de s é {}", s[0]);
 
 arataca89@gmail.com
 
-Última atualização: 20241206
+Última atualização: 20241209
