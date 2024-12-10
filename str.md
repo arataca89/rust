@@ -47,7 +47,14 @@ O tipo ```str```, também chamado de "slice de string", é o tipo de string mais
 	- [rmatches()](#rmatches) - Retorna um iterador sobre as subslices que correspondem ao padrão passado como argumento, iniciando no final da ```str```.
 	- [match_indices()](#match_indices) - Retorna um iterador sobre as subslices que correspondem ao padrão passado como argumento, assim como seus índices.
 	- [rmatch_indices()](#rmatch_indices) - Retorna um iterador sobre as subslices que correspondem ao padrão passado como argumento, assim como seus índices, em ordem reversa.
-
+	- [trim()](#trim) - Remove espaços em branco do início e do fim da ```str```.
+	- [trim_start()](#trim_start) - Remove espaços em branco do início da ```str```.
+	- [trim_end()](#trim_end) - Remove espaços em branco do final da ```str```.
+	- [trim_matches()](#trim_matches) - Remove todos os prefixos e sufixos que correspondem a um padrão.
+	- [strip_prefix()](#strip_prefix) - Remove o prefixo passado como argumento.
+	- [strip_suffix()](#strip_suffix) - Remove o sufixo passado como argumento.
+	
+	
 ---
 
  (<font color="red">unsafe</font>).
@@ -1291,7 +1298,7 @@ assert_eq!("cfg=foo=bar".rsplit_once('='), Some(("cfg=foo", "bar")));
 ## matches()
 
 ```
-matches<P>(&self, pat: P) -> Matches<'_, P> ⓘ
+matches<P>(&self, pat: P) -> Matches<'_, P> 
 where
     P: Pattern,
 ```
@@ -1317,7 +1324,7 @@ assert_eq!(v, ["1", "2", "3"]);
 ## rmatches()
 
 ```
-rmatches<P>(&self, pat: P) -> RMatches<'_, P> ⓘ
+rmatches<P>(&self, pat: P) -> RMatches<'_, P> 
 where
     P: Pattern,
     <P as Pattern>::Searcher<'a>: for<'a> ReverseSearcher<'a>,
@@ -1346,7 +1353,7 @@ assert_eq!(v, ["3", "2", "1"]);
 ## match_indices()
 
 ```
-match_indices<P>(&self, pat: P) -> MatchIndices<'_, P> ⓘ
+match_indices<P>(&self, pat: P) -> MatchIndices<'_, P> 
 where
     P: Pattern,
 ```
@@ -1380,7 +1387,7 @@ Se o padrão permitir uma pesquisa reversa, mas seus resultados puderem diferir 
 ## rmatch_indices()
 
 ```
-rmatch_indices<P>(&self, pat: P) -> RMatchIndices<'_, P> ⓘ
+rmatch_indices<P>(&self, pat: P) -> RMatchIndices<'_, P> 
 where
     P: Pattern,
     <P as Pattern>::Searcher<'a>: for<'a> ReverseSearcher<'a>,
@@ -1418,6 +1425,190 @@ Para iterar a partir do início, o método ```match_indices()``` pode ser usado.
 trim(&self) -> &str
 ```
 
+Retorna uma slice de string com espaços em branco iniciais e finais removidos.
+
+"Espaço em branco" é definido de acordo com os termos da Unicode Derived Core Property ```White_Space```, que inclui novas linhas.
+
+```
+let s = "\n Hello\tworld\t\n";
+
+assert_eq!("Hello\tworld", s.trim());
+```
+
+## trim_start()
+
+```
+trim_start(&self) -> &str
+```
+
+Retorna uma slice de string com os espaços em branco iniciais removidos.
+
+"Espaço em branco" é definido de acordo com os termos da Unicode Derived Core Property ```White_Space```, que inclui novas linhas. 
+
+### Direcionalidade do texto
+
+Uma string é uma sequência de bytes. "início" neste contexto significa a primeira posição dessa string de bytes; para uma linguagem da esquerda para a direita como inglês ou russo, isso será o lado esquerdo, e para linguagens da direita para a esquerda como árabe ou hebraico, isso será o lado direito.
+
+### Exemplos
+
+Uso básico:
+
+```
+let s = "\n Hello\tworld\t\n";
+assert_eq!("Hello\tworld\t\n", s.trim_start());
+```
+
+Direcionalidade:
+
+```
+let s = "  English  ";
+assert!(Some('E') == s.trim_start().chars().next());
+
+let s = "  עברית  ";
+assert!(Some('ע') == s.trim_start().chars().next());
+```
+
+## trim_end()
+
+```
+trim_end(&self) -> &str
+```
+
+Retorna uma slice de string com espaços em branco finais removidos.
+
+"Espaço em branco" é definido de acordo com os termos da Unicode Derived Core Property ```White_Space```, que inclui novas linhas.
+
+### Direcionalidade do texto
+
+Uma string é uma sequência de bytes. "Fim", neste contexto, significa a última posição dessa string de bytes; para uma linguagem da esquerda para a direita como inglês ou russo, isso será o lado direito, e para linguagens da direita para a esquerda como árabe ou hebraico, isso será o lado esquerdo.
+
+### Exemplos
+
+Uso básico:
+
+```
+let s = "\n Hello\tworld\t\n";
+assert_eq!("\n Hello\tworld", s.trim_end());
+```
+
+Direcionalidade:
+
+```
+let s = "  English  ";
+assert!(Some('h') == s.trim_end().chars().rev().next());
+
+let s = "  עברית  ";
+assert!(Some('ת') == s.trim_end().chars().rev().next());
+```
+
+## trim_matches()
+
+```
+trim_matches<P>(&self, pat: P) -> &str
+where
+    P: Pattern,
+    <P as Pattern>::Searcher<'a>: for<'a> DoubleEndedSearcher<'a>,
+```
+
+Retorna uma slice de string com todos os prefixos e sufixos que correspondem a um padrão removido repetidamente.
+
+O padrão pode ser um caractere, uma slice de caracteres ou uma função ou closure que determina se um caractere corresponde.
+
+### Exemplos
+
+Padrão simples:
+
+```
+assert_eq!("11foo1bar11".trim_matches('1'), "foo1bar");
+assert_eq!("123foo1bar123".trim_matches(char::is_numeric), "foo1bar");
+
+let x: &[_] = &['1', '2'];
+assert_eq!("12foo1bar12".trim_matches(x), "foo1bar");
+```
+
+Padrão mais complexo, usando uma closure:
+
+```
+assert_eq!("1foo1barXX".trim_matches(|c| c == '1' || c == 'X'), "foo1bar");
+```
+
+## trim_start_matches()
+
+```
+trim_start_matches<P>(&self, pat: P) -> &str
+where
+    P: Pattern,
+```
+ 
+Retorna uma slice de string com todos os prefixos que correspondem a um padrão removidos repetidamente.
+
+O padrão pode ser uma ```&str```, um ```char```, uma slice de ```char``` ou uma função ou closure que determina se um caractere corresponde.
+
+### Direcionalidade do texto
+
+Uma string é uma sequência de bytes. "início" neste contexto significa a primeira posição dessa string de bytes; para uma linguagem da esquerda para a direita como inglês ou russo, isso será o lado esquerdo, e para linguagens da direita para a esquerda como árabe ou hebraico, isso será o lado direito.
+ 
+```
+assert_eq!("11foo1bar11".trim_start_matches('1'), "foo1bar11");
+assert_eq!("123foo1bar123".trim_start_matches(char::is_numeric), "foo1bar123");
+
+let x: &[_] = &['1', '2'];
+assert_eq!("12foo1bar12".trim_start_matches(x), "foo1bar12");
+```
+
+## strip_prefix()
+
+```
+strip_prefix<P>(&self, prefix: P) -> Option<&str>
+where
+    P: Pattern,
+``` 
+
+Retorna uma slice de string com o prefixo removido.
+
+Se a string começar com o prefixo, retorna a substring após o prefixo, envolto em ```Some```. Ao contrário de ```trim_start_matches()```, este método remove o prefixo exatamente uma vez.
+
+Se a string não começar com o prefixo, retorna ```None```.
+
+O prefixo pode ser uma ```&str```, um ```char```, uma slice de ```char``` ou uma função ou closure que determina se um caractere corresponde.
+
+```
+assert_eq!("foo:bar".strip_prefix("foo:"), Some("bar"));
+assert_eq!("foo:bar".strip_prefix("bar"), None);
+assert_eq!("foofoo".strip_prefix("foo"), Some("foo"));
+```
+
+## strip_suffix()
+
+```
+strip_suffix<P>(&self, suffix: P) -> Option<&str>
+where
+    P: Pattern,
+    <P as Pattern>::Searcher<'a>: for<'a> ReverseSearcher<'a>,
+``` 
+Retorna uma slice de string com o sufixo removido.
+
+Se a string termina com o sufixo, retorna a substring antes do sufixo, envolto em ```Some```. Ao contrário de ```trim_end_matches()```, este método remove o sufixo exatamente uma vez.
+
+Se a string não termina com o sufixo, retorna ```None```.
+
+O padrão pode ser uma ```&str```, um ```char```, uma slice de ```char``` ou uma função ou closure que determina se um caractere corresponde.
+
+```
+assert_eq!("bar:foo".strip_suffix(":foo"), Some("bar"));
+assert_eq!("bar:foo".strip_suffix("bar"), None);
+assert_eq!("foofoo".strip_suffix("foo"), Some("foo"));
+```
+
+## trim_end_matches()
+
+```
+trim_end_matches<P>(&self, pat: P) -> &str
+where
+    P: Pattern,
+    <P as Pattern>::Searcher<'a>: for<'a> ReverseSearcher<'a>,
+```
+
 asd
 
 ---
@@ -1447,4 +1638,4 @@ println!("A primeira letra de s é {}", s[0]);
 
 arataca89@gmail.com
 
-Última atualização: 20241209
+Última atualização: 20241210
