@@ -53,6 +53,17 @@ O tipo ```str```, também chamado de "slice de string", é o tipo de string mais
 	- [trim_matches()](#trim_matches) - Remove todos os prefixos e sufixos que correspondem a um padrão.
 	- [strip_prefix()](#strip_prefix) - Remove o prefixo passado como argumento.
 	- [strip_suffix()](#strip_suffix) - Remove o sufixo passado como argumento.
+	- [trim_end_matches()](#trim_end_matches) - Remove todos os sufixos que correspondem a um padrão.
+	- [parse()](#parse) - Converte a ```str``` em outro tipo.
+	- [is_ascii()](#is_ascii) - Verifica se todos os caracteres estão dentro do intervalo ASCII. 
+	- [eq_ignore_ascii_case()](#eq_ignore_ascii_case) - Verifica se duas strings correspondem em maiúsculas e minúsculas ASCII.
+	- [make_ascii_uppercase()](#make_ascii_uppercase) - Converte a string em maiúsculas ASCII.
+	- [make_ascii_lowercase()](#make_ascii_lowercase) - Converte a string em minúsculas ASCII.
+	- [trim_ascii_start()](#trim_ascii_start) - Remove os espaços em branco ASCII do início.
+	- [trim_ascii_end()](#trim_ascii_end) - Remove os espaços em branco ASCII do fim.
+	- [trim_ascii()](#trim_ascii) - Remove os espaços em branco ASCII do início e do fim.
+	- [escape_debug()](#escape_debug) - Retorna um iterador que escapa cada caractere em ```self``` com ```char::escape_debug```.
+	- [escape_default()](#escape_default) - Retorna um iterador que escapa cada caractere em ```self``` com ```char::escape_default```.
 	
 	
 ---
@@ -1609,7 +1620,302 @@ where
     <P as Pattern>::Searcher<'a>: for<'a> ReverseSearcher<'a>,
 ```
 
-asd
+Retorna uma slice de string com todos os sufixos que correspondem a um padrão removidos repetidamente.
+
+O padrão pode ser uma ```&str```, um ```char```, uma fatia de ```char``` ou uma função ou closure que determina se um caractere corresponde.
+
+### Direcionalidade do texto
+
+Uma string é uma sequência de bytes. "Fim", neste contexto, significa a última posição dessa string de bytes; para uma linguagem da esquerda para a direita como inglês ou russo, isso será o lado direito, e para linguagens da direita para a esquerda como árabe ou hebraico, isso será o lado esquerdo.
+
+
+### Exemplos
+
+Padrão simples:
+
+```
+assert_eq!("11foo1bar11".trim_end_matches('1'), "11foo1bar");
+assert_eq!("123foo1bar123".trim_end_matches(char::is_numeric), "123foo1bar");
+
+let x: &[_] = &['1', '2'];
+assert_eq!("12foo1bar12".trim_end_matches(x), "12foo1bar");
+```
+
+Um padrão mais complexo, usando closure:
+
+```
+assert_eq!("1fooX".trim_end_matches(|c| c == '1' || c == 'X'), "1foo");
+```
+
+## parse()
+
+```
+parse<F>(&self) -> Result<F, <F as FromStr>::Err>
+where
+    F: FromStr,
+```
+
+Converte a ```str``` em outro tipo.
+
+Como pretende converter para qualquer tipo,  ```parse()``` pode causar problemas com inferência de tipo. Assim, ```parse()``` é uma das poucas vezes que você verá a sintaxe carinhosamente conhecida como "turbofish": ```::<>```. Isso ajuda o algoritmo de inferência a entender especificamente em qual tipo você está tentando analisar.
+
+```parse()``` pode converter para qualquer tipo que implemente a trait ```FromStr```.
+
+### Erro
+
+Retornará ```Err``` se não for possível analisar esta slice de string no tipo desejado.
+
+### Exemplos
+
+Uso básico:
+
+```
+let four: u32 = "4".parse().unwrap();
+
+assert_eq!(4, four);
+```
+
+Usando "turbofish":
+
+```
+let four = "4".parse::<u32>();
+
+assert_eq!(Ok(4), four);
+```
+
+Falha ao tentar converter:
+
+```
+let nope = "j".parse::<u32>();
+
+assert!(nope.is_err());
+```
+
+## is_ascii()
+
+```
+is_ascii(&self) -> bool
+```
+ 
+Verifica se todos os caracteres nesta string estão dentro do intervalo ASCII. 
+
+```
+let ascii = "hello!\n";
+let non_ascii = "Grüße, Jürgen ❤";
+
+assert!(ascii.is_ascii());
+assert!(!non_ascii.is_ascii());
+```
+
+## eq_ignore_ascii_case()
+
+```
+eq_ignore_ascii_case(&self, other: &str) -> bool
+```
+
+Verifica se duas strings correspondem em maiúsculas e minúsculas ASCII.
+
+Igual a ```to_ascii_lowercase(a) == to_ascii_lowercase(b)```, mas sem alocar e copiar temporários.
+
+```
+assert!("Ferris".eq_ignore_ascii_case("FERRIS"));
+assert!("Ferrös".eq_ignore_ascii_case("FERRöS"));
+assert!(!"Ferrös".eq_ignore_ascii_case("FERRÖS"));
+```
+
+## make_ascii_uppercase()
+
+```
+make_ascii_uppercase(&mut self)
+```
+
+Converte esta string para seu equivalente em maiúsculas ASCII no local.
+
+Letras ASCII 'a' a 'z' são mapeadas para 'A' a 'Z', mas letras não ASCII permanecem inalteradas.
+
+Para retornar um novo valor em maiúsculas sem modificar o existente, use ```to_ascii_uppercase()```.
+
+```
+let mut s = String::from("Grüße, Jürgen ❤");
+
+s.make_ascii_uppercase();
+
+assert_eq!("GRüßE, JüRGEN ❤", s);
+```
+
+## make_ascii_lowercase()
+
+```
+make_ascii_lowercase(&mut self)
+```
+ 
+Converte esta string para seu equivalente em minúsculas ASCII no local.
+
+Letras ASCII 'A' a 'Z' são mapeadas para 'a' a 'z', mas letras não ASCII permanecem inalteradas.
+
+Para retornar um novo valor em minúsculas sem modificar o existente, use ```to_ascii_lowercase()```.
+
+```
+let mut s = String::from("GRÜßE, JÜRGEN ❤");
+
+s.make_ascii_lowercase();
+
+assert_eq!("grÜße, jÜrgen ❤", s);
+```
+
+## trim_ascii_start()
+
+```
+trim_ascii_start(&self) -> &str
+```
+
+Retorna uma slice de string com os espaços em branco ASCII iniciais removidos.
+
+"Espaço em branco" refere-se à definição usada por ```u8::is_ascii_whitespace```.
+
+```
+assert_eq!(" \t \u{3000}hello world\n".trim_ascii_start(), "\u{3000}hello world\n");
+assert_eq!("  ".trim_ascii_start(), "");
+assert_eq!("".trim_ascii_start(), "");
+```
+
+## trim_ascii_end()
+
+```
+trim_ascii_end(&self) -> &str
+``` 
+Retorna uma slice de string com espaços em branco ASCII finais removidos.
+
+"Espaço em branco" refere-se à definição usada por ```u8::is_ascii_whitespace```.
+
+```
+assert_eq!("\r hello world\u{3000}\n ".trim_ascii_end(), "\r hello world\u{3000}");
+assert_eq!("  ".trim_ascii_end(), "");
+assert_eq!("".trim_ascii_end(), "");
+```
+
+## trim_ascii()
+
+```
+trim_ascii(&self) -> &str
+``` 
+
+Retorna uma slice de string com espaços em branco ASCII iniciais e finais removidos.
+
+"Espaço em branco" refere-se à definição usada por ```u8::is_ascii_whitespace```.
+
+```
+assert_eq!("\r hello world\n ".trim_ascii(), "hello world");
+assert_eq!("  ".trim_ascii(), "");
+assert_eq!("".trim_ascii(), "");
+```
+
+## escape_debug()
+
+```
+escape_debug(&self) -> EscapeDebug<'_>
+``` 
+
+Retorna um iterador que escapa cada caractere em ```self``` com ```char::escape_debug```.
+
+Observação: apenas os pontos de código de grafema estendidos que iniciam a string serão escapados.
+
+### Exemplos
+
+Como um iterador:
+
+```
+for c in "❤\n!".escape_debug() {
+    print!("{c}");
+}
+println!();
+```
+
+Saída:
+
+```
+❤\n!
+```
+
+Usando ```println!``` diretamente:
+
+```
+println!("{}", "❤\n!".escape_debug());
+```
+
+Saída:
+
+```
+❤\n!
+```
+
+Os dois exemplos acima são equivalentes a:
+
+```
+println!("❤\\n!");
+```
+
+Usando ```to_string()```:
+
+```
+assert_eq!("❤\n!".escape_debug().to_string(), "❤\\n!");
+```
+
+## escape_default()
+
+```
+escape_default(&self) -> EscapeDefault<'_>
+```
+ 
+Retorna um iterador que escapa cada caractere em ```self``` com ```char::escape_default```.
+
+### Exemplos
+
+Como um iterador:
+
+```
+for c in "❤\n!".escape_default() {
+    print!("{c}");
+}
+println!();
+```
+
+Saída:
+
+```
+\u{2764}\n!
+```
+
+Usando ```println!``` diretamente:
+
+```
+println!("{}", "❤\n!".escape_default());
+```
+
+Saída:
+
+```
+\u{2764}\n!
+```
+
+Os dois exemplos acima são equivalentes a:
+
+```
+println!("\\u{{2764}}\\n!");
+```
+
+Usando ```to_string()```:
+
+```
+assert_eq!("❤\n!".escape_default().to_string(), "\\u{2764}\\n!");
+```
+
+## escape_unicode()
+
+```
+escape_unicode(&self) -> EscapeUnicode<'_>
+``` 
+
 
 ---
 
@@ -1628,6 +1934,7 @@ println!("A primeira letra de s é {}", s[0]);
 </pre>
 </td>
 </tr></table>
+
 ---
 
 ## Referências
@@ -1638,4 +1945,4 @@ println!("A primeira letra de s é {}", s[0]);
 
 arataca89@gmail.com
 
-Última atualização: 20241210
+Última atualização: 20241211
