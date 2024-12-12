@@ -64,6 +64,12 @@ O tipo ```str```, também chamado de "slice de string", é o tipo de string mais
 	- [trim_ascii()](#trim_ascii) - Remove os espaços em branco ASCII do início e do fim.
 	- [escape_debug()](#escape_debug) - Retorna um iterador que escapa cada caractere em ```self``` com ```char::escape_debug```.
 	- [escape_default()](#escape_default) - Retorna um iterador que escapa cada caractere em ```self``` com ```char::escape_default```.
+	- [escape_unicode()](#escape_unicode) - Retorna um iterador que escapa cada caractere em ```self``` com ```char::escape_unicode```.
+	- [into_boxed_bytes()](#into_boxed_bytes) - Converte um ```Box<str>``` em um ```Box<[u8]>``` sem copiar ou alocar.
+	- [replace()](#replace) - Substitui todas as correspondências de um padrão por outra string.
+	- [replacen()](#replacen) - Substitui as primeiras N correspondências de um padrão por outra string.
+	- [to_lowercase()](#to_lowercase) - Retorna o equivalente em minúsculas desta slice de string, como uma nova ```String```.
+	- [to_uppercase()](#to_uppercase) - Retorna o equivalente em maiúsculas desta slice de string, como uma nova ```String```.
 	
 	
 ---
@@ -1916,6 +1922,200 @@ assert_eq!("❤\n!".escape_default().to_string(), "\\u{2764}\\n!");
 escape_unicode(&self) -> EscapeUnicode<'_>
 ``` 
 
+Retorna um iterador que escapa cada caractere em ```self``` com ```char::escape_unicode```.
+
+### Exemplos
+
+Como um iterador:
+
+```
+for c in "❤\n!".escape_unicode() {
+    print!("{c}");
+}
+println!();
+```
+
+Usando ```println!``` diretamente:
+
+```
+println!("{}", "❤\n!".escape_unicode());
+```
+
+Ambos exemplos acima são equivalentes a:
+
+```
+println!("\\u{{2764}}\\u{{a}}\\u{{21}}");
+```
+
+Usando ```to_string()```:
+
+```
+assert_eq!("❤\n!".escape_unicode().to_string(), "\\u{2764}\\u{a}\\u{21}");
+```
+
+## into_boxed_bytes()
+
+```
+into_boxed_bytes(self: Box<str>) -> Box<[u8]>
+```
+ 
+Converte um ```Box<str>``` em um ```Box<[u8]>``` sem copiar ou alocar.
+
+```
+let s = "this is a string";
+let boxed_str = s.to_owned().into_boxed_str();
+let boxed_bytes = boxed_str.into_boxed_bytes();
+assert_eq!(*boxed_bytes, *s.as_bytes());
+```
+
+## replace()
+
+```
+replace<P>(&self, from: P, to: &str) -> String
+where
+    P: Pattern,
+``` 
+
+Substitui todas as correspondências de um padrão por outra string.
+
+```replace()``` cria uma nova ```String``` e copia os dados desta fatia de string para ela. Ao fazer isso, tenta encontrar correspondências de um padrão. Se encontrar alguma, substitui pela slice de string de substituição. 
+
+### Exemplos
+
+Uso básico:
+
+```
+let s = "this is old";
+
+assert_eq!("this is new", s.replace("old", "new"));
+assert_eq!("than an old", s.replace("is", "an"));
+```
+
+Quando o padrão não corresponde, ```replace()``` retorna esta slice de string como String:
+
+```
+let s = "this is old";
+assert_eq!(s, s.replace("cookie monster", "little lamb"));
+```
+
+## replacen()
+
+```
+replacen<P>(&self, pat: P, to: &str, count: usize) -> String
+where
+    P: Pattern,
+```
+ 
+Substitui as primeiras N correspondências de um padrão por outra string.
+
+```replacen()``` cria uma nova ```String``` e copia os dados desta slice de string para ela. Ao fazer isso, tenta encontrar correspondências de um padrão. Se encontrar alguma, substitui pela slice de string de substituição no máximo ```count``` vezes.
+
+### Exemplos
+
+Uso básico:
+
+```
+let s = "foo foo 123 foo";
+assert_eq!("new new 123 foo", s.replacen("foo", "new", 2));
+assert_eq!("faa fao 123 foo", s.replacen('o', "a", 3));
+assert_eq!("foo foo new23 foo", s.replacen(char::is_numeric, "new", 1));
+```
+
+Quando o padrão não corresponde, retorna esta slice de string como ```String```:
+
+```
+let s = "this is old";
+assert_eq!(s, s.replacen("cookie monster", "little lamb", 10));
+```
+
+## to_lowercase()
+
+```
+to_lowercase(&self) -> String
+```
+ 
+Retorna o equivalente em minúsculas desta slice de string, como uma nova ```String```.
+
+"Minúsculas" é definido de acordo com os termos da Unicode Derived Core Property ```Lowercase```.
+
+Como alguns caracteres podem se expandir para vários caracteres ao mudar para minúsculos, esta função retorna uma ```String``` em vez de modificar o parâmetro no local.
+
+### Exemplos
+
+Uso básico:
+
+```
+let s = "HELLO";
+
+assert_eq!("hello", s.to_lowercase());
+```
+
+Um exemplo complicado, com sigma:
+
+```
+let sigma = "Σ";
+
+assert_eq!("σ", sigma.to_lowercase());
+
+// mas, no fim da palavra é ς, não σ:
+let odysseus = "ὈΔΥΣΣΕΎΣ";
+
+assert_eq!("ὀδυσσεύς", odysseus.to_lowercase());
+```
+
+Linguagens sem minúsculas não são alteradas:
+
+```
+let new_year = "农历新年";
+
+assert_eq!(new_year, new_year.to_lowercase());
+```
+
+## to_uppercase()
+
+```
+to_uppercase(&self) -> String
+```
+
+Retorna o equivalente em maiúsculas desta slice de string, como uma nova ```String```.
+
+"Maiúsculas" é definido de acordo com os termos da Unicode Derived Core Property ```Uppercase```.
+
+Como alguns caracteres podem se expandir para vários caracteres ao mudar para maiúsculos, esta função retorna uma ```String``` em vez de modificar o parâmetro no local.
+
+### Exemplos
+
+Uso básico:
+
+```
+let s = "hello";
+
+assert_eq!("HELLO", s.to_uppercase());
+```
+
+Idiomas sem maiúsculas não são alterados:
+
+```
+let new_year = "农历新年";
+
+assert_eq!(new_year, new_year.to_uppercase());
+```
+
+Um caractere pode se converter em muitos:
+
+```
+let s = "tschüß";
+
+assert_eq!("TSCHÜSS", s.to_uppercase());
+```
+
+## into_string()
+
+```
+into_string(self: Box<str>) -> String
+``` 
+
+asd
 
 ---
 
@@ -1945,4 +2145,4 @@ println!("A primeira letra de s é {}", s[0]);
 
 arataca89@gmail.com
 
-Última atualização: 20241211
+Última atualização: 20241212
