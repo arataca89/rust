@@ -7,6 +7,78 @@ O tipo ```str```, também chamado de "slice de string", é o tipo de string mais
 * [Representação](#representação)
 * [Invariante](#invariante)
 * [Métodos](#métodos)
+	- [as_bytes()](#as_bytes) - Converte uma slice de string em uma slice de bytes.
+	- [as_bytes_mut()](#as_bytes_mut) - Converte uma slice de string mutável em uma slice de bytes mutável  (<font color="red">unsafe</font>).
+	- [as_mut_ptr()](#as_mut_ptr) - Converte uma slice de string mutável em um ponteiro bruto.
+	- [as_ptr()](#as_ptr) - Converte uma slice de string em um ponteiro bruto.
+	- [bytes()](#bytes) - Retorna um iterador sobre os bytes de uma slice de string.
+	- [char_indices()](#char_indices) - Retorna um iterador sobre os caracteres de uma slice de string e suas posições.
+	- [chars()](#chars) - Retorna um iterador sobre os caracteres de uma slice de string.
+	- [contains()](#contains) - Retorna ```true``` se a ```str``` contém o padrão passado como argumento.
+	- [ends_with()](#ends_with) - Retorna ```true``` se o padrão passado como argumento corresponde a um sufixo da ```str```.
+	- [eq_ignore_ascii_case()](#eq_ignore_ascii_case) - Verifica se duas strings correspondem em maiúsculas e minúsculas ASCII.
+	- [escape_debug()](#escape_debug) - Retorna um iterador que escapa cada caractere em ```self``` com ```char::escape_debug```.
+	- [escape_default()](#escape_default) - Retorna um iterador que escapa cada caractere em ```self``` com ```char::escape_default```.
+	- [escape_unicode()](#escape_unicode) - Retorna um iterador que escapa cada caractere em ```self``` com ```char::escape_unicode```.
+	- [find()](#find) - Retorna o índice de byte do primeiro caractere que corresponde ao padrão passado como argumento.
+	- [get()](#get) - Retorna uma subslice da ```str```.
+	- [get_mut()](#get_mut) - Retorna uma subslice mutável da ```str```.
+	- [get_unchecked()](#get_unchecked) - Retorna uma subslice não verificada da ```str``` (<font color="red">unsafe</font>).
+	- [get_unchecked_mut()](#get_unchecked_mut) - Retorna uma subslice mutável não verificada da ```str``` (<font color="red">unsafe</font>).
+	- [into_boxed_bytes()](#into_boxed_bytes) - Converte um ```Box<str>``` em um ```Box<[u8]>``` sem copiar ou alocar.
+	- [into_string()](#into_string) - Converte um ```Box<str>``` em uma ```String``` sem copiar ou alocar.
+	- [is_ascii()](#is_ascii) - Verifica se todos os caracteres estão dentro do intervalo ASCII. 
+	- [is_char_boundary()](#is_char_boundary) - Verifica se é o primeiro byte em uma sequência UTF-8 ou o final da string.
+	- [is_empty()](#is_empty) - Retorna ```true``` se ```self``` tem um comprimento de zero bytes.
+	- [len()](#len) - Retorna o comprimento da ```str```. 
+	- [lines()](#lines) - Retorna um iterador sobre as linhas de uma string, como slices de string.
+	- [make_ascii_lowercase()](#make_ascii_lowercase) - Converte a string em minúsculas ASCII.
+	- [make_ascii_uppercase()](#make_ascii_uppercase) - Converte a string em maiúsculas ASCII.
+	- [match_indices()](#match_indices) - Retorna um iterador sobre as subslices que correspondem ao padrão passado como argumento, assim como seus índices.
+	- [matches()](#matches) - Retorna um iterador sobre as subslices que correspondem ao padrão passado como argumento.
+	- [parse()](#parse) - Converte a ```str``` em outro tipo.
+	- [repeat()](#repeat) - Cria uma nova ```String``` repetindo uma string n vezes.
+	- [replace()](#replace) - Substitui todas as correspondências de um padrão por outra string.
+	- [replacen()](#replacen) - Substitui as primeiras N correspondências de um padrão por outra string.
+	- [rfind()](#rfind) - Retorna o índice de byte para o primeiro caractere da última correspondência do padrão passado como argumento.
+	- [rmatch_indices()](#rmatch_indices) - Retorna um iterador sobre as subslices que correspondem ao padrão passado como argumento, assim como seus índices, em ordem reversa.
+	- [rmatches()](#rmatches) - Retorna um iterador sobre as subslices que correspondem ao padrão passado como argumento, iniciando no final da ```str```.
+	- [rsplit()](#rsplit) - Separa a ```str``` em subslices conforme o padrão passado como argumento. Itera pelas subslices retornadas na ordem inversa, de trás pra frente, da direita para a esquerda.
+	- [rsplit_once()](#rsplit_once) - Divide a ``str``` na última ocorrência do delimitador especificado e retorna o prefixo antes do delimitador e o sufixo após o delimitador.
+	- [rsplit_terminator()](#rsplit_terminator) - Equivalente a ```split()```, exceto que a substring final é ignorada se estiver vazia.  Itera pelas subslices retornadas na ordem inversa, de trás pra frente, da direita para a esquerda.
+	- [rsplitn()](#rsplitn) - Retorna um iterador sobre as substrings da slice de string fornecida, separadas por um padrão, iniciando no final da slice de string, restrito a retornar no máximo ```n``` itens.
+	- [split()](#split) - Separa a ```str``` em subslices conforme o padrão passado como argumento.
+	- [split_ascii_whitespace()](#split_ascii_whitespace) - Divide uma slice de string conforme os espaços em branco ASCII.
+	- [split_at()](#split_at) - Divide uma slice de string em duas. 
+	- [split_at_checked()](#split_at_checked) - Divide uma slice de string em duas.
+	- [split_at_mut()](#split_at_mut) - Divide uma slice mutável de string em duas. 
+	- [split_at_mut_checked()](#split_at_mut_checked) - Divide uma slice mutável de string em duas.
+	- [split_inclusive()](#split_inclusive) - Separa a ```str``` em subslices conforme o padrão passado como argumento; insere o padrão no final da subslice.
+	- [split_once()](#split_once) - Divide a ``str``` na primeira ocorrência do delimitador especificado e retorna o prefixo antes do delimitador e o sufixo após o delimitador.
+	- [split_terminator()](#split_terminator) - Equivalente a ```split()```, exceto que a substring final é ignorada se estiver vazia.
+	- [split_whitespace()](#split_whitespace) - Divide uma slice de string conforme os espaços em branco.
+	- [splitn()](#splitn) - Retorna um iterador sobre as substrings da slice de string fornecida, separadas por um padrão, restrito a retornar no máximo ```n``` itens.
+	- [starts_with()](#starts_with) - Retorna ```true``` se o padrão passado como argumento corresponde a um prefixo da ```str```.
+	- [strip_prefix()](#strip_prefix) - Remove o prefixo passado como argumento.
+	- [strip_suffix()](#strip_suffix) - Remove o sufixo passado como argumento.
+	- [to_ascii_uppercase()](#to_ascii_uppercase) - Retorna uma cópia desta string onde cada caractere é mapeado para seu equivalente em maiúsculas ASCII.
+	- [to_lowercase()](#to_lowercase) - Retorna o equivalente em minúsculas desta slice de string, como uma nova ```String```.
+	- [to_uppercase()](#to_uppercase) - Retorna o equivalente em maiúsculas desta slice de string, como uma nova ```String```.
+	- [trim()](#trim) - Remove espaços em branco do início e do fim da ```str```.
+	- [trim_ascii()](#trim_ascii) - Remove os espaços em branco ASCII do início e do fim.
+	- [trim_ascii_end()](#trim_ascii_end) - Remove os espaços em branco ASCII do fim.
+	- [trim_ascii_start()](#trim_ascii_start) - Remove os espaços em branco ASCII do início.
+	- [trim_end()](#trim_end) - Remove espaços em branco do final da ```str```.
+	- [trim_end_matches()](#trim_end_matches) - Remove todos os sufixos que correspondem a um padrão.
+	- [trim_matches()](#trim_matches) - Remove todos os prefixos e sufixos que correspondem a um padrão.
+	- [trim_start()](#trim_start) - Remove espaços em branco do início da ```str```.
+	- encode_utf16() - Retorna um iterador de ```u16``` sobre a string codificada como UTF-16.
+
+<!-- 
+
+métodos na ordem em que foram copiados do site
+https://doc.rust-lang.org/std/primitive.str.html#implementations
+
    - [len()](#len) - Retorna o comprimento da ```str```. 
    - [is_empty()](#is_empty) - Retorna ```true``` se ```self``` tem um comprimento de zero bytes.
    - [is_char_boundary()](#is_char_boundary) - Verifica se é o primeiro byte em uma sequência UTF-8 ou o final da string.
@@ -70,13 +142,11 @@ O tipo ```str```, também chamado de "slice de string", é o tipo de string mais
 	- [replacen()](#replacen) - Substitui as primeiras N correspondências de um padrão por outra string.
 	- [to_lowercase()](#to_lowercase) - Retorna o equivalente em minúsculas desta slice de string, como uma nova ```String```.
 	- [to_uppercase()](#to_uppercase) - Retorna o equivalente em maiúsculas desta slice de string, como uma nova ```String```.
-	
-	
----
+	- [into_string()](#into_string) - Converte um ```Box<str>``` em uma ```String``` sem copiar ou alocar.
+	- [repeat()](#repeat) - Cria uma nova ```String``` repetindo uma string n vezes.
+	- [to_ascii_uppercase()](#to_ascii_uppercase) - Retorna uma cópia desta string onde cada caractere é mapeado para seu equivalente em maiúsculas ASCII.
 
- (<font color="red">unsafe</font>).
-
-
+-->
 
 ---
 
@@ -2115,25 +2185,86 @@ assert_eq!("TSCHÜSS", s.to_uppercase());
 into_string(self: Box<str>) -> String
 ``` 
 
-asd
+Converte um ```Box<str>``` em uma ```String``` sem copiar ou alocar.
 
----
+```
+let string = String::from("birthday gift");
+let boxed_str = string.clone().into_boxed_str();
 
-<img src="images/warning_unsafe.png" width="100" alt="UNSAFE">
+assert_eq!(boxed_str.into_string(), string);
+```
 
-<br>
+## repeat()
+
+```
+repeat(&self, n: usize) -> String
+```
+ 
+Cria uma nova ```String``` repetindo uma string n vezes.
+
+### Pânico
+
+Esta função entrará em pânico se a capacidade exceder o limite. 
+
+### Exemplos
+
+Uso básico:
+
+```
+assert_eq!("abc".repeat(4), String::from("abcabcabcabc"));
+```
+
+Pânico devido a overflow:
 
 <table><tr>
 <td><img src="images/error.png" width="48" alt="ERROR"></td>
 <td>
 <pre>
-let s = "hello";
-
-// O código abaixo não irá compilar!
-println!("A primeira letra de s é {}", s[0]);
+// emitirá pânico em tempo de execução
+let huge = "0123456789abcdef".repeat(usize::MAX);
 </pre>
 </td>
 </tr></table>
+
+## to_ascii_uppercase()
+
+```
+to_ascii_uppercase(&self) -> String
+```
+
+Retorna uma cópia desta string onde cada caractere é mapeado para seu equivalente em maiúsculas ASCII.
+
+Letras ASCII 'a' a 'z' são mapeadas para 'A' a 'Z', mas letras não ASCII permanecem inalteradas.
+
+Para colocar a maiúscula no valor no local, use ```make_ascii_uppercase()```.
+
+Para colocar em maiúsculas caracteres ASCII além de caracteres não ASCII, use ```to_uppercase()```.
+
+```
+let s = "Grüße, Jürgen ❤";
+
+assert_eq!("GRüßE, JüRGEN ❤", s.to_ascii_uppercase());
+```
+
+## to_ascii_lowercase()
+
+```
+to_ascii_lowercase(&self) -> String
+```
+ 
+Retorna uma cópia desta string onde cada caractere é mapeado para seu equivalente minúsculo ASCII.
+
+Letras ASCII 'A' a 'Z' são mapeadas para 'a' a 'z', mas letras não ASCII permanecem inalteradas.
+
+Para colocar a minúscula no valor no local, use ```make_ascii_lowercase()```.
+
+Para minúsculas caracteres ASCII além de caracteres não ASCII, use ```to_lowercase()```. 
+
+```
+let s = "Grüße, Jürgen ❤";
+
+assert_eq!("grüße, jürgen ❤", s.to_ascii_lowercase());
+```
 
 ---
 
