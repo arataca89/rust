@@ -8,6 +8,42 @@
 * [Deref](#deref)
 * [Representação](#representação)
 * [Métodos](#métodos)
+	- [as_bytes()](#as_bytes) - Retorna uma slice de bytes do conteúdo da ```String```.
+	- [as_mut_str()](#as_mut_str) - Converte uma ```String``` em uma slice de string mutável.
+	- [as_mut_vec()](#as_mut_vec) - Retorna uma referência mutável para o conteúdo da ```String``` (<font color="red">unsafe</font>).
+	- [as_str()](#as_str) - Extrai uma slice de string contendo toda a ```String```.
+	- [clear()](#clear) - Limpa a string, apaga todo o conteúdo.
+	- [drain()](#drain) - Remove um intervalo de caracteres, retornando todos os caracteres removidos como um iterador.
+	- [from_raw_parts()](#from_raw_parts) - Cria uma nova String a partir de um ponteiro, um comprimento e uma capacidade (<font color="red">unsafe</font>).
+	- [from_utf16()](#from_utf16) - Decodifica um vetor v codificado em UTF-16 para uma ```String```, retornando ```Err``` se v contiver dados inválidos. 
+	- [from_utf16_lossy()](#from_utf16_lossy) - Decodifica uma slice v codificada em UTF-16 em uma ```String```, substituindo dados inválidos pelo caractere de substituição (U+FFFD).
+	- [from_utf8()](#from_utf8) - Converte um vetor de bytes em uma ```String```.
+	- [from_utf8_lossy()](#from_utf8_lossy) - Converte uma slice de bytes em uma string, incluindo caracteres inválidos.
+	- [from_utf8_unchecked()](#from_utf8_unchecked) - Converte um vetor de bytes para uma ```String``` sem verificar se a string contém UTF-8 válido. (<font color="red">unsafe</font>).
+	- [insert()](#insert) - Insere um caractere em determinada posição.
+	- [insert_str()](#insert_str) - Insere uma ```&str``` numa determinada posição.
+	- [into_boxed_str()](#into_boxed_str) - Converte a String em um ```Box<str>```.
+	- [into_bytes()](#into_bytes) - Converte uma ```String``` em um vetor de bytes.
+	- [is_empty()](#is_empty) - Retorna ```true``` se a ```String``` tem o comprimento zero, senão retorna ```false```.
+	- [len()](#len) - Retorna o comprimento da ```String```.
+	- [new()](#new) - Cria uma nova ```String``` vazia.
+	- [pop()](#pop) - Remove o último caractere da string e o retorna.
+	- [push()](#push) - Adiciona um ```char``` ao final da ```String```.
+	- [push_str()](#push_str) - Anexa uma slice de string ao final da ```String```.
+	- [remove()](#remove) - Remove o caractere de determinada posição e o retorna.
+	- [replace_range()](#replace_range) - Remove o intervalo especificado e o substitui pela string fornecida. 
+	- [reserve()](#reserve) - Aumenta a capacidade da ```String```.
+	- [reserve_exact()](#reserve_exact) - Aumenta a capacidade da ```String```.
+	- [retain()](#retain) - Mantém apenas os caracteres especificados pelo predicado.
+	- [shrink_to()](#shrink_to) - Reduz a capacidade da ```String```.
+	- [shrink_to_fit()](#shrink_to_fit) - Reduz a capacidade da ```String``` para corresponder ao seu comprimento.
+	- [split_off()](#split_off) - Divide a string em duas.
+	- [truncate()](#truncate) - Trunca a string.
+	- [try_reserve()](#try_reserve) - Aumenta a capacidade da ```String```.
+	- [try_reserve_exact()](#try_reserve_exact) - Aumenta a capacidade da ```String```.
+	- [with_capacity()](#with_capacity) - Cria uma nova ```String``` vazia com a capacidade especificada. 
+
+<!--
 	- [new()](#new) - Cria uma nova ```String``` vazia.
 	- [with_capacity()](#with_capacity) - Cria uma nova ```String``` vazia com a capacidade especificada. 
 	- [from_utf8()](#from_utf8) - Converte um vetor de bytes em uma ```String```.
@@ -42,7 +78,8 @@
 	- [drain()](#drain) - Remove um intervalo de caracteres, retornando todos os caracteres removidos como um iterador.
 	- [replace_range()](#replace_range) - Remove o intervalo especificado e o substitui pela string fornecida. 
 	- [into_boxed_str()](#into_boxed_str) - Converte a String em um ```Box<str>```.
-	
+
+-->
 
 ---
 
@@ -1158,4 +1195,4 @@ assert_eq!(static_ref, "bucket");
 
 arataca89@gmail.com
 
-Última atualização: 20241205
+Última atualização: 20241212
