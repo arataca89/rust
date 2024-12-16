@@ -6,19 +6,19 @@ Uma ```trait``` define uma funcionalidade que um tipo de dados deverá implement
 
 Traits são semelhantes ao recurso chamado de interfaces em outras linguagens.
 
-[1. Definindo uma trait](#1-Definindo-uma-trait)
+[1. Definindo uma trait](#1-definindo-uma-trait)
 
-[2. Implementando uma trait](#2-Implementando-uma-trait)
+[2. Implementando uma trait](#2-implementando-uma-trait)
 
-[3. Limitação na implementação de uma trait](#3-Limitação-na-implementação-de-uma-trait)
+[3. Limitação na implementação de uma trait](#3-limitação-na-implementação-de-uma-trait)
 
-[4. Implementação padrão em métodos de uma trait](#4-Implementação-padrão-em-métodos-de-uma-trait)
+[4. Implementação padrão em métodos de uma trait](#4-implementação-padrão-em-métodos-de-uma-trait)
 
-[5. Trait como parâmetro](#5-Trait-como-parâmetro-de-função)
+[5. Trait como parâmetro](#5-trait-como-parâmetro-de-função)
 
-[6. Retornando tipos que implementam uma trait](#6-Retornando-tipos-que-implementam-uma-trait)
+[6. Retornando tipos que implementam uma trait](#6-retornando-tipos-que-implementam-uma-trait)
 
-[7. Usando trait bounds para implementar métodos condicionamente](#7-Usando-trait-bounds-para-implementar-métodos-condicionamente)
+[7. Usando trait bounds para implementar métodos condicionamente](#7-usando-trait-bounds-para-implementar-métodos-condicionamente)
 
 ---
 
@@ -453,4 +453,4 @@ Em linguagens dinamicamente tipadas, receberíamos um erro em tempo de execuçã
 
 arataca89@gmail.com
 
-Última atualização: 20240915
+Última atualização: 20241216
