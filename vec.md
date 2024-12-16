@@ -25,6 +25,7 @@ Um tipo de array dinâmico, escrito como ```Vec<T>```, abreviação para "vetor"
 	- [reserve()](#reserve) - Reserva capacidade para mais elementos.
 	- [reserve_exact()](#reserve_exact) - Reserva capacidade mínima para mais elementos.	
 	- [try_reserve()](#try_reserve) - Tenta reservar capacidade para mais elementos.
+	- [try_reserve_exact()](#try_reserve_exact)- Tenta reservar capacidade mínima para mais elementos.
 
 	
 ---
@@ -420,7 +421,7 @@ Tenta reservar capacidade para pelo menos mais **additional** elementos  a serem
 
 ### Erro
 
-Se a capacidade transbordar ou o alocador relatar uma falha, um erro será retornado. 
+Se a capacidade transbordar(overflow) ou o alocador relatar uma falha, um erro será retornado. 
 
 ```
 use std::collections::TryReserveError;
@@ -449,8 +450,39 @@ try_reserve_exact(
 ) -> Result<(), TryReserveError>
 ```
 
-asd
+Tenta reservar a capacidade mínima para que pelo menos ```additional``` elementos sejam inseridos no ```Vec<T>```. Ao contrário de ```try_reserve()```, não alocará memória a mais para evitar alocações frequentes. Após chamar ```try_reserve_exact()```, a capacidade será maior ou igual a ```self.len() + additional``` se retornar ```Ok(())```. Não faz nada se a capacidade já for suficiente.
 
+Observe que o alocador pode fornecerar mais espaço que o solicitado. Portanto, não se pode confiar que a capacidade seja precisamente mínima. Prefira ```try_reserve()``` se inserções futuras forem esperadas.
+
+### Erro
+
+Se a capacidade transbordar(overflow) ou o alocador relatar uma falha, um erro será retornado.
+
+```
+use std::collections::TryReserveError;
+
+fn process_data(data: &[u32]) -> Result<Vec<u32>, TryReserveError> {
+    let mut output = Vec::new();
+
+    // Pré-reserva a memória, saindo se não conseguir
+    output.try_reserve_exact(data.len())?;
+
+// memória reservada com sucesso, o trabalho continua...
+    output.extend(data.iter().map(|&val| {
+        val * 2 + 5 // muito complicado
+    }));
+
+    Ok(output)
+}
+```
+
+## shrink_to_fit()
+
+```
+shrink_to_fit(&mut self)
+```
+
+asd
 
 
 ---
@@ -463,4 +495,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20241215
+Última atualização: 20241216
