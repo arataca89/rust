@@ -26,6 +26,15 @@ Um tipo de array dinâmico, escrito como ```Vec<T>```, abreviação para "vetor"
 	- [reserve_exact()](#reserve_exact) - Reserva capacidade mínima para mais elementos.	
 	- [try_reserve()](#try_reserve) - Tenta reservar capacidade para mais elementos.
 	- [try_reserve_exact()](#try_reserve_exact)- Tenta reservar capacidade mínima para mais elementos.
+	- [shrink_to_fit()](#shrink_to_fit) - Reduz a capacidade do vetor o máximo possível.
+	- [shrink_to()](#shrink_to) - Reduz a capacidade do vetor com um limite inferior.
+	- [into_boxed_slice()](#into_boxed_slice) - Converte o vetor em ```Box<[T]>```.
+	- [truncate()](#truncate) - Reduz o tamanho do vetor, descartando elementos.
+	- [as_slice()](#as_slice) - Extrai uma slice contendo o vetor inteiro.
+	- [as_mut_slice()](#as_mut_slice) - Extrai uma slice mutável de todo o vetor.
+	- [as_ptr()](#as_ptr) - Retorna um ponteiro bruto para o buffer do vetor.
+	- [set_len()](#set_len) - Ajusta o comprimento do vetor, mas de forma insegura. (<font color="red">unsafe</font>)
+	- [swap_remove()](#swap_remove()) - Remove e retorna um elemento substituindo-o no vetor pelo último elemento. <font color="green">**Complexidade O(1)**</font>. <img src="images/ok.png" width="30" alt="OK">
 
 	
 ---
@@ -482,7 +491,324 @@ fn process_data(data: &[u32]) -> Result<Vec<u32>, TryReserveError> {
 shrink_to_fit(&mut self)
 ```
 
+Reduz a capacidade do vetor o máximo possível.
+
+O comportamento deste método depende do alocador, que pode reduzir o vetor no local ou realocar. O vetor resultante pode ainda ter alguma capacidade excedente, tal como acontece com ```with_capacity()```. Consulte ```Allocator::shrink``` para mais detalhes.
+
+```
+let mut vec = Vec::with_capacity(10);
+vec.extend([1, 2, 3]);
+assert!(vec.capacity() >= 10);
+vec.shrink_to_fit();
+assert!(vec.capacity() >= 3);
+```
+
+## shrink_to()
+
+```
+shrink_to(&mut self, min_capacity: usize)
+``` 
+
+Reduz a capacidade do vetor com um limite inferior.
+
+A capacidade permanecerá pelo menos tão grande quanto o comprimento e o valor fornecido.
+
+Se a capacidade atual for menor que o limite inferior, esta é uma operação sem efeito.
+
+```
+let mut vec = Vec::with_capacity(10);
+vec.extend([1, 2, 3]);
+assert!(vec.capacity() >= 10);
+vec.shrink_to(4);
+assert!(vec.capacity() >= 4);
+vec.shrink_to(0);
+assert!(vec.capacity() >= 3);
+```
+
+## into_boxed_slice()
+
+```
+into_boxed_slice(self) -> Box<[T], A>
+```
+
+Converte o vetor em ```Box<[T]>```.
+
+Antes de fazer a conversão, este método descarta o excesso de capacidade como ```shrink_to_fit()```.
+
+### Exemplos
+
+```
+let v = vec![1, 2, 3];
+
+let slice = v.into_boxed_slice();
+```
+
+Qualquer capacidade excedente é removida:
+
+```
+let mut vec = Vec::with_capacity(10);
+vec.extend([1, 2, 3]);
+
+assert!(vec.capacity() >= 10);
+let slice = vec.into_boxed_slice();
+assert_eq!(slice.into_vec().capacity(), 3);
+```
+
+## truncate()
+
+```
+truncate(&mut self, len: usize)
+```
+ 
+Reduz o tamanho do vetor, mantendo os primeiros ```len``` elementos e descartando o restante.
+
+Se ```len``` for maior ou igual ao comprimento atual do vetor, este método não terá efeito.
+
+O método ```drain()``` pode emular ```truncate()```, mas faz com que os elementos em excesso sejam retornados em vez de descartados.
+
+Observe que este método não tem efeito na capacidade alocada do vetor.
+
+### Exemplos
+
+Reduz um vetor de cinco elementos para dois elementos:""" 
+
+```
+let mut vec = vec![1, 2, 3, 4, 5];
+vec.truncate(2);
+assert_eq!(vec, [1, 2]);
+```
+
+Nenhuma truncagem ocorre quando ```len``` é maior que o comprimento atual do vetor:
+
+```
+let mut vec = vec![1, 2, 3];
+vec.truncate(8);
+assert_eq!(vec, [1, 2, 3]);
+```
+
+Truncar quando ```len == 0``` é equivalente a chamar o método ```clear()```.
+
+```
+let mut vec = vec![1, 2, 3];
+vec.truncate(0);
+assert_eq!(vec, []);
+```
+
+## as_slice()
+
+```
+as_slice(&self) -> &[T]
+``` 
+
+Extrai uma slice contendo o vetor inteiro.
+
+Equivalente a ```&s[..]```.
+
+```
+use std::io::{self, Write};
+let buffer = vec![1, 2, 3, 5, 8];
+io::sink().write(buffer.as_slice()).unwrap();
+```
+
+## as_mut_slice()
+
+```
+as_mut_slice(&mut self) -> &mut [T]
+``` 
+
+Extrai uma slice mutável de todo o vetor.
+
+Equivalente a ```&mut s[..]```.
+
+```
+use std::io::{self, Read};
+let mut buffer = vec![0; 3];
+io::repeat(0b101).read_exact(buffer.as_mut_slice()).unwrap();
+```
+
+## as_ptr()
+
+```
+as_ptr(&self) -> *const T
+``` 
+
+Retorna um ponteiro bruto para o buffer do vetor, ou um ponteiro bruto pendente válido para leituras de tamanho zero se o vetor não for alocado.
+
+O chamador deve garantir que o vetor sobreviva ao ponteiro que esta função retorna, ou então ele acabará pendurado. Modificar o vetor pode fazer com que seu buffer seja realocado, o que também tornaria quaisquer ponteiros para ele inválidos.
+
+O chamador também deve garantir que a memória para a qual o ponteiro (não transitivamente) aponta nunca seja gravada (exceto dentro de uma ```UnsafeCell```) usando este ponteiro ou qualquer ponteiro derivado dele. Se você precisar alterar o conteúdo do slice, use ```as_mut_ptr()```.
+
+Este método garante que, para o propósito do modelo de aliasing, este método não materialize uma referência ao slice subjacente e, portanto, o ponteiro retornado permanecerá válido quando misturado com outras chamadas para ```as_ptr()```, ```as_mut_ptr()``` e ```as_non_null()```. Note que chamar outros métodos que materializam referências mutáveis ​​para a slice, ou referências mutáveis ​​para elementos específicos que você está planejando acessar por meio deste ponteiro, bem como escrever para esses elementos, ainda pode invalidar este ponteiro. Veja o segundo exemplo abaixo para saber como esta garantia pode ser usada.
+
+### Exemplos
+
+```
+let x = vec![1, 2, 4];
+let x_ptr = x.as_ptr();
+
+unsafe {
+    for i in 0..x.len() {
+        assert_eq!(*x_ptr.add(i), 1 << i);
+    }
+}
+```
+
+Devido à garantia de aliasing, o código a seguir é legal:
+
+```
+unsafe {
+    let mut v = vec![0, 1, 2];
+    let ptr1 = v.as_ptr();
+    let _ = ptr1.read();
+    let ptr2 = v.as_mut_ptr().offset(2);
+    ptr2.write(2);
+    // Notavelmente, a gravação em `ptr2` *não* invalidou `ptr1`
+    // porque ele alterou um elemento diferente:
+    let _ = ptr1.read();
+}
+``` 
+
+## as_mut_ptr()
+
+```
+as_mut_ptr(&mut self) -> *mut T
+```
+
+Retorna um ponteiro mutável bruto para o buffer do vetor, ou um ponteiro bruto pendente válido para leituras de tamanho zero se o vetor não for alocado.
+
+O chamador deve garantir que o vetor sobreviva ao ponteiro que esta função retorna, ou então ele acabará pendurado. Modificar o vetor pode fazer com que seu buffer seja realocado, o que também tornaria quaisquer ponteiros para ele inválidos.
+
+Este método garante que, para o propósito do modelo de aliasing, este método não materializa uma referência a slice subjacente e, portanto, o ponteiro retornado permanecerá válido quando misturado com outras chamadas para ```as_ptr()```, ```as_mut_ptr()``` e ```as_non_null()```. Observe que chamar outros métodos que materializam referências a slice, ou referências a elementos específicos que você está planejando acessar por meio deste ponteiro, ainda pode invalidar este ponteiro. Veja o segundo exemplo abaixo para saber como esta garantia pode ser usada.
+
+### Exemplos
+
+```
+// Aloque um vetor grande o suficiente para 4 elementos.
+let size = 4;
+let mut x: Vec<i32> = Vec::with_capacity(size);
+let x_ptr = x.as_mut_ptr();
+
+// Inicializa elementos por meio de gravações de
+// ponteiros brutos e, em seguida, define o comprimento.
+unsafe {
+    for i in 0..size {
+        *x_ptr.add(i) = i as i32;
+    }
+    x.set_len(size);
+}
+assert_eq!(&*x, &[0, 1, 2, 3]);
+```
+
+Devido à garantia de aliasing, o código a seguir é legal:
+
+```
+unsafe {
+    let mut v = vec![0];
+    let ptr1 = v.as_mut_ptr();
+    ptr1.write(1);
+    let ptr2 = v.as_mut_ptr();
+    ptr2.write(2);
+    // Notavelmente, a gravação em `ptr2` *não* invalidou `ptr1`:
+    ptr1.write(3);
+}
+```
+
+
+## set_len()
+
+<img src="images/warning_unsafe.png" width="100" alt="UNSAFE">
+
+```
+set_len(&mut self, new_len: usize)
+```
+
+Força o comprimento do vetor para **new_len**.
+
+Esta é uma operação de baixo nível que não mantém nenhuma das invariantes normais do tipo. Normalmente, a alteração do comprimento de um vetor é feita usando uma das operações seguras, como ```truncate()```, ```resize()```, ```extend()```, ou ```clear()```.
+
+### Segurança
+
+* **new_len** deve ser menor ou igual a ```capacity()```;
+* Os elementos em **old_len..new_len** devem ser inicializados.
+
+### Exemplos
+
+Este método pode ser útil para situações em que o vetor está servindo como um buffer para outro código, particularmente sobre FFI: 
+
+```
+pub fn get_dictionary(&self) -> Option<Vec<u8>> {
+    // De acordo com a documentação do método FFI, "32.768 bytes são sempre suficientes".
+    let mut dict = Vec::with_capacity(32_768);
+    let mut dict_length = 0;
+	// SEGURANÇA: Quando `deflateGetDictionary` retorna `Z_OK`, ele garante que:
+	// 1. `dict_length` elementos foram inicializados.
+	// 2. `dict_length` <= a capacidade (32_768)
+	// o que torna `set_len` seguro para chamar.
+    unsafe {
+	// Faz a chamada FFI...
+        let r = deflateGetDictionary(self.strm, dict.as_mut_ptr(), &mut dict_length);
+        if r == Z_OK {
+	// ...e atualiza o comprimento para o que foi inicializado.
+            dict.set_len(dict_length);
+            Some(dict)
+        } else {
+            None
+        }
+    }
+}
+``` 
+
+Embora o exemplo a seguir seja válido, há um vazamento de memória, pois os vetores internos não foram liberados antes da chamada a ```set_len()```:
+
+```
+let mut vec = vec![vec![1, 0, 0],
+                   vec![0, 1, 0],
+                   vec![0, 0, 1]];
+// SEGURANÇA:
+// 1. `old_len..0` está vazio, então nenhum elemento precisa ser inicializado.
+// 2. `0 <= capacity` sempre contém qualquer `capacity` que seja.
+unsafe {
+    vec.set_len(0);
+}
+```
+
+Normalmente, aqui, ```clear()``` deveria ter sido usado para descartar corretamente o conteúdo e, portanto, não vazar memória.
+
+## swap_remove()
+
+```
+swap_remove(&mut self, index: usize) -> T
+```
+
+Remove um elemento do vetor e o retorna.
+
+O elemento removido é substituído pelo último elemento do vetor.
+
+Isso não preserva a ordem dos elementos restantes, mas é O(1). Se você precisar preservar a ordem dos elementos, use ```remove()```.
+
+### Pânico
+
+Entra em pânico se o índice estiver fora dos limites.
+
+```
+let mut v = vec!["foo", "bar", "baz", "qux"];
+
+assert_eq!(v.swap_remove(1), "bar");
+assert_eq!(v, ["foo", "qux", "baz"]);
+
+assert_eq!(v.swap_remove(0), "foo");
+assert_eq!(v, ["baz", "qux"]);
+```
+
+## insert()
+
+```
+insert(&mut self, index: usize, element: T)
+``` 
+ 
 asd
+
+
 
 
 ---
@@ -495,4 +821,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20241216
+Última atualização: 20241218
