@@ -35,6 +35,14 @@ Um tipo de array dinâmico, escrito como ```Vec<T>```, abreviação para "vetor"
 	- [as_ptr()](#as_ptr) - Retorna um ponteiro bruto para o buffer do vetor.
 	- [set_len()](#set_len) - Ajusta o comprimento do vetor, mas de forma insegura. (<font color="red">unsafe</font>)
 	- [swap_remove()](#swap_remove()) - Remove e retorna um elemento substituindo-o no vetor pelo último elemento. <font color="green">**Complexidade O(1)**</font>. <img src="images/ok.png" width="30" alt="OK">
+	- [insert()](#insert) - Insere um elemento numa determinada posição , deslocando todos os elementos após ele para a direita.
+	- [remove()](#remove) - Remove e retorna elemento em determinada posição, deslocando todos os elementos após ele para a esquerda.
+	- [retain()](#retain) - Mantém apenas os elementos especificados pelo predicado (closure passada como argumento).
+	- [dedup_by_key()](#dedup_by_key) - Remove todos, exceto o primeiro, dos elementos consecutivos no vetor que resolvem para a mesma chave.
+	- [dedub_by()](#dedup_by) - Remove todos, exceto o primeiro, dos elementos consecutivos no vetor que satisfazem uma determinada relação de igualdade.
+	- [push()](#push) - Insere um elemento no final do vetor.
+	- [pop()](#pop) -  Remove o último elemento do vetor e o retorna, ou ```None``` se estiver vazio. <font color="green">**Complexidade O(1)**</font>. <img src="images/ok.png" width="30" alt="OK">
+	- [append()](#append) - Move os elementos de um vetor para outro.
 
 	
 ---
@@ -806,10 +814,228 @@ assert_eq!(v, ["baz", "qux"]);
 insert(&mut self, index: usize, element: T)
 ``` 
  
+Insere um elemento na posição **index**, deslocando todos os elementos após ele para a direita.
+
+### Pânico
+
+Entra em pânico se **index** é maior que ```len()```.
+
+### Exemplos
+
+```
+let mut vec = vec![1, 2, 3];
+vec.insert(1, 4);
+assert_eq!(vec, [1, 4, 2, 3]);
+vec.insert(4, 5);
+assert_eq!(vec, [1, 4, 2, 3, 5]);
+```
+
+### Complexidade
+
+**O(Vec::len)**.
+
+Todos os itens após o índice de inserção devem ser deslocados para a direita. No pior caso, todos os elementos são deslocados quando o índice de inserção é 0. 
+
+## remove()
+
+```
+remove(&mut self, index: usize) -> T
+```
+
+Remove e retorna o elemento na posição **index**, deslocando todos os elementos após ele para a esquerda.
+
+Observação: Como este método desloca os elementos restantes, ele tem um desempenho de pior caso de **O(n)**. Se você não precisar que a ordem dos elementos seja preservada, use ```swap_remove()```. Se você quiser remover elementos do início, considere usar ```VecDeque::pop_front()```.
+
+### Pânico
+
+Entra em pânico se **index** estiver fora dos limites.
+
+```
+let mut v = vec![1, 2, 3];
+assert_eq!(v.remove(1), 2);
+assert_eq!(v, [1, 3]);
+```
+
+## retain()
+
+```
+retain<F>(&mut self, f: F)
+where
+    F: FnMut(&T) -> bool,
+``` 
+ 
+Mantém apenas os elementos especificados pelo predicado (closure passada como argumento).
+
+Em outras palavras, remove todos os elementos **e** para os quais **f(&e)** retorna **false**. Este método opera no local, visitando cada elemento exatamente uma vez na ordem original, e preserva a ordem dos elementos retidos.
+
+### Exemplos
+
+```
+let mut vec = vec![1, 2, 3, 4];
+vec.retain(|&x| x % 2 == 0);
+assert_eq!(vec, [2, 4]);
+```
+
+Como os elementos são visitados exatamente uma vez na ordem original, o estado externo pode ser usado para decidir quais elementos manter. 
+
+```
+let mut vec = vec![1, 2, 3, 4, 5];
+let keep = [false, true, true, false, true];
+let mut iter = keep.iter();
+vec.retain(|_| *iter.next().unwrap());
+assert_eq!(vec, [2, 3, 5]);
+```
+
+## retain_mut()
+
+```
+retain_mut<F>(&mut self, f: F)
+where
+    F: FnMut(&mut T) -> bool,
+```
+
+Mantém apenas os elementos especificados pelo predicado(closure passada como argumento), passando uma referência mutável para o elemento.
+
+Em outras palavras, remove todos os elementos e tais que **f(&mut e)** retorna **false**. Este método opera no local, visitando cada elemento exatamente uma vez na ordem original, e preserva a ordem dos elementos retidos.
+
+```
+let mut vec = vec![1, 2, 3, 4];
+vec.retain_mut(|x| if *x <= 3 {
+    *x += 1;
+    true
+} else {
+    false
+});
+assert_eq!(vec, [2, 3, 4]);
+```
+
+## dedup_by_key()
+
+```
+dedup_by_key<F, K>(&mut self, key: F)
+where
+    F: FnMut(&mut T) -> K,
+    K: PartialEq,
+```
+
+Remove todos, exceto o primeiro, dos elementos consecutivos no vetor que resolvem para a mesma chave.
+
+
+```
+let mut vec = vec![10, 20, 21, 30, 20];
+    
+vec.dedup_by_key(|i| *i / 10);
+    
+assert_eq!(vec, [10, 20, 30, 20]);
+```
+
+Se o vetor estiver ordenado, isso remove todas as duplicatas:
+
+```   
+let mut vec2 = vec![10, 20, 20, 30, 20, 40, 40, 50];
+    
+vec2.dedup_by_key(|i| *i / 10);
+    
+assert_eq!(vec2, [10, 20, 30, 20, 40, 50]);
+```
+
+## dedup_by()
+
+```
+dedup_by<F>(&mut self, same_bucket: F)
+where
+    F: FnMut(&mut T, &mut T) -> bool,
+```
+
+Remove todos, exceto o primeiro, dos elementos consecutivos no vetor que satisfazem uma determinada relação de igualdade.
+
+A função ```same_bucket()``` recebe referências a dois elementos do vetor e deve determinar se os elementos são iguais. Os elementos são passados na ordem oposta à sua ordem na fatia, então se ```same_bucket(a, b)``` retornar **true**, **a** é removido.
+
+Se o vetor estiver ordenado, isso remove todas as duplicatas.
+
+```
+let mut vec = vec!["foo", "bar", "Bar", "baz", "bar"];
+
+vec.dedup_by(|a, b| a.eq_ignore_ascii_case(b));
+
+assert_eq!(vec, ["foo", "bar", "baz", "bar"]);
+```
+
+## push()
+
+```
+push(&mut self, value: T)
+```
+
+Insere um elemento no final do vetor.
+
+### Pânico
+
+Entra em pânico se a nova capacidade exceder ```isize::MAX bytes```.
+
+### Exemplo
+
+```
+let mut vec = vec![1, 2];
+vec.push(3);
+assert_eq!(vec, [1, 2, 3]);
+```
+
+### Complexidade
+
+Leva tempo amortizado **O(1)**. Se o comprimento do vetor exceder sua capacidade após ```push()```, **O(capacidade)** de tempo é gasto para copiar os elementos do vetor para uma alocação maior. Essa operação cara é compensada pelas inserções **O(1)** dentro da capacidade que ela permite. 
+
+## pop()
+
+```
+pop(&mut self) -> Option<T>
+```
+ 
+Remove o último elemento do vetor e o retorna, ou ```None``` se estiver vazio.
+
+Se você quiser remover o primeiro elemento, considere usar ```VecDeque::pop_front()``` em vez disso.
+
+### Exemplos
+
+```
+let mut vec = vec![1, 2, 3];
+assert_eq!(vec.pop(), Some(3));
+assert_eq!(vec, [1, 2]);
+```
+
+### Complexidade
+
+<font color="green">**Complexidade O(1)**</font>  
+
+## append()
+
+```
+append(&mut self, other: &mut Vec<T, A>)
+```
+
+Move todos os elementos de **other** para **self,** deixando **other** vazio.
+
+### Pânico
+
+Entra em pânico se a nova capacidade exceder ```isize::MAX bytes``` ou se os tipos dos elementos dos vetores forem diferentes.
+
+```
+let mut vec = vec![1, 2, 3];
+let mut vec2 = vec![4, 5, 6];
+vec.append(&mut vec2);
+assert_eq!(vec, [1, 2, 3, 4, 5, 6]);
+assert_eq!(vec2, []);
+```
+
+## drain()
+
+```
+drain<R>(&mut self, range: R) -> Drain<'_, T, A> ⓘ
+where
+    R: RangeBounds<usize>,
+```
+
 asd
-
-
-
 
 ---
 
@@ -821,4 +1047,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20241218
+Última atualização: 20241219
