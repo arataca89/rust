@@ -1,3 +1,5 @@
+#### arataca89
+
 # Linguagem Rust - Vec
 
 std::Vec
@@ -18,32 +20,44 @@ Um tipo de array dinâmico, escrito como ```Vec<T>```, abreviação para "vetor"
 * [Capacidade e realocação](#capacidade-e-realocação)
 * [Garantias](#garantias)
 * [Métodos](#métodos)
-	- [new()](#new) - Constrói um novo ```Vec<T>``` vazio.
-	- [with_capacity()](#with_capacity) - Constrói um novo ```Vec<T>``` vazio com pelo menos a capacidade especificada.
-	- [from_raw_parts()](#from_raw_parts) - Cria um ```Vec<T>``` diretamente de um ponteiro, um comprimento e uma capacidade.
-	- [capacity()](#capacity) - Retorna o número total de elementos que o vetor pode conter sem realocar.
-	- [reserve()](#reserve) - Reserva capacidade para mais elementos.
-	- [reserve_exact()](#reserve_exact) - Reserva capacidade mínima para mais elementos.	
-	- [try_reserve()](#try_reserve) - Tenta reservar capacidade para mais elementos.
-	- [try_reserve_exact()](#try_reserve_exact)- Tenta reservar capacidade mínima para mais elementos.
-	- [shrink_to_fit()](#shrink_to_fit) - Reduz a capacidade do vetor o máximo possível.
-	- [shrink_to()](#shrink_to) - Reduz a capacidade do vetor com um limite inferior.
-	- [into_boxed_slice()](#into_boxed_slice) - Converte o vetor em ```Box<[T]>```.
-	- [truncate()](#truncate) - Reduz o tamanho do vetor, descartando elementos.
-	- [as_slice()](#as_slice) - Extrai uma slice contendo o vetor inteiro.
+	- [append()](#append) - Move os elementos de um vetor para outro.
 	- [as_mut_slice()](#as_mut_slice) - Extrai uma slice mutável de todo o vetor.
 	- [as_ptr()](#as_ptr) - Retorna um ponteiro bruto para o buffer do vetor.
-	- [set_len()](#set_len) - Ajusta o comprimento do vetor, mas de forma insegura. (<font color="red">unsafe</font>)
-	- [swap_remove()](#swap_remove()) - Remove e retorna um elemento substituindo-o no vetor pelo último elemento. <font color="green">**Complexidade O(1)**</font>. <img src="images/ok.png" width="30" alt="OK">
-	- [insert()](#insert) - Insere um elemento numa determinada posição , deslocando todos os elementos após ele para a direita.
-	- [remove()](#remove) - Remove e retorna elemento em determinada posição, deslocando todos os elementos após ele para a esquerda.
-	- [retain()](#retain) - Mantém apenas os elementos especificados pelo predicado (closure passada como argumento).
-	- [dedup_by_key()](#dedup_by_key) - Remove todos, exceto o primeiro, dos elementos consecutivos no vetor que resolvem para a mesma chave.
+	- [as_slice()](#as_slice) - Extrai uma slice contendo o vetor inteiro.
+	- [capacity()](#capacity) - Retorna o número total de elementos que o vetor pode conter sem realocar.
+	- [clear()](#clear) - Limpa o vetor, removendo todos os valores.
 	- [dedub_by()](#dedup_by) - Remove todos, exceto o primeiro, dos elementos consecutivos no vetor que satisfazem uma determinada relação de igualdade.
-	- [push()](#push) - Insere um elemento no final do vetor.
+	- [dedup()](#dedup) - Remove elementos repetidos consecutivos.
+	- [dedup_by_key()](#dedup_by_key) - Remove todos, exceto o primeiro, dos elementos consecutivos no vetor que resolvem para a mesma chave.
+	- [drain()](#drain) - Remove o intervalo especificado do vetor, retornando todos os elementos removidos como um iterador.
+	- [extend_from_slice()](#extend_from_slice) - Clona e anexa todos os elementos de uma slice ao ```Vec```.
+	- [extend_from_within()](#extend_from_within) - Copia elementos de dentro do vetor para o final.
+	- [from_raw_parts()](#from_raw_parts) - Cria um ```Vec<T>``` diretamente de um ponteiro, um comprimento e uma capacidade.
+	- [insert()](#insert) - Insere um elemento numa determinada posição , deslocando todos os elementos após ele para a direita.
+	- [into_boxed_slice()](#into_boxed_slice) - Converte o vetor em ```Box<[T]>```.
+	- [into_flattened()](#into_flattened) - Recebe um ```Vec<[T; N]>``` e o achata em um ```Vec<T>```.
+	- [is_empty()](#is_empty) - Retorna ```true``` se o vetor não contém elementos.
+	- [len()](#len) - Retorna o número de elementos no vetor.
+	- [new()](#new) - Constrói um novo ```Vec<T>``` vazio.
 	- [pop()](#pop) -  Remove o último elemento do vetor e o retorna, ou ```None``` se estiver vazio. <font color="green">**Complexidade O(1)**</font>. <img src="images/ok.png" width="30" alt="OK">
-	- [append()](#append) - Move os elementos de um vetor para outro.
-
+	- [push()](#push) - Insere um elemento no final do vetor.
+	- [remove()](#remove) - Remove e retorna elemento em determinada posição, deslocando todos os elementos após ele para a esquerda.
+	- [reserve()](#reserve) - Reserva capacidade para mais elementos.
+	- [reserve_exact()](#reserve_exact) - Reserva capacidade mínima para mais elementos.	
+	- [resize()](#resize) - Redimensiona o vetor.
+	- [resize_with()](#resize_with) - Redimensiona o vetor.
+	- [retain()](#retain) - Mantém apenas os elementos especificados pelo predicado (closure passada como argumento).
+	- [set_len()](#set_len) - Ajusta o comprimento do vetor, mas de forma insegura. (<font color="red">unsafe</font>)
+	- [shrink_to()](#shrink_to) - Reduz a capacidade do vetor com um limite inferior.
+	- [shrink_to_fit()](#shrink_to_fit) - Reduz a capacidade do vetor o máximo possível.
+	- [spare_capacity_mut()](#spare_capacity_mut) - Retorna a capacidade de reserva restante do vetor.
+	- [splice()](#splice) - Cria um iterador que substitui o intervalo especificado no vetor por outro iterador e produz os itens removidos.
+	- [split_off()](#split_off) - Divide o vetor em duas partes no índice fornecido.
+	- [swap_remove()](#swap_remove()) - Remove e retorna um elemento substituindo-o no vetor pelo último elemento. <font color="green">**Complexidade O(1)**</font>. <img src="images/ok.png" width="30" alt="OK">
+	- [truncate()](#truncate) - Reduz o tamanho do vetor, descartando elementos.
+	- [try_reserve()](#try_reserve) - Tenta reservar capacidade para mais elementos.
+	- [try_reserve_exact()](#try_reserve_exact)- Tenta reservar capacidade mínima para mais elementos.
+	- [with_capacity()](#with_capacity) - Constrói um novo ```Vec<T>``` vazio com pelo menos a capacidade especificada.
 	
 ---
 
@@ -1030,12 +1044,344 @@ assert_eq!(vec2, []);
 ## drain()
 
 ```
-drain<R>(&mut self, range: R) -> Drain<'_, T, A> ⓘ
+drain<R>(&mut self, range: R) -> Drain<'_, T, A>
 where
     R: RangeBounds<usize>,
 ```
 
-asd
+Remove o intervalo especificado do vetor, retornando todos os elementos removidos como um iterador. Se o iterador for descartado antes de ser totalmente consumido, ele descarta os elementos removidos restantes.
+
+O iterador retornado mantém um empréstimo mutável no vetor para otimizar sua implementação.
+
+### Pânico
+
+Entra em pânico se o ponto de partida for maior que o ponto final ou se o ponto final for maior que o comprimento do vetor. 
+
+### Vazamento
+
+Se o iterador retornado sair do escopo sem ser descartado (devido a ```mem::forget()```, por exemplo), o vetor pode ter perdido e vazado elementos arbitrariamente, incluindo elementos fora do intervalo.
+
+```
+let mut v = vec![1, 2, 3];
+let u: Vec<_> = v.drain(1..).collect();
+assert_eq!(v, &[1]);
+assert_eq!(u, &[2, 3]);
+
+// Um ​​intervalo completo limpa o vetor, como `clear()` faz
+v.drain(..);
+assert_eq!(v, &[]);
+```
+
+## clear()
+
+```
+clear(&mut self)
+```
+
+Limpa o vetor, removendo todos os valores.
+
+Observe que este método não tem efeito na capacidade alocada do vetor. 
+
+```
+let mut v = vec![1, 2, 3];
+
+v.clear();
+
+assert!(v.is_empty());
+```
+
+## len()
+```
+len(&self) -> usize
+```
+
+Retorna o número de elementos no vetor, também conhecido como seu 'comprimento'. 
+
+```
+let a = vec![1, 2, 3];
+assert_eq!(a.len(), 3);
+```
+
+## is_empty()
+
+```
+is_empty(&self) -> bool
+```
+ 
+
+Retorna ```true``` se o vetor não contém elementos.
+
+```
+let mut v = Vec::new();
+assert!(v.is_empty());
+
+v.push(1);
+assert!(!v.is_empty());
+```
+
+## split_off()
+
+```
+split_off(&mut self, at: usize) -> Vec<T, A>
+where
+    A: Clone,
+```
+
+Divide o vetor em duas partes no índice fornecido.
+
+Retorna um novo vetor alocado contendo os elementos no intervalo **[at, len)**. Após a chamada, o vetor original será deixado contendo os elementos **[0, at)** com sua capacidade anterior inalterada.
+
+* Se você deseja assumir a propriedade de todo o conteúdo e capacidade do vetor, consulte ```mem::take()``` ou ```mem::replace()```.
+* Se você não precisa do vetor retornado, consulte ```Vec::truncate()```.
+* Se você deseja assumir a propriedade de uma subslice arbitrária, ou não precisa necessariamente armazenar os itens removidos em um vetor, consulte ```Vec::drain()```. 
+
+### Pânico
+
+Entra em pânico se **at > len**.
+
+```
+let mut vec = vec![1, 2, 3];
+let vec2 = vec.split_off(1);
+assert_eq!(vec, [1]);
+assert_eq!(vec2, [2, 3]);
+```
+
+## resize_with()
+
+```
+resize_with<F>(&mut self, new_len: usize, f: F)
+where
+    F: FnMut() -> T,
+``` 
+
+Redimensiona o vetor para que **len** seja igual a **new_len**.
+
+Se **new_len** for maior que **len**, o ```Vec``` é estendido pela diferença, com cada slot adicional preenchido com o resultado da chamada da closure **f**. Os valores de retorno de **f** acabarão no ```Vec``` na ordem em que foram gerados.
+
+Se **new_len** for menor que **len**, o ```Vec``` é simplesmente truncado.
+
+Este método usa uma closure para criar novos valores em cada **push**. Se você preferir clonar um valor fornecido, use ```Vec::resize()```. Se quiser usar a traço ```Default``` para gerar valores, você pode passar ```Default::default``` como o segundo argumento.
+
+```
+let mut vec = vec![1, 2, 3];
+vec.resize_with(5, Default::default);
+assert_eq!(vec, [1, 2, 3, 0, 0]);
+
+let mut vec = vec![];
+let mut p = 1;
+vec.resize_with(4, || { p *= 2; p });
+assert_eq!(vec, [2, 4, 8, 16]);
+```
+
+## leak()
+
+```
+leak<'a>(self) -> &'a mut [T]
+where
+    A: 'a,
+```
+
+Consome e vaza o ```Vec```, retornando uma referência mutável ao conteúdo, ```&'a mut [T]```.
+
+Observe que o tipo **T** deve sobreviver ao tempo de vida escolhido **'a**. Se o tipo tiver apenas referências estáticas, ou nenhuma, então isso pode ser escolhido para ser **'static**.
+
+A partir do Rust 1.57, esse método não realoca ou reduz o ```Vec```, então a alocação vazada pode incluir capacidade não utilizada que não faz parte da slice retornada.
+
+Essa função é útil principalmente para dados que vivem pelo restante da vida do programa.
+
+<img src="images/warning.png" width="100" alt="WARNING"> Descartar a referência retornada causará um vazamento de memória. 
+
+```
+let x = vec![1, 2, 3];
+let static_ref: &'static mut [usize] = x.leak();
+static_ref[0] += 1;
+assert_eq!(static_ref, &[2, 2, 3]);
+```
+
+## spare_capacity_mut()
+
+```
+spare_capacity_mut(&mut self) -> &mut [MaybeUninit<T>]
+```
+
+Retorna a capacidade de reserva restante do vetor como uma slice de ```MaybeUninit<T>```.
+
+A slice retornada pode ser usada para preencher o vetor com dados (por exemplo, lendo de um arquivo) antes de marcar os dados como inicializados usando o método ```set_len()```.
+
+```
+// Aloca um vetor grande o suficiente para 10 elementos.
+let mut v = Vec::with_capacity(10);
+
+// Preencha os 3 primeiros elementos.
+let uninit = v.spare_capacity_mut();
+uninit[0].write(0);
+uninit[1].write(1);
+uninit[2].write(2);
+
+// Marca os 3 primeiros elementos do vetor como inicializados.
+unsafe {
+    v.set_len(3);
+}
+
+assert_eq!(&v, &[0, 1, 2]);
+```
+
+## resize()
+
+```
+resize(&mut self, new_len: usize, value: T)
+```
+
+Redimensiona o ```Vec``` para que **len** seja igual a **new_len**.
+
+Se **new_len** for maior que **len**, o ```Vec``` é estendido pela diferença, com cada slot adicional preenchido com **value**. Se **new_len** for menor que **len**, o ```Vec``` é simplesmente truncado.
+
+Este método requer que **T** implemente ```Clone```, para poder clonar o valor passado. Se você precisar de mais flexibilidade (ou quiser depender de ```Default``` em vez de ```Clone```), use ```Vec::resize_with()```. Se você precisar apenas redimensionar para um tamanho menor, use ```Vec::truncate()```.
+
+```
+let mut vec = vec!["hello"];
+vec.resize(3, "world");
+assert_eq!(vec, ["hello", "world", "world"]);
+
+let mut vec = vec![1, 2, 3, 4];
+vec.resize(2, 0);
+assert_eq!(vec, [1, 2]);
+```
+
+## extend_from_slice()
+
+```
+extend_from_slice(&mut self, other: &[T])
+``` 
+
+Clona e anexa todos os elementos de uma slice ao ```Vec```.
+
+Itera sobre a slice **other**, clona cada elemento e, em seguida, o anexa a este ```Vec```. A slice **other** é percorrida em ordem.
+
+Observe que esta função é a mesma que ```extend()```, exceto que é especializada para funcionar com slices. Se e quando o Rust obtiver especialização, esta função provavelmente será depreciada (mas ainda estará disponível).
+
+```
+let mut vec = vec![1];
+vec.extend_from_slice(&[2, 3, 4]);
+assert_eq!(vec, [1, 2, 3, 4]);
+```
+
+## extend_from_within()
+
+```
+extend_from_within<R>(&mut self, src: R)
+```
+
+Copia elementos do intervalo **src** para o final do vetor.
+
+### Pânico 
+
+Entra em pânico se o ponto de partida for maior que o ponto final ou se o ponto final for maior que o comprimento do vetor. 
+
+```
+let mut vec = vec![0, 1, 2, 3, 4];
+
+vec.extend_from_within(2..);
+assert_eq!(vec, [0, 1, 2, 3, 4, 2, 3, 4]);
+
+vec.extend_from_within(..2);
+assert_eq!(vec, [0, 1, 2, 3, 4, 2, 3, 4, 0, 1]);
+
+vec.extend_from_within(4..8);
+assert_eq!(vec, [0, 1, 2, 3, 4, 2, 3, 4, 0, 1, 4, 2, 3, 4]);
+```
+
+## into_flattened()
+
+```
+into_flattened(self) -> Vec<T, A>
+```
+
+Recebe um ```Vec<[T; N]>``` e o achata em um ```Vec<T>```.
+
+### Pânico
+
+Entra em pânico se o comprimento do vetor resultante exceder o tamanho máximo do tipo ```usize```.
+
+Isso só é possível ao achatar um vetor de matrizes de tipos de tamanho zero, e, portanto, tende a ser irrelevante na prática. Se ```size_of::<T>() > 0```, isso nunca causará pânico. 
+ 
+
+### Exemplos
+
+```
+let mut vec = vec![[1, 2, 3], [4, 5, 6], [7, 8, 9]];
+let mut flattened = vec.into_flattened();
+assert_eq!(flattened, [1, 2, 3, 4, 5, 6, 7, 8, 9]);
+```
+
+```
+let mut vec = vec![[1, 2, 3], [4, 5, 6], [7, 8, 9]];
+assert_eq!(vec.pop(), Some([7, 8, 9]));
+assert_eq!(vec, [[1, 2, 3], [4, 5, 6]]);
+
+let mut flattened = vec.into_flattened();
+assert_eq!(flattened, [1, 2, 3, 4, 5, 6]);
+assert_eq!(flattened.pop(), Some(6));
+```
+
+## dedup()
+
+```
+dedup(&mut self)
+```
+
+Remove elementos repetidos consecutivos no vetor de acordo com a implementação da trait ```PartialEq```.
+
+Se o vetor estiver ordenado, isso remove todas as duplicatas.
+
+```
+let mut vec = vec![1, 2, 2, 3, 2];
+
+vec.dedup();
+
+assert_eq!(vec, [1, 2, 3, 2]);
+```
+
+## splice()
+
+```
+splice<R, I>(
+    &mut self,
+    range: R,
+    replace_with: I,
+) -> Splice<'_, <I as IntoIterator>::IntoIter, A> ⓘ
+where
+    R: RangeBounds<usize>,
+    I: IntoIterator<Item = T>,
+```
+
+Cria um iterador que substitui o intervalo especificado no vetor pelo iterador **replace_with** fornecido e produz os itens removidos. **replace_with** não precisa ter o mesmo comprimento que o intervalo.
+
+O intervalo é removido mesmo que o iterador não seja consumido até o final.
+
+Não é especificado quantos elementos são removidos do vetor se o valor ```Splice``` for vazado.
+
+O iterador de entrada **replace_with** só é consumido quando o valor ```Splice``` é descartado.
+
+Isso é ótimo se: 
+
+* A cauda (elementos no vetor após o intervalo) está vazia,
+* ou **replace_with** gera menos ou igual elementos do que o comprimento do intervalo,
+* ou o limite inferior do seu ```size_hint()``` é exato. 
+
+Caso contrário, um vetor temporário é alocado e a cauda é movida duas vezes. 
+
+### Pânico
+
+Entra em pânico se o ponto de partida for maior que o ponto final ou se o ponto final for maior que o comprimento do vetor. 
+
+```
+let mut v = vec![1, 2, 3, 4];
+let new = [7, 8, 9];
+let u: Vec<_> = v.splice(1..3, new).collect();
+assert_eq!(v, &[1, 7, 8, 9, 4]);
+assert_eq!(u, &[2, 3]);
+```
 
 ---
 
@@ -1047,4 +1393,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20241219
+Última atualização: 20241220
