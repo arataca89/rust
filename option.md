@@ -1,4 +1,6 @@
-# Option
+#### arataca89
+
+# Linguagem Rust - Option
 
 ```std::option::Option``` é uma enumeração definida na biblioteca padrão da linguagem Rust.
 
@@ -47,93 +49,50 @@ match result {
 
 ### Métodos
 
-[>>>](#is_some) is_some( ) - retorna ```true``` se o ```Option``` é um ```Some```.
-
-[>>>](#is_some_and) is_some_and() - retorna ```true``` se a ```Option``` é um ```Some``` e o valor dentro dela atende a closure passada como argumento.
-
-[>>>](#is_none) is_none() - retorna ```true``` se o ```Option``` é um ```None```.
-
-[>>>](#is_none_or) is_none_or() - retorna ```true``` se a ```Option``` é um ```None``` ou o valor ```Some``` dentro dela atende a closure passada como argumento.
-
-[>>>](#as_ref) as_ref() - converte de ```&Option<T>``` para ```Option<&T>.```
-
-[>>>](#as_mut) as_mut() - converte de ```&mut Option<T>``` para ```Option<&mut T>```.
-
-[>>>](#as_pin_ref) as_pin_ref() - converte de ```Pin<&Option<T>>``` para ```Option<Pin<&T>>```.)
-
-[>>>](#as_pin_mut) as_pin_mut() - converte de ```Pin<&mut Option<T>>``` para ```Option<Pin<&mut T>>```. )
-
-[>>>](as_slice) as_slice() - retorna uma slice do valor contido, se houver. Se este for ```None```, uma slice vazia é retornada.
-
-[>>>](#as_mut_slice) as_mut_slice() - retorna uma slice mutável do valor contido, se houver. Se este for ```None```, uma slice vazia é retornada.
-
-[>>>](#expect) expect(&str) - retorna o valor contido em ```Some```, consumindo ```self```. Se o valor for ```None``` emite ```panic!``` com a mensagem passada como argumento.
-
-[>>>](#unwrap) unwrap() - retorna o valor contido em ```Some```, consumindo ```self```. Caso o valor seja ```None``` emite ```panic!```.
-
-[>>>](#unwrap_or_else) unwrap_or_else(closure) - retorna o valor contido em ```Some``` ou, em caso de ```None```, calcula o valor a partir da closure passada como argumento.
-
-[>>>](#unwrap_or_default) unwrap_or_default() - retorna o valor contido em ```Some``` ou o valor default para o tipo de dados em questão.
-
-[>>>](#unwrap_unchecked) unwrap_unchecked() - retorna o valor contido em ```Some```, consumindo ```self```, sem verificar se o valor não é ```None```.
-
-[>>>](#map) map(closure) - mapeia ```Option<T>``` para ```Option<U>``` aplicando a closure passada como argumento ao valor contido (se ```Some```) ou retorna ```None``` (se ```None```).
-
-[>>>](#inspect) inspect(closure) - executa a closure passada como argumento com uma referência ao valor contido em ```Some```, se houver. Retorna a ```Option``` original.
-
-[>>>](#map_or) map_or(default, closure) - se a ```Option``` for ```None``` retorna o valor default fornecido como primeiro argumento. Se a ```Option``` for ```Some``` executa a closure passada como segundo argumento com o valor dentro de ```Some```.
-
-[>>>](#map_or_else) map_or_else(closure1, closure2) - se a ```Option``` for ```None``` executa a closure1 passada como primeiro argumento. Se a ```Option``` for ```Some``` executa a closure2 passada como segundo argumento com o valor dentro de ```Some```.
-
-[>>>](#ok_or) ok_or() - transforma um ```Option<T>``` em um ```Result<T, E>```, mapeando ```Some(v)``` para ```Ok(v)``` e ```None``` para ```Err(err)```.
-
-[>>>](#ok_or_else) ok_or_else(closure) - transforma um ```Option<T>``` em um ```Result<T, E>```, mapeando ```Some(v)``` para ```Ok(v)``` e ```None``` para ```Err(err())```, onde ```err()``` é a closure passada como argumento.
-
-[>>>](#as_deref) as_deref() - converte de ```Option<T>``` (ou ```&Option<T>```) para ```Option<&T::Target>```.
-
-[>>>](#as_deref_mut) as_deref_mut() - converte de ```Option<T>``` (ou ```&mut Option<T>```) para ```Option<&mut T::Target>```.
-
-[>>>](#iter) iter() - retorna um iterador sobre o valor possivelmente contido. 
-
-[>>>](#iter_mut) iter_mut() - retorna um iterador mutável sobre o valor possivelmente contido. 
-
-[>>>](#and) and(option) - se a ```Option``` for ```None```, retorna ```None```; caso contrário retorna o argumento passado (```option```).
-
-[>>>](#and_then) and_then(closure) - se a ```Option``` for ```None```, retorna ```None``` , caso contrário, chama a closure passada como argumento com o valor encapsulado em ```Some``` e retorna o resultado.
-
-[>>>](#or) or(option) - retorna a ```Option``` se ela contém um valor, caso contrário retorna a opcão passada como argumento (```option```).
-
-[>>>](#or_else) or_else(closure) - retorna a ```Option``` se ela contém um valor, caso contrário chama a closure passada como argumenmto e retorna o resultado.
-
-[>>>](#xor) xor(option) - retorna ```Some``` se um dos dois: ```self``` ou a opção passada como argumento(```option```) for ```Some```, somente um dos dois; caso contrário retorna ```None```.
-
-[>>>](#insert) insert(value) - insere um valor na ```Option``` e, em seguida, retorna uma referência mutável para ele. Se a ```Option``` já contém um valor, o valor antigo é descartado.
-
-[>>>](#get_or_insert) get_or_insert(value) - insere um valor na ```Option``` se ela for ```None```, então retorna uma referência mutável para o valor contido.
-
-[>>>](#get_or_insert_with) get_or_insert_with(closure) - se a ```Option``` for ```None```, insere o valor calculado a partir da closure passada como argumento e retorna uma referência mutável para o valor.
-
-[>>>](#take) take() - move o valor da ```Option``` deixando ```None``` em seu lugar.
-
-[>>>](#take_if) take_if(closure) - se a closure predicado passada como argumento for ```true```, move o valor da ```Option``` deixando ```None``` em seu lugar.
-
-[>>>](#replace) replace(value) - substitui o valor atual da ```Option``` retornando o valor antigo se presente.
-
-[>>>](#zip) zip(Option) - combina ```self``` com outra ```Option```.
-
-[>>>](#unzip) unzip() - descompacta uma ```Option``` contendo uma tupla de duas ```Option```.
-
-[>>>](#copied) copied() - mapeia um ```Option<&T>``` para um ```Option<T>``` copiando o conteúdo da opção.
-
-[>>>](#cloned) cloned() - mapeia um ```Option<&T>``` para um ```Option<T>``` clonando o conteúdo da opção.
-
-[>>>](#copied) copied() - mapeia um ```Option<&mut T>``` para um ```Option<T>``` copiando o conteúdo da opção.
-
-[>>>](#cloned) cloned() - mapeia um ```Option<&mut T>``` para um ```Option<T>``` clonando o conteúdo da opção.
-
-[>>>](#transpose) transpose() - transpõe uma ```Option``` contendo um ```Result``` para um ```Result``` contendo uma ```Option```.
-
-[>>>](#flatten) flatten() - converte de ```Option<Option<T>>``` para ```Option<T>```.
+- [and(option)](#and) - se a ```Option``` for ```None```, retorna ```None```; caso contrário retorna o argumento passado (```option```).
+- [and_then(closure)](#and_then) - se a ```Option``` for ```None```, retorna ```None``` , caso contrário, chama a closure passada como argumento com o valor encapsulado em ```Some``` e retorna o resultado.
+- [as_deref()](#as_deref) - converte de ```Option<T>``` (ou ```&Option<T>```) para ```Option<&T::Target>```.
+- [as_deref_mut()](#as_deref_mut) - converte de ```Option<T>``` (ou ```&mut Option<T>```) para ```Option<&mut T::Target>```.
+- [as_mut()](#as_mut) - converte de ```&mut Option<T>``` para ```Option<&mut T>```.
+- [as_mut_slice()](#as_mut_slice) - retorna uma slice mutável do valor contido, se houver. Se este for ```None```, uma slice vazia é retornada.
+- [as_pin_mut()](#as_pin_mut) - converte de ```Pin<&mut Option<T>>``` para ```Option<Pin<&mut T>>```. )
+- [as_pin_ref()](#as_pin_ref) - converte de ```Pin<&Option<T>>``` para ```Option<Pin<&T>>```.)
+- [as_ref()](#as_ref) - converte de ```&Option<T>``` para ```Option<&T>.```
+- [as_slice()](#as_slice) - retorna uma slice do valor contido, se houver. Se este for ```None```, uma slice vazia é retornada.
+- [cloned()](#cloned) - mapeia um ```Option<&mut T>``` para um ```Option<T>``` clonando o conteúdo da opção.
+- [cloned()](#cloned) - mapeia um ```Option<&T>``` para um ```Option<T>``` clonando o conteúdo da opção.
+- [copied()](#copied) - mapeia um ```Option<&mut T>``` para um ```Option<T>``` copiando o conteúdo da opção.
+- [copied()](#copied) - mapeia um ```Option<&T>``` para um ```Option<T>``` copiando o conteúdo da opção.
+- [expect(&str)](#expect) - retorna o valor contido em ```Some```, consumindo ```self```. Se o valor for ```None``` emite ```panic!``` com a mensagem passada como argumento.
+- [flatten()](#flatten) - converte de ```Option<Option<T>>``` para ```Option<T>```.
+- [get_or_insert(value)](#get_or_insert) - insere um valor na ```Option``` se ela for ```None```, então retorna uma referência mutável para o valor contido.
+- [get_or_insert_with(closure)](#get_or_insert_with) - se a ```Option``` for ```None```, insere o valor calculado a partir da closure passada como argumento e retorna uma referência mutável para o valor.
+- [insert(value)](#insert) - insere um valor na ```Option``` e, em seguida, retorna uma referência mutável para ele. Se a ```Option``` já contém um valor, o valor antigo é descartado.
+- [inspect(closure)](#inspect) - executa a closure passada como argumento com uma referência ao valor contido em ```Some```, se houver. Retorna a ```Option``` original.
+- [is_none()](#is_none) - retorna ```true``` se o ```Option``` é um ```None```.
+- [is_none_or()](#is_none_or) - retorna ```true``` se a ```Option``` é um ```None``` ou o valor ```Some``` dentro dela atende a closure passada como argumento.
+- [is_some()](#is_some) - retorna ```true``` se o ```Option``` é um ```Some```.
+- [is_some_and()](#is_some_and) - retorna ```true``` se a ```Option``` é um ```Some``` e o valor dentro dela atende a closure passada como argumento.
+- [iter()](#iter) - retorna um iterador sobre o valor possivelmente contido. 
+- [iter_mut()](#iter_mut) - retorna um iterador mutável sobre o valor possivelmente contido. 
+- [map(closure)](#map) - mapeia ```Option<T>``` para ```Option<U>``` aplicando a closure passada como argumento ao valor contido (se ```Some```) ou retorna ```None``` (se ```None```).
+- [map_or(default, closure)](#map_or) - se a ```Option``` for ```None``` retorna o valor default fornecido como primeiro argumento. Se a ```Option``` for ```Some``` executa a closure passada como segundo argumento com o valor dentro de ```Some```.
+- [map_or_else(closure1, closure2)](#map_or_else) - se a ```Option``` for ```None``` executa a closure1 passada como primeiro argumento. Se a ```Option``` for ```Some``` executa a closure2 passada como segundo argumento com o valor dentro de ```Some```.
+- [ok_or()](#ok_or) - transforma um ```Option<T>``` em um ```Result<T, E>```, mapeando ```Some(v)``` para ```Ok(v)``` e ```None``` para ```Err(err)```.
+- [ok_or_else(closure)](#ok_or_else) - transforma um ```Option<T>``` em um ```Result<T, E>```, mapeando ```Some(v)``` para ```Ok(v)``` e ```None``` para ```Err(err())```, onde ```err()``` é a closure passada como argumento.
+- [or(option)](#or) - retorna a ```Option``` se ela contém um valor, caso contrário retorna a opcão passada como argumento (```option```).
+- [or_else(closure)](#or_else) - retorna a ```Option``` se ela contém um valor, caso contrário chama a closure passada como argumenmto e retorna o resultado.
+- [replace(value)](#replace) - substitui o valor atual da ```Option``` retornando o valor antigo se presente.
+- [take()](#take) - move o valor da ```Option``` deixando ```None``` em seu lugar.
+- [take_if(closure)](#take_if) - se a closure predicado passada como argumento for ```true```, move o valor da ```Option``` deixando ```None``` em seu lugar.
+- [transpose()](#transpose) - transpõe uma ```Option``` contendo um ```Result``` para um ```Result``` contendo uma ```Option```.
+- [unwrap()](#unwrap) - retorna o valor contido em ```Some```, consumindo ```self```. Caso o valor seja ```None``` emite ```panic!```.
+- [unwrap_or_default()](#unwrap_or_default) - retorna o valor contido em ```Some``` ou o valor default para o tipo de dados em questão.
+- [unwrap_or_else(closure)](#unwrap_or_else) - retorna o valor contido em ```Some``` ou, em caso de ```None```, calcula o valor a partir da closure passada como argumento.
+- [unwrap_unchecked()](#unwrap_unchecked) - retorna o valor contido em ```Some```, consumindo ```self```, sem verificar se o valor não é ```None```.
+- [unzip()](#unzip) - descompacta uma ```Option``` contendo uma tupla de duas ```Option```.
+- [xor(option)](#xor) - retorna ```Some``` se um dos dois: ```self``` ou a opção passada como argumento(```option```) for ```Some```, somente um dos dois; caso contrário retorna ```None```.
+- [zip(Option)](#zip) - combina ```self``` com outra ```Option```.
 
 ---
 
@@ -996,4 +955,4 @@ assert_eq!(Some(6), x.flatten().flatten());
 
 arataca89@gmail.com
 
-Última atualização: 20241123
+Última atualização: 20241220
