@@ -3,16 +3,16 @@
 [Rust by Example](https://doc.rust-lang.org/rust-by-example/index.html) (RBE ou Rust através de exemplos, numa tradução livre) é uma coleção de exemplos executáveis que ilustram vários conceitos e bibliotecas padrão do Rust. Este artigo aborda alguns tópicos do RBE .
 
 * [match](#match)
-* [Option](#Option)
-* [Result](#Result)
-* [Operador ?](#Operador-)
+* [Option](#option)
+* [Result](#result)
+* [Operador ?](#operador-)
 * [panic!](#panic)
-* [HashMap](#HashMap)
-* [Chaves em HashMap](#Chaves-em-HashMap)
-* [HashSet](#HashSet)
-* [Rc](#Rc)
-* [Arc](#Arc)
-* [Manipulação de erro](https://github.com/arataca89/rust/blob/main/rbe_erro.md)
+* [HashMap](#hashmap)
+* [Chaves em HashMap](#chaves-em-hashmap)
+* [HashSet](#hashset)
+* [Rc](#rc)
+* [Arc](#arc)
+* [Manipulação de erro](rbe_erro.md#arataca89)
   
 ---
 
@@ -689,4 +689,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20241106
+Última atualização: 20241222
