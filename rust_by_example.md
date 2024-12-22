@@ -13,6 +13,7 @@
 * [Rc](#rc)
 * [Arc](#arc)
 * [Manipulação de erro](rbe_erro.md#arataca89)
+* [Arquivos E/S](rbe_file_io.md#arataca89)
   
 ---
 
