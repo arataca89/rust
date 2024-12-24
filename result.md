@@ -48,10 +48,10 @@ A correspondência de padrões usando ```Result``` é clara e direta para casos 
 * [as_deref_mut()](#as_deref_mut) - retorna outro ```Result``` com referências mutáveis aos valores do ```Result``` original
 * [as_mut()](#as_mut) - converte de ```&mut Result<T, E>``` para ```Result<&mut T, &mut E>```
 * [as_ref()](#as_ref) - converte de ```&Result<T, E>``` para ```Result<&T, &E>```
-* [cloned()](#cloned) - mapeia um ```Result<&mut T, E>``` para um ```Result<T, E>``` clonando o conteúdo da parte ```Ok```.
-* [cloned()](#cloned) - mapeia um ```Result<&T, E>``` para um ```Result<T, E>``` clonando o conteúdo da parte ```Ok```.
-* [copied()](#copied) - mapeia um ```Result<&mut T, E>``` para um ```Result<T, E>``` copiando o conteúdo da parte ```Ok```.
-* [copied()](#copied) - mapeia um ```Result<&T, E>``` para um ```Result<T, E>``` copiando o conteúdo da parte ```Ok```.
+* [cloned()1](#cloned1) - mapeia um ```Result<&mut T, E>``` para um ```Result<T, E>``` clonando o conteúdo da parte ```Ok```.
+* [cloned()2](#cloned2) - mapeia um ```Result<&T, E>``` para um ```Result<T, E>``` clonando o conteúdo da parte ```Ok```.
+* [copied()1](#copied1) - mapeia um ```Result<&mut T, E>``` para um ```Result<T, E>``` copiando o conteúdo da parte ```Ok```.
+* [copied()2](#copied2) - mapeia um ```Result<&T, E>``` para um ```Result<T, E>``` copiando o conteúdo da parte ```Ok```.
 * [err()](#err) - converte um ```Result<T, E>``` em um ```Option<E>```.
 * [expect(&str)](#expect) - retorna o valor embutido no ```Ok```. Em caso de erro chama ```panic!``` com a ```&str``` passada como argumento como mensagem de erro.
 * [expect_err(&str)](#expect_err) - retorna o valor embutido no ```Err```. Se o valor é um ```Ok```, gera pânico com uma mensagem que tem o argumento ```&str``` e o valor do ```Ok```.
@@ -676,7 +676,7 @@ assert_eq!(unsafe { x.unwrap_err_unchecked() }, "emergency failure");
 
 ---
 
-### copied()
+### copied()1
 
 Mapeia um ```Result<&T, E>``` para um ```Result<T, E>``` copiando o conteúdo da parte ```Ok```.
 
@@ -690,7 +690,7 @@ assert_eq!(copied, Ok(12));
 
 ---
 
-### cloned()
+### cloned()1
 
 Mapeia um ```Result<&T, E>``` para um ```Result<T, E>``` clonando o conteúdo da parte ```Ok```.
 
@@ -704,7 +704,7 @@ assert_eq!(cloned, Ok(12));
 
 ---
 
-### copied()
+### copied()2
 
 Mapeia um ```Result<&mut T, E>``` para um ```Result<T, E>``` copiando o conteúdo da parte ```Ok```.
 
@@ -718,7 +718,7 @@ assert_eq!(copied, Ok(12));
 
 ---
 
-### cloned()
+### cloned()2
 
 Mapeia um ```Result<&mut T, E>``` para um ```Result<T, E>``` clonando o conteúdo da parte ```Ok```.
 
