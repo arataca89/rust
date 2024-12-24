@@ -1,4 +1,6 @@
-# Result
+#### arataca89
+
+# Linguagem Rust - Result
 
 ```std::result::Result``` é uma enumeração definida na biblioteca padrão da linguagem Rust.
 
@@ -40,76 +42,41 @@ A correspondência de padrões usando ```Result``` é clara e direta para casos 
 
 ### Métodos
 
-[>>>](#is_ok) is_ok( ) - retorna ```true``` se é um ```Ok```
-
-[>>>](#is_ok_and) is_ok_and(closure) - retorna ```true``` se é um ```Ok``` e o valor embutido no ```Ok``` atende a closure
-
-[>>>](#is_err) is_err( ) - retorna ```true``` se é um ```Err```
-
-[>>>](#is_err_and) is_err_and(closure) - retorna ```true``` se é um ```Err``` e o valor embutido no ```Err``` atende a closure
-
-[>>>](#ok) ok( ) - converte um ```Result<T, E>``` em um ```Option<T>```
-
-[>>>](#err) err( ) - converte um ```Result<T, E>``` em um ```Option<E>```.
-
-[>>>](#as_ref) as_ref( ) - converte de ```&Result<T, E>``` para ```Result<&T, &E>```
-
-[>>>](#as_mut) as_mut( ) - converte de ```&mut Result<T, E>``` para ```Result<&mut T, &mut E>```
-
-[>>>)](#map) map(closure) - mapeia de ```Result<T, E>``` para ```Result<U, E>``` aplicando a closure ao valor do ```Ok```
-
-[>>>](#map_or) map_or(default, closure) - se é um ```Ok```, aplica a closure ao valor do ```Ok```; se é um ```Err```, retorna o valor default 
-
-[>>>](#map_or_else) map_or_else(closure_err, closure_ok) - se  é um ```Ok```, aplica closure_ok ao valor de ```Ok```. Se é um ```Err```, aplica closure_err ao valor de ```Err```
-
-[>>>](#map_err) map_err(closure) - mapeia de ```Result<T, E>``` para ```Result<T, F>``` aplicando a closure ao valor de ```Err```
-
-
-[>>>](#inspect) inspect(closure) - aplica a closure ao valor contido no ```Ok``` sem alterar o valor original.
-
-[>>>](#inspect_err) inspect_err(closure) - aplica a closure ao valor contido no ```Err``` sem alterar o valor original.
-
-[>>>](#as_deref) as_deref() - retorna outro ```Result``` com referências aos valores do ```Result``` original
-
-[>>>](#as_deref_mut) as_deref_mut() - retorna outro ```Result``` com referências mutáveis aos valores do ```Result``` original
-
-[>>>](#iter) iter() - retorna um iterador para o valor embutido no ```Result```
-
-[>>>](#expect) expect(&str) - retorna o valor embutido no ```Ok```. Em caso de erro chama ```panic!``` com a ```&str``` passada como argumento como mensagem de erro.
-
-[>>>](#unwrap) unwrap() - retorna o valor embutido no ```Ok```. Em caso de erro chama ```panic!``` com as mensagens padrão.
-
-[>>>](#unwrap_or_default) unwrap_or_default() - retorna o valor embutido no ```Ok`` ou o valor default para o tipo de dados em questão.
-
-[>>>](#expect_err) expect_err(&str) - retorna o valor embutido no ```Err```. Se o valor é um ```Ok```, gera pânico com uma mensagem que tem o argumento ```&str``` e o valor do ```Ok```.
-
-[>>>](#unwrap_err) unwrap_err() - retorna o valor embutido no ```Err```. Se o valor é um ```Ok```, gera pânico com uma mensagem de pânico fornecida pelo valor do ```Ok```. 
-
-[>>>](#and) and() - retorna ```res``` se o resultado for ```Ok```, caso contrário retorna o valor ```Err``` de self.)
-
-[>>>](#and_then) and_then(closure) - se for ```Ok```, chama a closure passada como argumento. Caso contrário retorna o valor ```Err``` de ```self```.
-
-[>>>](#or) or() - retorna ```res``` se o resultado for ```Err```, caso contrário retorna o valor ```Ok``` de self.
-
-[>>>](#or_else) or_else(closure) - se for ```Err```, chama a closure passada como argumento com o valoor de ```Err```. Caso contrário retorna o valor ```Ok``` de self.
-
-[>>>](#unwrap_or) unwrap_or(default) - retorna o valor ```Ok``` contido ou o valor default fornecido.
-
-[>>>](#unwrap_or_else) unwrap_or_else(closure) - retorna o valor ```Ok``` contido ou o calcula a partir da closure passada como argumento.
-
-[>>>](#unwrap_unchecked) unwrap_unchecked() - retorna o valor ```Ok``` contido, consumindo ```self```, sem verificar se o valor não é um ```Err```.
-
-[>>>](#unwrap_err_unchecked) unwrap_err_unchecked() - retorna o valor ```Err``` contido, consumindo ```self```, sem verificar se o valor não é um ```Ok```.
-
-[>>>](#copied) copied() - mapeia um ```Result<&T, E>``` para um ```Result<T, E>``` copiando o conteúdo da parte ```Ok```.
-
-[>>>](#cloned) cloned() - mapeia um ```Result<&T, E>``` para um ```Result<T, E>``` clonando o conteúdo da parte ```Ok```.
-
-[>>>](#copied) copied() - mapeia um ```Result<&mut T, E>``` para um ```Result<T, E>``` copiando o conteúdo da parte ```Ok```.
-
-[>>>](#cloned) cloned() - mapeia um ```Result<&mut T, E>``` para um ```Result<T, E>``` clonando o conteúdo da parte ```Ok```.
-
-[>>>](#transpose) transpose() - transpõe de um ```Result``` com um ```Option``` para um ```Option``` com um ```Result```.
+* [and()](#and) - retorna ```res``` se o resultado for ```Ok```, caso contrário retorna o valor ```Err``` de self.)
+* [and_then(closure)](#and_then) - se for ```Ok```, chama a closure passada como argumento. Caso contrário retorna o valor ```Err``` de ```self```.
+* [as_deref()](#as_deref) - retorna outro ```Result``` com referências aos valores do ```Result``` original
+* [as_deref_mut()](#as_deref_mut) - retorna outro ```Result``` com referências mutáveis aos valores do ```Result``` original
+* [as_mut()](#as_mut) - converte de ```&mut Result<T, E>``` para ```Result<&mut T, &mut E>```
+* [as_ref()](#as_ref) - converte de ```&Result<T, E>``` para ```Result<&T, &E>```
+* [cloned()](#cloned) - mapeia um ```Result<&mut T, E>``` para um ```Result<T, E>``` clonando o conteúdo da parte ```Ok```.
+* [cloned()](#cloned) - mapeia um ```Result<&T, E>``` para um ```Result<T, E>``` clonando o conteúdo da parte ```Ok```.
+* [copied()](#copied) - mapeia um ```Result<&mut T, E>``` para um ```Result<T, E>``` copiando o conteúdo da parte ```Ok```.
+* [copied()](#copied) - mapeia um ```Result<&T, E>``` para um ```Result<T, E>``` copiando o conteúdo da parte ```Ok```.
+* [err()](#err) - converte um ```Result<T, E>``` em um ```Option<E>```.
+* [expect(&str)](#expect) - retorna o valor embutido no ```Ok```. Em caso de erro chama ```panic!``` com a ```&str``` passada como argumento como mensagem de erro.
+* [expect_err(&str)](#expect_err) - retorna o valor embutido no ```Err```. Se o valor é um ```Ok```, gera pânico com uma mensagem que tem o argumento ```&str``` e o valor do ```Ok```.
+* [inspect(closure)](#inspect) - aplica a closure ao valor contido no ```Ok``` sem alterar o valor original.
+* [inspect_err(closure)](#inspect_err) - aplica a closure ao valor contido no ```Err``` sem alterar o valor original.
+* [is_err()](#is_err) - retorna ```true``` se é um ```Err```
+* [is_err_and(closure)](#is_err_and) - retorna ```true``` se é um ```Err``` e o valor embutido no ```Err``` atende a closure
+* [is_ok()](#is_ok) - retorna ```true``` se é um ```Ok```
+* [is_ok_and(closure)](#is_ok_and) - retorna ```true``` se é um ```Ok``` e o valor embutido no ```Ok``` atende a closure
+* [iter()](#iter) - retorna um iterador para o valor embutido no ```Result```
+* [map(closure))](#map) - mapeia de ```Result<T, E>``` para ```Result<U, E>``` aplicando a closure ao valor do ```Ok```
+* [map_err(closure)](#map_err) - mapeia de ```Result<T, E>``` para ```Result<T, F>``` aplicando a closure ao valor de ```Err```
+* [map_or(default, closure)](#map_or) - se é um ```Ok```, aplica a closure ao valor do ```Ok```; se é um ```Err```, retorna o valor default 
+* [map_or_else(closure_err, closure_ok)](#map_or_else) - se  é um ```Ok```, aplica closure_ok ao valor de ```Ok```. Se é um ```Err```, aplica closure_err ao valor de ```Err```
+* [ok()](#ok) - converte um ```Result<T, E>``` em um ```Option<T>```
+* [or()](#or) - retorna ```res``` se o resultado for ```Err```, caso contrário retorna o valor ```Ok``` de self.
+* [or_else(closure)](#or_else) - se for ```Err```, chama a closure passada como argumento com o valoor de ```Err```. Caso contrário retorna o valor ```Ok``` de self.
+* [transpose()](#transpose) - transpõe de um ```Result``` com um ```Option``` para um ```Option``` com um ```Result```.
+* [unwrap()](#unwrap) - retorna o valor embutido no ```Ok```. Em caso de erro chama ```panic!``` com as mensagens padrão.
+* [unwrap_err()](#unwrap_err) - retorna o valor embutido no ```Err```. Se o valor é um ```Ok```, gera pânico com uma mensagem de pânico fornecida pelo valor do ```Ok```. 
+* [unwrap_err_unchecked()](#unwrap_err_unchecked) - retorna o valor ```Err``` contido, consumindo ```self```, sem verificar se o valor não é um ```Ok```.
+* [unwrap_or(default)](#unwrap_or) - retorna o valor ```Ok``` contido ou o valor default fornecido.
+* [unwrap_or_default()](#unwrap_or_default) - retorna o valor embutido no ```Ok`` ou o valor default para o tipo de dados em questão.
+* [unwrap_or_else(closure)](#unwrap_or_else) - retorna o valor ```Ok``` contido ou o calcula a partir da closure passada como argumento.
+* [unwrap_unchecked()](#unwrap_unchecked) - retorna o valor ```Ok``` contido, consumindo ```self```, sem verificar se o valor não é um ```Err```.
 
 ---
 
@@ -792,4 +759,4 @@ assert_eq!(x.transpose(), y);
 
 arataca89@gmail.com
 
-Última atualização: 20241113
+Última atualização: 20241224
