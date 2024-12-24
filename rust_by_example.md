@@ -14,7 +14,10 @@
 * [Arc](#arc)
 * [Manipulação de erro](rbe_erro.md#arataca89)
 * [Arquivos E/S](rbe_file_io.md#arataca89)
-  
+* [operador ?](rbe_question_mark.md#arataca89)
+* [Impressão formatada](rbe_formatted_print.md#arataca89)
+
+ 
 ---
 
 ## match
@@ -690,4 +693,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20241222
+Última atualização: 20241224
