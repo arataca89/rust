@@ -10,6 +10,8 @@
 
 [Exemplo List](#exemplo-list)
 
+[Formatação](#formatação)
+
 ---
 
 ## Introdução
@@ -370,6 +372,98 @@ Saída:
 [1, 2, 3]
 ```
 
+## Formatação
+
+Vimos que a formatação é especificada por meio de uma string de formato: 
+
+* format!("{}", foo) -> "3735928559"
+* format!("0x{:X}", foo) -> "0xDEADBEEF"
+* format!("0o{:o}", foo) -> "0o33653337357"
+
+A mesma variável (**foo**) pode ser formatada de forma diferente dependendo do tipo de argumento usado: **X**, **o** ou não especificado.
+
+Essa funcionalidade de formatação é implementada por meio de traits, e existe uma trait para cada tipo de argumento. A trait de formatação mais comum é ```Display```, que lida com casos em que o tipo de argumento não é especificado: ```{}``` por exemplo.
+
+```
+use std::fmt::{self, Formatter, Display};
+
+struct City {
+    name: &'static str,
+    // Latitude
+    lat: f32,
+    // Longitude
+    lon: f32,
+}
+
+impl Display for City {
+    // `f` é um buffer, e este método deve escrever a string formatada nele.
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        let lat_c = if self.lat >= 0.0 { 'N' } else { 'S' };
+        let lon_c = if self.lon >= 0.0 { 'E' } else { 'W' };
+
+        // `write!` é como `format!`, mas escreverá a string formatada
+        // em um buffer (o primeiro argumento).
+        write!(f, "{}: {:.3}°{} {:.3}°{}",
+               self.name, self.lat.abs(), lat_c, self.lon.abs(), lon_c)
+    }
+}
+
+#[derive(Debug)]
+struct Color {
+    red: u8,
+    green: u8,
+    blue: u8,
+}
+
+impl Display for Color {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        write!(f, "{{{},{},{}}}", self.red, self.green, self.blue)
+    }   
+}
+
+fn main() {
+    for city in [
+        City { name: "Dublin", lat: 53.347778, lon: -6.259722 },
+        City { name: "Oslo", lat: 59.95, lon: 10.75 },
+        City { name: "Vancouver", lat: 49.25, lon: -123.1 },
+    ] {
+        println!("{}", city);
+    }
+
+    println!("");
+
+    for color in [
+        Color { red: 128, green: 255, blue: 90 },
+        Color { red: 0, green: 3, blue: 254 },
+        Color { red: 0, green: 0, blue: 0 },
+    ] {
+        println!("Debug  : {:?}", color);
+        println!("Display: {}", color);
+        println!("");
+    }
+}
+```
+
+Saída:
+
+```
+Dublin: 53.348°N 6.260°W
+Oslo: 59.950°N 10.750°E
+Vancouver: 49.250°N 123.100°W
+
+Debug  : Color { red: 128, green: 255, blue: 90 }
+Display: {128,255,90}
+
+Debug  : Color { red: 0, green: 3, blue: 254 }
+Display: {0,3,254}
+
+Debug  : Color { red: 0, green: 0, blue: 0 }
+Display: {0,0,0}
+```
+
+Você pode ver uma [lista completa das traits de formatação](https://doc.rust-lang.org/std/fmt/#formatting-traits) e seus tipos de argumento na documentação de [std::fmt](https://doc.rust-lang.org/std/fmt/). 
+
+
 ## Referências
 
 [Rust By Example - Formatted print](https://doc.rust-lang.org/rust-by-example/hello/print.html)
@@ -391,4 +485,4 @@ Saída:
 
 arataca89@gmail.com
 
-Última atualização: 20241224
+Última atualização: 20241225
