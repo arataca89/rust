@@ -8,6 +8,8 @@
 
 [Ownership (propriedade)](https://github.com/arataca89/rust/tree/main/ownership)
 
+[Estrutura (struct)](https://github.com/arataca89/rust/blob/main/structs.md)
+
 [Result](https://github.com/arataca89/rust/blob/main/result.md)
 
 [Option](https://github.com/arataca89/rust/blob/main/option.md)
