@@ -1,3 +1,5 @@
+#### arataca89
+
 # Linguagem Rust - estruturas
 
 Uma ```struct```, ou estrutura, é um tipo de dado criado pelo programador que permite encapsular vários valores relacionados de modo que o tipo de dado criado melhore o significado do seu uso e a compreensão das diversas partes do programa. Se você estiver familiarizado com uma linguagem orientada a objetos, uma ```struct``` é como os atributos de dados de um objeto. 
@@ -15,6 +17,8 @@ Uma ```struct```, ou estrutura, é um tipo de dado criado pelo programador que p
 * [Propriedade dos dados da struct](#propriedade-dos-dados-da-struct)
 
 * [Exemplo do uso de struct](#exemplo-do-uso-de-struct)
+
+* [Definindo métodos](#definindo-métodos)
 
 ---
 
@@ -251,8 +255,251 @@ error: could not compile `structs` (bin "structs") due to 2 previous errors
 
 ## Exemplo do uso de struct 
 
-asd
+Para entender quando podemos querer usar structs, vamos escrever um programa que calcula a área de um retângulo. Começaremos usando variáveis ​​simples e, em seguida, refatoraremos o programa até usarmos structs.
 
+Vamos criar um novo projeto binário com **Cargo** chamado **rectangles** que receberá a largura e a altura de um retângulo especificadas em pixels e calculará a área do retângulo. O código abaixo mostra um programa curto com uma maneira de fazer exatamente isso no **src/main.rs** do nosso projeto.
+
+```
+fn main() {
+    let width1 = 30;
+    let height1 = 50;
+
+    println!(
+        "A área do retângulo é {} pixels quadrados.",
+        area(width1, height1)
+    );
+}
+
+fn area(width: u32, height: u32) -> u32 {
+    width * height
+}
+```
+
+Agora, execute este programa usando ```cargo run```:
+
+```
+C:\Users\arataca89\Documents\rust\packages\rectangle>cargo run
+   Compiling rectangle v0.1.0 (C:\Users\arataca89\Documents\rust\packages\rectangle)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.69s
+     Running `target\debug\rectangle.exe`
+A área do retângulo é 1500 pixels quadrados.
+```
+
+Este código consegue descobrir a área do retângulo chamando a função ```area()``` com cada dimensão, mas podemos fazer mais para tornar este código claro e legível.
+
+O problema com este código é evidente na assinatura de ```area()```:
+
+```
+fn area(width: u32, height: u32) -> u32 {
+```
+
+A função ```area()``` deve calcular a área de um retângulo, mas a função que escrevemos tem dois parâmetros, e não está claro em nenhum lugar do nosso programa que os parâmetros estão relacionados. Seria mais legível e mais gerenciável agrupar largura(width) e altura(height). Esse agrupamento pode ser feito usando tuplas.
+
+#### Refatorando com tuplas
+
+```
+fn main() {
+    let rect1 = (30, 50);
+
+    println!(
+        "A área do retângulo é {} pixels quadrados.",
+        area(rect1)
+    );
+}
+
+fn area(dimensions: (u32, u32)) -> u32 {
+    dimensions.0 * dimensions.1
+}
+```
+
+De certa forma, este programa é melhor. Tuplas nos permitem adicionar um pouco de estrutura, e agora estamos passando apenas um argumento. Mas de outra forma, esta versão é menos clara: tuplas não nomeiam seus elementos, então temos que indexar nas partes da tupla, tornando nosso cálculo menos óbvio.
+
+Misturar largura e altura não importaria para o cálculo da área, mas se quisermos desenhar o retângulo na tela, importaria! Teríamos que ter em mente que largura é o índice de tupla 0 e altura é o índice de tupla 1. Isso seria ainda mais difícil para outra pessoa descobrir e manter em mente se ela fosse usar nosso código. Como não transmitimos o significado de nossos dados em nosso código, agora é mais fácil introduzir erros.
+
+#### Refatoração com Structs: adicionando mais significado 
+
+Usamos structs para adicionar significado rotulando os dados. Podemos transformar a tupla que estamos usando em uma ```struct``` com um nome para a estrutura toda, bem como nomes para as partes, como mostrado abaixo.
+
+```
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+
+    println!(
+        "A área do retângulo é {} pixels quadrados.",
+        area(&rect1)
+    );
+}
+
+fn area(rectangle: &Rectangle) -> u32 {
+    rectangle.width * rectangle.height
+}
+``` 
+
+Aqui, definimos uma ```struct``` e a nomeamos **Rectangle**. Dentro das chaves, definimos os campos como **width**(largura) e **height**(altura), ambos do tipo ```u32```. Então, em **main()**, criamos uma instância particular de **Rectangle** que tem uma largura de 30 e uma altura de 50.
+
+Nossa função de área agora é definida com um parâmetro, que nomeamos **rectangle**, cujo tipo é um empréstimo imutável de uma instância da estrutura **Rectangle**. Queremos emprestar a estrutura em vez de assumir a propriedade dela. Dessa forma, **main()** mantém sua propriedade e pode continuar usando **rect1**, que é o motivo pelo qual usamos o **&** na assinatura da função e onde chamamos a função.
+
+A função **area()** acessa os campos **width** e **height** da instância de **Rectangle** (note que acessar campos de uma instância struct emprestada não move os valores dos campos, e é por isso que você frequentemente vê empréstimos de structs). Nossa assinatura de função para **area()** agora diz exatamente o que queremos dizer: calcular a área de um **Rectangle**, usando seus campos **width**(largura) e **height**(altura). Isso transmite que **width** e **height** estão relacionados entre si, e dá nomes descritivos aos valores em vez de usar os valores de índice de tupla de 0 e 1. Isso é uma vitória para a clareza.
+
+#### Adicionando funcionalidades com traits derivadas
+
+Seria útil poder imprimir uma instância de **Rectangle** enquanto depuramos nosso programa e ver os valores de todos os seus campos. O código abaixo tenta usar o macro ```println!```. Isso não funcionará, no entanto.
+
+```
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+
+    println!("rect1 is {}", rect1);
+}
+```
+
+Quando compilamos este código, obtemos um erro com esta mensagem principal:
+
+```
+error[E0277]: `Rectangle` doesn't implement `std::fmt::Display`
+```
+
+A macro ```println!``` pode fazer muitos tipos de formatação e, por padrão, as chaves dizem ao ```println!``` para usar a formatação conhecida como ```Display```: saída destinada ao consumo direto do usuário final. Os tipos primitivos que vimos até agora implementam ```Display``` por padrão porque há apenas uma maneira de mostrar o inteiro **1** ou qualquer outro tipo primitivo para um usuário. Mas com **structs**, a maneira como ```println!``` deve formatar a saída é menos clara porque há mais possibilidades de exibição: Você quer vírgulas ou não? Você quer imprimir as chaves? Todos os campos devem ser mostrados? Devido a essa ambiguidade, Rust não tenta adivinhar o que queremos, e <font color="blue">**structs não têm uma implementação fornecida de ```Display``` para usar com ```println!``` e o espaço reservado ```{}```**</font>. 
+
+Se continuarmos lendo os erros, encontraremos esta nota útil:
+
+```
+   = help: the trait `std::fmt::Display` is not implemented for `Rectangle`
+   = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+```
+
+Vamos tentar! A chamada de macro ```println!``` agora ficará assim:
+
+```
+println!("rect1 is {rect1:?}");
+```
+
+Colocar o especificador **:?** dentro das chaves informa ao ```println!``` que queremos usar um formato de saída chamado ```Debug```. A trait ```Debug``` nos permite imprimir nossa estrutura de uma forma útil para desenvolvedores, para que possamos ver seu valor enquanto depuramos nosso código.
+
+Compile o código com essa mudança. Droga! Ainda recebemos um erro: 
+
+```
+error[E0277]: `Rectangle` doesn't implement `Debug`
+```
+
+Mas, novamente, o compilador nos dá uma nota útil:
+
+```
+   = help: the trait `Debug` is not implemented for `Rectangle`
+   = note: add `#[derive(Debug)]` to `Rectangle` or manually `impl Debug for Rectangle`
+```
+
+Rust inclui funcionalidade para imprimir informações de depuração, mas temos que optar explicitamente por tornar essa funcionalidade disponível para nossa estrutura. Para fazer isso, adicionamos o atributo externo:
+
+```
+#[derive(Debug)]
+```
+
+Logo antes da definição da estrutura, como mostrado abaixo.
+
+```
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let rect1 = Rectangle {
+        width: 30,
+        height: 50,
+    };
+
+    println!("rect1 is {rect1:?}");
+}
+```
+
+Agora, quando executarmos o programa, não teremos nenhum erro e veremos a seguinte saída: 
+
+```
+$ cargo run
+   Compiling rectangles v0.1.0 (file:///projects/rectangles)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.48s
+     Running `target/debug/rectangles`
+rect1 is Rectangle { width: 30, height: 50 }
+```
+
+Ótimo! Não é a saída mais bonita, mas mostra os valores de todos os campos para esta instância, o que definitivamente ajudaria durante a depuração. Quando temos structs maiores, é útil ter uma saída que seja um pouco mais fácil de ler; nesses casos, podemos usar **{:#?}** em vez de **{:?}** na string fornecida a ```println!```. Neste exemplo, usar o estilo **{:#?}** irá gerar a seguinte saída:
+
+```
+$ cargo run
+   Compiling rectangles v0.1.0 (file:///projects/rectangles)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.48s
+     Running `target/debug/rectangles`
+rect1 is Rectangle {
+    width: 30,
+    height: 50,
+}
+```
+
+Outra maneira de imprimir um valor usando o formato ```Debug``` é usar a macro ```dbg!```, que assume a propriedade de uma expressão (ao contrário de ```println!```, que recebe uma referência), imprime o arquivo e o número da linha de onde essa chamada de macro ```dbg!``` ocorre em seu código junto com o valor resultante dessa expressão e retorna a propriedade do valor. 
+
+**Observação**: Chamar a macro ```dbg!``` imprime para o fluxo de console de erro padrão (**stderr**), ao contrário de ```println!```, que imprime para o fluxo de console de saída padrão (**stdout**).
+
+Aqui está um exemplo onde estamos interessados no valor que é atribuído ao campo **width**, bem como no valor da estrutura inteira em **rect1**:
+
+```
+#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let scale = 2;
+    let rect1 = Rectangle {
+        width: dbg!(30 * scale),
+        height: 50,
+    };
+
+    dbg!(&rect1);
+}
+```
+
+Podemos colocar ```dbg!``` recebendo a expressão **30 * scale** porque ```dbg!``` retorna a propriedade do valor da expressão, o campo **width** receberá o mesmo valor como se não tivéssemos a chamada ```dbg!```. Porém, não queremos que ```dbg!``` assuma a propriedade de **rect1**, então usamos uma referência a **rect1** na próxima chamada. Aqui está como a saída deste exemplo se parece:
+
+```
+$ cargo run
+   Compiling rectangles v0.1.0 (file:///projects/rectangles)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.61s
+     Running `target/debug/rectangles`
+[src/main.rs:10:16] 30 * scale = 60
+[src/main.rs:14:5] &rect1 = Rectangle {
+    width: 60,
+    height: 50,
+}
+```
+
+Podemos ver que o primeiro pedaço de saída veio de **src/main.rs** linha 10, onde estamos depurando a expressão **30 * scale**, e seu valor resultante é **60** (a formatação de depuração implementada para inteiros é imprimir apenas seu valor). A chamada ```dbg!``` na linha 14 de **src/main.rs** imprime o valor de **&rect1**, que é a estrutura **Rectangle**. Esta saída usa a formatação de depuração bonita do tipo **Rectangle**. A macro ```dbg!``` pode ser realmente útil quando você está tentando descobrir o que seu código está fazendo!
+
+Além da trait ```Debug```, Rust forneceu uma série de traits para usarmos com o atributo **derive** que podem adicionar comportamento útil aos nossos tipos personalizados. Essas traits e seus comportamentos podem ser vistas [aqui](derivable_traits.md#arataca89).  Existem também muitos atributos além de **derive**; para mais informações, consulte a seção [Atributos](https://doc.rust-lang.org/reference/attributes.html) da Referência Rust.
+
+Nossa função ```area()``` é muito específica: ela só calcula a área de retângulos. Seria útil vincular esse comportamento mais estreitamente à nossa estrutura **Rectangle**  porque ele não funcionará com nenhum outro tipo. Vamos ver como podemos continuar a refatorar esse código transformando a função de área em um método de área definido no nosso tipo **Rectangle**.
+
+## Definindo métodos
+
+asd
 
 ---
 
@@ -263,4 +510,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20241202
+Última atualização: 20241225
