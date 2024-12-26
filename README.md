@@ -4,6 +4,8 @@
 
 [Rust através de exemplos](https://github.com/arataca89/rust/blob/main/rust_by_example.md)
 
+---
+
 [str](https://github.com/arataca89/rust/blob/main/str.md)
 
 [String](https://github.com/arataca89/rust/blob/main/string.md)
