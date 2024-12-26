@@ -2,6 +2,7 @@
 
 [Rust by Example](https://doc.rust-lang.org/rust-by-example/index.html) (RBE ou Rust através de exemplos, numa tradução livre) é uma coleção de exemplos executáveis que ilustram vários conceitos e bibliotecas padrão do Rust. Este artigo aborda alguns tópicos do RBE .
 
+* [Tuplas](#tuplas)
 * [match](#match)
 * [Option](#option)
 * [Result](#result)
@@ -661,9 +662,58 @@ fn main() {
 
 ---
 
-## asd
+# Tuplas
 
-asd
+Uma tupla é uma coleção de valores de diferentes tipos. Tuplas são construídas usando parênteses **( )**, e cada tupla em si é um valor com assinatura de tipo **(T1, T2, ...)**, onde **T1**, **T2** são os tipos de seus membros. Funções podem usar tuplas para retornar vários valores, pois tuplas podem conter qualquer número de valores.
+
+```
+// Tuplas podem ser usadas como argumentos e valores de retorno de funções.
+fn reverse(pair: (i32, bool)) -> (bool, i32) {
+    //'let' pode ser usada para vincular membros de uma tupla a variáveis.
+    let (int_param, bool_param) = pair;
+
+    (bool_param, int_param)
+}
+
+fn main() {
+    // Uma tupla com vários tipos diferentes.
+    let long_tuple = (1u8, 2u16, 3u32, 4u64,
+                      -1i8, -2i16, -3i32, -4i64,
+                      0.1f32, 0.2f64,
+                      'a', true);
+
+     // Valores podem ser extraídos da tupla usando índices.
+    println!("Primeiro valor da tupla: {}", long_tuple.0);
+    println!("Segundo  valor da tupla: {}", long_tuple.1);
+
+    // Tuplas podem conter itens que são tuplas.
+    let tuple_of_tuples = ((1u8, 2u16, 2u32), (4u64, -1i8), -2i16);
+
+    // Tuplas podem ser impressas...
+    println!("Tupla de tuplas: {:?}", tuple_of_tuples);
+
+    // ..., exceto tuplas com mais de 12 elementos.
+    //let too_long_tuple = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13);
+    //println!("Tupla muito longa: {:?}", too_long_tuple);
+    // TODO ^ Descomente as 2 linhas acima para ver o erro de compilação.
+
+    let pair = (1, true);
+    println!("pair         : {:?}", pair);
+
+    println!("reverse(pair): {:?}", reverse(pair));
+
+    // Para criar tuplas de um elemento, a vírgula é necessária para diferenciá-las
+    // de um literal cercado por parênteses.
+    println!("Tupla com apenas um item: {:?}", (5u32,));
+    println!("Um inteiro              : {:?}", (5u32));
+
+    // Tuplas podem ser "desmontadas"
+    let tuple = (1, "hello", 4.5, true);
+
+    let (a, b, c, d) = tuple;
+    println!("{:?}, {:?}, {:?}, {:?}", a, b, c, d);
+}
+``` 
 
 ---
 
@@ -689,8 +739,10 @@ asd
 
 [RBE - Arc](https://doc.rust-lang.org/rust-by-example/std/arc.html)
 
+[RBE - Tuples](https://doc.rust-lang.org/rust-by-example/primitives/tuples.html)
+
 ---
 
 arataca89@gmail.com
 
-Última atualização: 20241224
+Última atualização: 20241226
