@@ -1,5 +1,9 @@
 # Programação Rust
 
+<img src="images/dicas.png" width="100" alt="DICAS"> [Dicas](https://github.com/arataca89/rust/blob/main/dicas.md)
+
+[Rust através de exemplos](https://github.com/arataca89/rust/blob/main/rust_by_example.md)
+
 [str](https://github.com/arataca89/rust/blob/main/str.md)
 
 [String](https://github.com/arataca89/rust/blob/main/string.md)
@@ -28,9 +32,8 @@
 
 [minigrep2 - melhorando o código do minigrep com iterators](https://github.com/arataca89/rust/tree/main/minigrep2)
 
-[Dicas](https://github.com/arataca89/rust/blob/main/dicas.md)
-
-[Rust através de exemplos](https://github.com/arataca89/rust/blob/main/rust_by_example.md)
-
 ---
+
 arataca89@gmail.com
+
+Última atualização: 20241226
