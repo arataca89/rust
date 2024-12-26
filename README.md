@@ -6,6 +6,8 @@
 
 ---
 
+[Tuplas](https://github.com/arataca89/rust/blob/main/tuple.md)
+
 [str](https://github.com/arataca89/rust/blob/main/str.md)
 
 [String](https://github.com/arataca89/rust/blob/main/string.md)
