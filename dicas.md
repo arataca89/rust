@@ -10,10 +10,8 @@ Um atributo é um metadado geral e de forma livre que é interpretado de acordo 
 
 [Atributos](https://doc.rust-lang.org/reference/attributes.html)
 
-# asdfg
-
 ---
 
 arataca89@gmail.com
 
-Última atualização: 20241018
+Última atualização: 20241226
