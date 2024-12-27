@@ -1,5 +1,9 @@
 # Programação Rust
 
+<img src="images/atencao2.png" width="100" alt="ATENCAO: REPOSITORIO NAO OFICIAL">
+
+---
+
 <img src="images/dicas.png" width="100" alt="DICAS"> [Dicas](https://github.com/arataca89/rust/blob/main/dicas.md)
 
 [Rust através de exemplos](https://github.com/arataca89/rust/blob/main/rust_by_example.md)
