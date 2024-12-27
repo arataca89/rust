@@ -1,6 +1,6 @@
 # Programação Rust
 
-<img src="images/atencao2.png" width="100" alt="ATENCAO: REPOSITORIO NAO OFICIAL">
+<img src="images/atencao2.png" width="200" alt="ATENCAO: REPOSITORIO NAO OFICIAL">
 
 ---
 
