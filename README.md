@@ -30,6 +30,8 @@
 
 [Traits](https://github.com/arataca89/rust/tree/main/traits)
 
+[Traits deriváveis](https://github.com/arataca89/rust/blob/main/derivable_traits.md)
+
 [Lifetimes (tempos de vida)](https://github.com/arataca89/rust/tree/main/lifetimes)
 
 [Escrevendo um programa de linha de comando - minigrep](https://github.com/arataca89/rust/tree/main/minigrep)
@@ -44,4 +46,4 @@
 
 arataca89@gmail.com
 
-Última atualização: 20241226
+Última atualização: 20241227
