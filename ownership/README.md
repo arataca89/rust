@@ -1,28 +1,30 @@
+#### arataca89
+
 # Linguagem Rust - ownership
 
 Ownership (propriedade) é o recurso do Rust que tem mais implicações profundas no resto da linguagem. A propriedade permite que o Rust possa garantir segurança de memória sem precisar de um coletor de lixo (garbage collection), então é importante entender como ownership funciona.
 
-[1. Entendendo o que é ownership](#1-Entendendo-o-que-é-ownership)
+[1. Entendendo o que é ownership](#1-entendendo-o-que-é-ownership)
 
-[2. Movendo dados na memória](#2-Movendo-dados-na-memória)
+[2. Movendo dados na memória](#2-movendo-dados-na-memória)
 
-[3. Clonando dados na memória](#3-Clonando-dados-na-memória)
+[3. Clonando dados na memória](#3-clonando-dados-na-memória)
 
-[4. A trait Copy](#4-A-trait-Copy)
+[4. A trait Copy](#4-a-trait-copy)
 
-[5. Ownership e funções](#5-Ownership-e-funções)
+[5. Ownership e funções](#5-ownership-e-funções)
 
-[6. Valores de retorno e escopo](#6-Valores-de-retorno-e-escopo)
+[6. Valores de retorno e escopo](#6-valores-de-retorno-e-escopo)
 
-[7. Referências e empréstimo](#7-Referências-e-empréstimo)
+[7. Referências e empréstimo](#7-referências-e-empréstimo)
 
-[8. Dangling References](#8-Dangling-References)
+[8. Dangling References](#8-dangling-references)
 
-[9. O tipo de dados slice](#9-O-tipo-de-dados-slice)
+[9. O tipo de dados slice](#9-o-tipo-de-dados-slice)
 
-[10. Slice de string](#10-Slice-de-string)
+[10. Slice de string](#10-slice-de-string)
 
-[11. Literais strings e outros tipos de slices](#11-Literais-strings-e-outros-tipos-de-slices)
+[11. Literais strings e outros tipos de slices](#11-literais-strings-e-outros-tipos-de-slices)
 
 ---
 
@@ -783,4 +785,4 @@ Esta slice é do tipo ``´&[i32]``` e funciona da mesma forma que as slices de s
 
 arataca89@gmail.com
 
-Última atualização: 20240925
+Última atualização: 20241227
