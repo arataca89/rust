@@ -1,3 +1,5 @@
+#### arataca89
+
 # Linguagem Rust - Traits
 
 Uma ```trait``` define uma funcionalidade que um tipo de dados deverá implementar.
@@ -453,4 +455,4 @@ Em linguagens dinamicamente tipadas, receberíamos um erro em tempo de execuçã
 
 arataca89@gmail.com
 
-Última atualização: 20241216
+Última atualização: 20241228
