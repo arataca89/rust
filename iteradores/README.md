@@ -1,3 +1,5 @@
+#### arataca89
+
 # Linguagem Rust - iterators
 
 Iteradores permitem que você execute alguma operação em uma sequência de itens, um de cada por vez. Um iterador (iterator) é responsável pela lógica de iterar sobre cada item e indicar quando a sequência terminou. Quando você usa iteradores, você não precisa reimplementar essa lógica sozinho. 
@@ -30,13 +32,13 @@ Em linguagens que não possuem iteradores fornecidos por suas bibliotecas padrã
 Iteradores cuidam de toda essa lógica para você, reduzindo a repetição de código que você poderia potencialmente estragar. Iteradores lhe dão mais flexibilidade para usar a mesma lógica com muitos tipos diferentes de sequências, não apenas estruturas de dados que você pode indexar, como vetores. Vamos examinar como os iteradores fazem isso. 
 
 
-[1. A trait Iterator e o método next](#1-A-trait-Iterator-e-o-método-next)
+[1. A trait Iterator e o método next](#1-a-trait-iterator-e-o-método-next)
 
-[2. Métodos que consomem um iterator](#2-Métodos-que-consomem-um-iterator)
+[2. Métodos que consomem um iterator](#2-métodos-que-consomem-um-iterator)
 
-[3. Metodos que produzem outros iteradores](#3-Métodos-que-produzem-outros-iteradores)
+[3. Metodos que produzem outros iteradores](#3-métodos-que-produzem-outros-iteradores)
 
-[4. Usando closures que capturam seu ambiente](#4-Usando-closures-que-capturam-seu-ambiente)
+[4. Usando closures que capturam seu ambiente](#4-usando-closures-que-capturam-seu-ambiente)
 
 ---
 
@@ -243,4 +245,4 @@ A closure captura o parâmetro ```shoe_size``` do ambiente e compara o valor com
 
 arataca89@gmail.com
 
-Última atualização: 20241005
+Última atualização: 20241228
