@@ -3,7 +3,7 @@
 # Linguagem Rust - assert_eq!
 
 
-```assert_eq!``` é uma macro usada em testes para afirmar que duas expressões são iguais. Ela usa a trait ```PartialEq``` para executar seu trabalho. Para saber mais sobre traits veja: [Traits](traits.md#arataca89) e [Traits deriváveis](derivable_traits.md#arataca89).
+```assert_eq!``` é uma macro usada em testes para afirmar que duas expressões são iguais. Ela usa a trait ```PartialEq``` para executar seu trabalho. Para saber mais sobre traits veja: [Traits]([traits.md#arataca89](https://github.com/arataca89/rust/tree/main/traits)) e [Traits deriváveis](derivable_traits.md#arataca89).
 
 ```
 macro_rules! assert_eq {
