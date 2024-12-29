@@ -41,10 +41,12 @@
 
 [Iteradores](https://github.com/arataca89/rust/tree/main/iteradores)
 
+[Iteradores - métodos](https://github.com/arataca89/rust/blob/main/iterators_methods.md)
+
 [minigrep2 - melhorando o código do minigrep com iterators](https://github.com/arataca89/rust/tree/main/minigrep2)
 
 ---
 
 arataca89@gmail.com
 
-Última atualização: 20241228
+Última atualização: 20241229
