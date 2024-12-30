@@ -1,3 +1,5 @@
+#### arataca89
+
 # minigrep - escrevendo um programa de linha de comando
 
 Baseado no projeto descrito no [capítulo 12 do "Livro"](https://doc.rust-lang.org/book/ch12-00-an-io-project.html)
@@ -5,39 +7,39 @@ Baseado no projeto descrito no [capítulo 12 do "Livro"](https://doc.rust-lang.o
 
 Este projeto escreve uma versão simples da clássica ferramenta ```grep``` presente em sistemas "Unix like". O comando ```grep```, basicamente, procura por um padrão de string em um arquivo. Para isso ele recebe como argumentos um caminho de arquivo (path) e uma string. O comando então lê o arquivo, procura pelas linhas que têm a string procurada e imprime estas linhas na tela.
 
-[1. Recebendo argumentos da linha de comando](#1-Recebendo-argumentos-da-linha-de-comando)
+[1. Recebendo argumentos da linha de comando](#1-recebendo-argumentos-da-linha-de-comando)
 
-[2. Lendo o arquivo](#2-Lendo-o-arquivo)
+[2. Lendo o arquivo](#2-lendo-o-arquivo)
 
-[3. Organização do código](#3-Organização-do-código)
+[3. Organização do código](#3-organização-do-código)
 
-[4. Retirando a análise dos argumentos da linha de comando para fora de ```main()```](#4-Retirando-a-análise-dos-argumentos-da-linha-de-comando-para-fora-de-main)
+[4. Retirando a análise dos argumentos da linha de comando para fora de ```main()```](#4-retirando-a-análise-dos-argumentos-da-linha-de-comando-para-fora-de-main)
 
-[5. Juntando os valores referentes a string a ser procurada e o nome do arquivo em uma única estrutura](#5-Juntando-os-valores-referentes-a-string-a-ser-procurada-e-o-nome-do-arquivo-em-uma-única-estrutura)
+[5. Juntando os valores referentes a string a ser procurada e o nome do arquivo em uma única estrutura](#5-juntando-os-valores-referentes-a-string-a-ser-procurada-e-o-nome-do-arquivo-em-uma-única-estrutura)
 
-[6. Criando um construtor para o tipo ```Config```](#6-Criando-um-construtor-para-o-tipo-Config)
+[6. Criando um construtor para o tipo ```Config```](#6-criando-um-construtor-para-o-tipo-config)
 
-[7. Tratamento de erro](#7-Tratamento-de-erro)
+[7. Tratamento de erro](#7-tratamento-de-erro)
 
-[8. Retirando a lógica principal de ```main()```](#8-Retirando-a-lógica-principal-de-main)
+[8. Retirando a lógica principal de ```main()```](#8-retirando-a-lógica-principal-de-main)
 
-[9. Refatorando ```run()``` para que execute o tratamento de erro](#9-Refatorando-run-para-que-execute-o-tratamento-de-erro)
+[9. Refatorando ```run()``` para que execute o tratamento de erro](#9-refatorando-run-para-que-execute-o-tratamento-de-erro)
 
-[10. Separando a lógica para um crate de biblioteca](#10-Separando-a-lógica-para-um-crate-de-biblioteca)
+[10. Separando a lógica para um crate de biblioteca](#10-separando-a-lógica-para-um-crate-de-biblioteca)
 
-[11. Desenvolvendo a funcionalidade da biblioteca usando TDD](#11-Desenvolvendo-a-funcionalidade-da-biblioteca-usando-TDD)
+[11. Desenvolvendo a funcionalidade da biblioteca usando TDD](#11-desenvolvendo-a-funcionalidade-da-biblioteca-usando-tdd)
 
-[12. Escrevendo o teste que falha](#12-Escrevendo-o-teste-que-falha)
+[12. Escrevendo o teste que falha](#12-escrevendo-o-teste-que-falha)
 
-[13. Escrevendo código para o teste passar](#13-Escrevendo-código-para-o-teste-passar)
+[13. Escrevendo código para o teste passar](#13-escrevendo-código-para-o-teste-passar)
 
-[14. Inserindo a chamada a ```search()``` em ```run()```](#14-Inserindo-a-chamada-a-search-em-run)
+[14. Inserindo a chamada a ```search()``` em ```run()```](#14-inserindo-a-chamada-a-search-em-run)
 
-[15. Adicionando o recurso ```case insensitive```](#15-Adicionando-o-recurso-case-insensitive)
+[15. Adicionando o recurso ```case insensitive```](#15-adicionando-o-recurso-case-insensitive)
 
-[16. Inserindo a nova funcionalidade em ```run()```](#16-Inserindo-a-nova-funcionalidade-em-run)
+[16. Inserindo a nova funcionalidade em ```run()```](#16-inserindo-a-nova-funcionalidade-em-run)
 
-[17. Enviando as mensagens de erro para ```strerr```](#17-Enviando-as-mensagens-de-erro-para-strerr)
+[17. Enviando as mensagens de erro para ```strerr```](#17-enviando-as-mensagens-de-erro-para-strerr)
 
 ---
 
@@ -905,4 +907,4 @@ fn main() {
 ---
 arataca89@gmail.com
 
-Última atualização: 20240812
+Última atualização: 20241230
