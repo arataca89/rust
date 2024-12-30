@@ -2,6 +2,16 @@
 
 # Linguagem Rust - enum
 
+[Introdução](#introdução)
+
+[Enum ao estilo C](#enum-ao-estilo-c)
+
+[enum pode ter métodos](#enum-pode-ter-métodos)
+
+---
+
+## Introdução
+
 ```enum``` é um tipo definido pelo usuário que consiste de um container de nomes relacionados que podem conter valores. Por exemplo:
 
 ```
@@ -53,9 +63,30 @@ fn main() {
 }
 ```
 
-Neste exemplo temos uma ```enum``` chamada **Operacao** que possui 4 nomes: **Adicao**, **Subtracao**, **Multiplicacao** e **Divisao**. Estes nomes são chamados **variantes** da ```enum```. Note que as variantes estão relacionadas, elas são as quatro operações aritméticas básicas. A intenção é criar uma função que receba a operação e os operandos e retorne o resultado da operação aritmética, ou seja, uma simples calculadora.
+Neste exemplo temos uma ```enum``` chamada **Operacao** que possui 4 nomes: **Adicao**, **Subtracao**, **Multiplicacao** e **Divisao**. Estes nomes são chamados **variantes** da ```enum```. 
 
-Neste caso a função citada é ```executar()``` que deve receber a operação aritmética a ser executada, e os dois operandos. Ela deve retonar o resultado da operação ou uma string de erro. Note que ela retorna um tipo ```Result``` que também é uma enumeração.
+```
+.....
+enum Operacao {
+    Adicao,
+    Subtracao,
+    Multiplicacao,
+    Divisao,
+}
+.....
+```
+
+Note que as variantes estão relacionadas, elas são as quatro operações aritméticas básicas. A intenção é criar uma função que receba a operação e os operandos e retorne o resultado da operação aritmética, ou seja, uma simples calculadora.
+
+Neste caso a função citada é ```executar()``` que deve receber a operação aritmética a ser executada, e os dois operandos. Ela deve retonar o resultado da operação ou uma string de erro.
+
+```
+.....
+fn executar(operacao: Operacao, x: f64, y: f64) -> Result<f64, &'static str> {
+.....
+```
+
+Note que ela retorna um tipo ```Result``` que também é uma enumeração.
 
 ```Result``` é uma enumeração da biblioteca padrão Rust que possui duas variantes.
 
@@ -105,6 +136,117 @@ Aqui, verificamos se o divisor é zero; se for, retornamos um ```Result``` que �
 
 ---
 
+## Enum ao estilo C
+
+A enumeração ao estilo da linguagem C possui apenas os nomes, sem valores embutidos, como mostrado no exemplo anterior. Abaixo temos outro exemplo.
+
+```
+enum HttpStatus {
+    Ok,
+    NotModified,
+    NotFound,
+}
+
+fn main(){
+
+    // o status veio como resposta do servidor
+    let status = HttpStatus::NotFound;
+
+    match status {
+        HttpStatus::Ok          => println!("Beleza"),
+        HttpStatus::NotModified => println!("Não modificado"),
+        HttpStatus::NotFound    => println!("Não encontrado"),
+    }
+}
+```
+
+Assim como na linguagem C, este tipo de enumeração pode ter valores inteiros associados; e a conversão para inteiro é permitida; conversão de inteiro para a variante da ```enum``` não é permitida.
+
+```
+enum HttpStatus {
+    Ok = 200,
+    NotModified = 304,
+    NotFound = 404,
+}
+
+fn main(){
+
+    // o status veio como resposta do servidor
+    let status = HttpStatus::NotFound;
+
+    match status {
+        HttpStatus::Ok          => println!("Beleza"),
+        HttpStatus::NotModified => println!("Não modificado"),
+        HttpStatus::NotFound    => println!("Não encontrado"),
+    }
+
+    println!("OK            : {}", HttpStatus::Ok as i32); // 200
+    //println!("HttpStatus::Ok: {}", 200 as HttpStatus::Ok); // ERRO
+}
+```
+
+Se inteiros não forem atribuídos, assim como na linguagem C, serão atribuidos automaticamente, iniciando com zero.
+
+```
+enum TokenType {
+    Eof,
+    Plus,
+    Minus,
+    Unknown,
+}
+
+fn main(){
+
+    let t1 = TokenType::Eof;
+    let t2 = TokenType::Plus;
+    let t3 = TokenType::Minus;
+    let t4 = TokenType::Unknown;
+
+    println!("Eof   : {}", t1 as i32);// 0
+    println!("Plus  : {}", t2 as i32);// 1
+    println!("Minus : {}", t3 as i32);// 2
+    println!("Unknow: {}", t4 as i32);// 3
+}
+```
+
+Variantes que não recebem valor, após uma que recebe, seguirão a ordem crescente dos valores.
+```
+enum TokenType {
+    Eof,
+    Plus = 43,
+    Minus = 45,
+    Unknown,
+}
+
+fn main(){
+
+    let t1 = TokenType::Eof;
+    let t2 = TokenType::Plus;
+    let t3 = TokenType::Minus;
+    let t4 = TokenType::Unknown;
+
+    println!("Eof   : {}", t1 as i32);// 0
+    println!("Plus  : {}", t2 as i32);// 43
+    println!("Minus : {}", t3 as i32);// 45
+    println!("Unknow: {}", t4 as i32);// 46
+}
+```
+
+---
+
+## enum pode ter métodos
+
+asd
+
+
+
+
+
+
+
+
+---
+
 <img src="images/em_construcao.png" width="250" alt="EM CONSTRUCAO">
 
 ---
@@ -125,4 +267,4 @@ Links:
 
 arataca89@gmail.com
 
-Última atualização: 20241228
+Última atualização: 20241230
