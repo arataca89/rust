@@ -9,6 +9,9 @@
 [Rust através de exemplos](https://github.com/arataca89/rust/blob/main/rust_by_example.md)
 
 ---
+
+[panic!](https://github.com/arataca89/rust/blob/main/panic.md)
+
 [assert_eq!](https://github.com/arataca89/rust/blob/main/assert_eq.md)
 
 [Tupla](https://github.com/arataca89/rust/blob/main/tuple.md)
@@ -49,4 +52,4 @@
 
 arataca89@gmail.com
 
-Última atualização: 20241229
+Última atualização: 20241230
