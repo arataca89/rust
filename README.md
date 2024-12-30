@@ -38,13 +38,15 @@
 
 [Lifetimes (tempos de vida)](https://github.com/arataca89/rust/tree/main/lifetimes)
 
-[Escrevendo um programa de linha de comando - minigrep](https://github.com/arataca89/rust/tree/main/minigrep)
-
 [Closures](https://github.com/arataca89/rust/tree/main/closures)
 
 [Iteradores](https://github.com/arataca89/rust/tree/main/iteradores)
 
 [Iteradores - métodos](https://github.com/arataca89/rust/blob/main/iterators_methods.md)
+
+---
+
+[Escrevendo um programa de linha de comando - minigrep](https://github.com/arataca89/rust/tree/main/minigrep)
 
 [minigrep2 - melhorando o código do minigrep com iterators](https://github.com/arataca89/rust/tree/main/minigrep2)
 
