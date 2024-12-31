@@ -34,7 +34,7 @@ O macro ```panic!``` é usada para construir erros que representam um bug que fo
 
 ```Result```, por outro lado, é usado para encapsular outros tipos que representam o resultado bem-sucedido de alguma computação, ```Ok(T)```, ou tipos de erro que representam um modo de falha de tempo de execução antecipado dessa computação, ```Err(E)```. ```Result``` é usado junto com tipos definidos pelo usuário que representam os vários modos de falha de tempo de execução antecipados que a computação associada pode encontrar. ```Result``` deve ser propagado manualmente, geralmente com a ajuda do operador ```?``` (interrogação) e da trait ```Try```, e deve ser relatado manualmente, geralmente com a ajuda da trait ```Error```.
 
-Para obter informações mais detalhadas sobre o tratamento de erros, consulte [Tratamento de erro](erro2.md#arataca89) ou a documentação do módulo [std::result](https://doc.rust-lang.org/std/result/index.html). 
+Para obter informações mais detalhadas sobre o tratamento de erros, consulte [Tratamento de erro](erro.md#arataca89) ou a documentação do módulo [std::result](https://doc.rust-lang.org/std/result/index.html). 
 
 ### Exemplos
 
