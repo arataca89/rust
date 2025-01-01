@@ -42,6 +42,8 @@
 
 [Iteradores](https://github.com/arataca89/rust/tree/main/iteradores)
 
+[Iteradores - Módulo iter](https://github.com/arataca89/rust/blob/main/module_iter.md)
+
 [Iteradores - métodos](https://github.com/arataca89/rust/blob/main/iterators_methods.md)
 
 ---
@@ -54,4 +56,4 @@
 
 arataca89@gmail.com
 
-Última atualização: 20241230
+Última atualização: 20250101
