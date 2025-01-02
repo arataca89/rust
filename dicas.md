@@ -2,6 +2,14 @@
 
 ## Rust - dicas
 
+[Desabilitar as mensagens de warning](#desabilitar-as-mensagens-de-warning)
+
+[Converter um Vec&lt;char&gt; em uma String](#converter-um-vecchar-em-uma-string)
+
+[Ler um arquivo texto para uma String](#ler-um-arquivo-texto-para-uma-string)
+
+---
+
 # Desabilitar as mensagens de warning
 Insira a seguinte atributo no início do seu arquivo fonte
 ```
@@ -38,11 +46,38 @@ fn main() {
 }
 ```
 
-
 Fonte: [https://stackoverflow.com/questions/23430735/how-to-convert-vecchar-to-a-string](https://stackoverflow.com/questions/23430735/how-to-convert-vecchar-to-a-string)
+
+---
+
+# Ler um arquivo texto para uma String
+
+```
+use std::fs;
+use std::io;
+/********************************************************************
+fs::read_to_string()
+    Lê todo o conteúdo de um arquivo para uma String.
+********************************************************************/
+fn main(){
+    let texto =  fs::read_to_string("lorem.txt");
+    match texto {
+        Ok(s)  => println!("{s}"),
+        Err(e) => println!("Erro: {}", e),
+    }
+}
+/********************************************************************
+Se o arquivo 'lorem.txt' existir, seu conteudo será exibido,
+senão a saída será:
+
+Erro: O sistema não pode encontrar o arquivo especificado. (os error 2)
+********************************************************************/
+```
+
+[std::read_to_string()](https://doc.rust-lang.org/beta/std/fs/fn.read_to_string.html)
 
 ---
 
 arataca89@gmail.com
 
-Última atualização: 20250101
+Última atualização: 20250102
