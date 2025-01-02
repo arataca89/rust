@@ -18,7 +18,11 @@ A maioria das linguagens não distingue entre esses dois tipos de erros e lida c
 
 [unwrap e expect](#unwrap-e-expect)
 
-[propagando erros](#propagando-erros)
+[Propagando erros](#propagando-erros)
+
+[Operador ?: um atalho para a propagação de erros](#operador--um-atalho-para-a-propaga%C3%A7%C3%A3o-de-erros)
+
+[Onde o operador ? pode ser usado](#onde-o-operador--pode-ser-usado)
 
 ---
 
@@ -289,9 +293,114 @@ Em código de qualidade de produção, a maioria dos Rustaceans escolhe ```expec
 
 ---
 
-## propagando erros
+## Propagando erros
+
+Quando a implementação de uma função chama algo que pode falhar, em vez de manipular o erro dentro da própria função, você pode retornar o erro para o código de chamada para que ele possa decidir o que fazer. Isso é conhecido como propagação do erro e dá mais controle ao código de chamada, onde pode haver mais informações ou lógica que ditam como o erro deve ser manipulado do que o que você tem disponível no contexto do seu código.
+
+Por exemplo, o código abaixo mostra uma função que lê um nome de usuário de um arquivo. Se o arquivo não existir ou não puder ser lido, essa função retornará esses erros para o código que chamou a função.
+
+```
+use std::fs::File;
+use std::io::{self, Read};
+
+fn read_username_from_file() -> Result<String, io::Error> {
+    let username_file_result = File::open("hello.txt");
+
+    let mut username_file = match username_file_result {
+        Ok(file) => file,
+        Err(e) => return Err(e),
+    };
+
+    let mut username = String::new();
+
+    match username_file.read_to_string(&mut username) {
+        Ok(_) => Ok(username),
+        Err(e) => Err(e),
+    }
+}
+```
+
+Essa função pode ser escrita de uma forma muito mais curta, mas vamos começar fazendo muito dela manualmente para explorar o tratamento de erros; no final, mostraremos a maneira mais curta. Vamos olhar para o tipo de retorno da função primeiro: ```Result<String, io::Error>```. Isso significa que a função está retornando um valor do tipo ```Result<T, E>```, onde o parâmetro genérico **T** foi preenchido com o tipo concreto **String** e o tipo genérico **E** foi preenchido com o tipo concreto **io::Error**.
+
+Se essa função for bem-sucedida sem problemas, o código que chama essa função receberá um valor **Ok** que contém uma **String** — o nome de usuário que essa função leu do arquivo. Se essa função encontrar algum problema, o código de chamada receberá um valor **Err** que contém uma instância de **io::Error** que contém mais informações sobre quais foram os problemas. Escolhemos **io::Error** como o tipo de retorno dessa função porque esse é o tipo do valor de erro retornado de ambas as operações que estamos chamando no corpo dessa função que podem falhar: a função ```File::open()``` e o método ```read_to_string()```.
+
+O corpo da função começa chamando a função ```File::open()```. Então, manipulamos o valor **Result** com um **match**. Se ```File::open()``` for bem-sucedido, o identificador de arquivo na variável **file** se torna o valor da variável mutável **username_file** e a função continua. No caso de **Err**, em vez de chamar ```panic!```, usamos a palavra-chave **return** para retornar antecipadamente da função e passar o valor de erro de ```File::open()```, agora na variável **e**, de volta ao código de chamada como o valor de erro desta função.
+
+Então, se tivermos um identificador de arquivo em **username_file**, a função cria uma nova **String** na variável **username** e chama o método ```read_to_string()``` no identificador de arquivo em **username_file** para ler o conteúdo do arquivo em **username**. O método ```read_to_string()``` também retorna um **Result** porque pode falhar, mesmo que ```File::open()``` tenha sido bem-sucedido. Então, precisamos de outro **match** para lidar com esse **Result**: se ```read_to_string()``` for bem-sucedido, então nossa função foi bem-sucedida, e retornamos o **username** do arquivo encapsulado em um **Ok**. Se ```read_to_string()``` falhar, retornamos o valor de erro da mesma forma que retornamos o valor de erro no **match** que lidou com o valor de retorno de ```File::open()```. No entanto, não precisamos dizer explicitamente **return**, porque esta é a última expressão na função.
+
+O código que chama esse código então manipulará o valor recebido de um **Ok** que contém um nome de usuário ou de um **Err** que contém um **io::Error**. Cabe ao código de chamada decidir o que fazer com esses valores. Se o código de chamada obtiver um valor **Err**, ele poderá chamar ```panic!``` e encerrar o programa, usar um nome de usuário padrão ou procurar o nome de usuário em algum lugar que não seja um arquivo, por exemplo. Não temos informações suficientes sobre o que o código de chamada irá fazer, então propagamos todas as informações de sucesso ou erro para cima para que ele manipule adequadamente.
+
+Como este padrão de propagação de erros é muito comum, Rust fornece o operador de interrogação, **?**, para tornar isso mais fácil.
+
+---
+
+## Operador ?: um atalho para a propagação de erros
+
+O código abaixo mostra uma implementação de ```read_username_from_file()``` que tem a mesma funcionalidade do código anterior, mas esta implementação usa o operador **?**.
+
+```
+use std::fs::File;
+use std::io::{self, Read};
+
+fn read_username_from_file() -> Result<String, io::Error> {
+    let mut username_file = File::open("hello.txt")?;
+    let mut username = String::new();
+    username_file.read_to_string(&mut username)?;
+    Ok(username)
+}
+```
+
+O **?** colocado após um valor **Result** é definido para funcionar quase da mesma forma que as expressões **match** que definimos para manipular os valores **Result** no código anterior. Se o valor do **Result** for um **Ok**, o valor dentro do **Ok** será retornado desta expressão, e o programa continuará. Se o valor for um **Err**, o **Err** será retornado de toda a função como se tivéssemos usado a palavra-chave **return**, então o valor do erro é propagado para o código de chamada.
+
+Há uma diferença entre o que a expressão **match** faz e o que o operador **?** faz: valores de erro que têm o operador **?** chamado neles passam pela função ```from()```, definida na trait ```From``` da biblioteca padrão, que é usada para converter valores de um tipo em outro. Quando o operador **?** chama a função ```from()```, o tipo de erro recebido é convertido no tipo de erro definido no tipo de retorno da função atual. Isso é útil quando uma função retorna um tipo de erro para representar todas as maneiras pelas quais uma função pode falhar, mesmo que partes possam falhar por muitos motivos diferentes.
+
+Por exemplo, poderíamos alterar a função ```read_username_from_file()``` para retornar um tipo de erro personalizado chamado **OurError** que definimos. Se também definirmos ```impl From<io::Error>``` para **OurError** para construir uma instância de **OurError** a partir de um **io::Error**, então o operador **?** no corpo de ```read_username_from_file()``` chamará ```from()``` e converterá os tipos de erro sem precisar adicionar mais código à função. 
+
+No contexto deste código atual, o **?** no final da chamada ```File::open()``` retornará o valor dentro de um **Ok** para a variável **username_file**. Se ocorrer um erro, o operador **?** retornará antecipadamente de toda a função e fornecerá qualquer valor **Err** para o código que está chamando. O mesmo se aplica ao **?** no final da chamada ```read_to_string()```.
+
+O operador **?** elimina muita repetição e torna a implementação dessa função mais simples. Poderíamos até encurtar esse código ainda mais concatenando chamadas de método imediatamente após o **?**.
+
+```
+use std::fs::File;
+use std::io::{self, Read};
+
+fn read_username_from_file() -> Result<String, io::Error> {
+    let mut username = String::new();
+
+    File::open("hello.txt")?.read_to_string(&mut username)?;
+
+    Ok(username)
+}
+```
+
+Movemos a criação da nova **String** em **username** para o início da função; essa parte não mudou. Em vez de criar uma variável **username_file**, encadeamos a chamada para ```read_to_string()``` diretamente no resultado de ```File::open("hello.txt")?```. Ainda temos um **?** no final da chamada ```read_to_string()```, e ainda retornamos um valor **Ok** contendo **username** quando ```File::open()``` e ```read_to_string()``` são bem-sucedidos em vez de retornar erros. A funcionalidade é novamente a mesma do código anterior; esta é apenas uma maneira diferente e mais ergonômica de escrevê-la.
+
+Abaixo temos uma maneira de tornar isso ainda mais curto usando ```fs::read_to_string()```.
+
+```
+use std::fs;
+use std::io;
+
+fn read_username_from_file() -> Result<String, io::Error> {
+    fs::read_to_string("hello.txt")
+}
+```
+
+Ler um arquivo em uma string é uma operação bastante comum, então a biblioteca padrão fornece a função conveniente ```fs::read_to_string()``` que abre o arquivo, cria uma nova **String**, lê o conteúdo do arquivo, coloca o conteúdo nessa **String** e o retorna. Claro, usar ```fs::read_to_string()``` não nos dá a oportunidade de explicar todo o tratamento de erros, então fizemos isso da maneira mais longa primeiro. 
+
+---
+
+## Onde o operador ? pode ser usado
 
 asd
+ 
+ 
+ 
+
+
+ 
+ 
+
 
 ---
 
@@ -310,4 +419,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20250101
+Última atualização: 20250102
