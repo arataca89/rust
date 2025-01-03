@@ -24,6 +24,8 @@ A maioria das linguagens não distingue entre esses dois tipos de erros e lida c
 
 [Onde o operador ? pode ser usado](#onde-o-operador--pode-ser-usado)
 
+[Quando entrar em pânico e quando não](#quando-entrar-em-pânico-e-quando-não)
+
 ---
 
 ## panic!
@@ -392,13 +394,92 @@ Ler um arquivo em uma string é uma operação bastante comum, então a bibliote
 
 ## Onde o operador ? pode ser usado
 
+O operador **?** só pode ser usado em funções cujo tipo de retorno seja compatível com o valor em que o **?** é usado. Isso ocorre porque o operador **?** é definido para realizar um retorno antecipado de um valor da função, da mesma forma que a expressão **match**. No código anterior que usou **match**, **match** estava usando um valor ```Result```, e o braço de retorno antecipado retornou um valor ```Err(e)```. O tipo de retorno da função tem que ser um ```Result``` para que seja compatível com esse retorno.
+
+No código abaixo, vamos analisar o erro que obteremos se usarmos o operador **?** em uma função principal com um tipo de retorno incompatível com o tipo do valor em que usamos com **?**.
+
+```
+use std::fs::File;
+
+fn main() {
+    let greeting_file = File::open("hello.txt")?;
+}
+```
+
+Este código abre um arquivo, o que pode falhar. O operador **?** segue o valor ```Result``` retornado por ```File::open()```, mas esta função principal tem o tipo de retorno ```()```, não ```Result```. Quando compilamos este código, obtemos a seguinte mensagem de erro:
+
+```
+$ cargo run
+   Compiling error-handling v0.1.0 (file:///projects/error-handling)
+error[E0277]: the `?` operator can only be used in a function that returns `Result` or `Option` (or another type that implements `FromResidual`)
+ --> src/main.rs:4:48
+  |
+3 | fn main() {
+  | --------- this function should return `Result` or `Option` to accept `?`
+4 |     let greeting_file = File::open("hello.txt")?;
+  |                                                ^ cannot use the `?` operator in a function that returns `()`
+  |
+  = help: the trait `FromResidual<Result<Infallible, std::io::Error>>` is not implemented for `()`
+help: consider adding return type
+  |
+3 ~ fn main() -> Result<(), Box<dyn std::error::Error>> {
+4 |     let greeting_file = File::open("hello.txt")?;
+5 + 
+6 +     Ok(())
+7 + }
+  |
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `error-handling` (bin "error-handling") due to 1 previous error
+```
+
+Este erro indica que só podemos usar o operador **?** em uma função que retorna ```Result```, ```Option``` ou outro tipo que implementa ```FromResidual```.
+
+Para corrigir o erro, você tem duas opções. Uma opção é alterar o tipo de retorno da sua função para ser compatível com o valor em que você está usando o operador **?** desde que você não tenha nenhuma restrição impedindo isso. A outra opção é usar um **match** ou um dos métodos de ```Result<T, E>``` para lidar com o ```Result<T, E>``` da maneira que for apropriada.
+
+A mensagem de erro também mencionou que **?** pode ser usado com valores ```Option<T>``` também. Assim como ao usar **?** em ```Result```, você só pode usar **?** em ```Option``` em uma função que retorna uma ```Option```. O comportamento do operador **?** quando chamado em um ```Option<T>``` é semelhante ao seu comportamento quando chamado em um ```Result<T, E>```: se o valor for ```None```, o ```None``` será retornado antecipadamente da função naquele ponto. Se o valor for ```Some```, o valor dentro de ```Some``` é o valor resultante da expressão, e a função continua. Abaixo temos um exemplo de uma função que encontra o último caractere da primeira linha no texto fornecido.
+
+```
+fn last_char_of_first_line(text: &str) -> Option<char> {
+    text.lines().next()?.chars().last()
+}
+```
+
+Esta função retorna ```Option<char>``` porque é possível que haja um caractere ali, mas também é possível que não haja. Este código pega o argumento da slice de string de texto e chama o método ```lines()``` nele, que retorna um iterador sobre as linhas na string. Como esta função quer examinar a primeira linha, ela chama ```next()``` no iterador para obter o primeiro valor do iterador. Se **text** for uma string vazia, esta chamada para ```next()``` retornará ```None```, nesse caso usamos **?** para parar e retornar ```None``` de ```last_char_of_first_line()```. Se **text** não for uma string vazia, ```next()``` retornará um valor ```Some``` contendo uma slice de string da primeira linha em **text**.
+ 
+O **?** extrai a slice da string, e podemos chamar ```chars()``` nessa slice de string para obter um iterador de seus caracteres. Estamos interessados ​​no último caractere nesta primeira linha, então chamamos ```last()``` para retornar o último item no iterador. Esta é uma ```Option``` porque é possível que a primeira linha seja a string vazia; por exemplo, se **text** começa com uma linha em branco, mas tem caracteres em outras linhas, como em "\nhi". No entanto, se houver um último caractere na primeira linha, ele será retornado na variante ```Some```. O operador **?** no meio nos dá uma maneira concisa de expressar essa lógica, permitindo-nos implementar a função em uma linha. Se não pudéssemos usar o operador **?** em ```Option```, teríamos que implementar essa lógica usando mais chamadas de método ou uma expressão **match**. 
+ 
+Observe que você pode usar o operador **?** em um ```Result``` em uma função que retorna ```Result```, e você pode usar o operador **?** em um ```Option``` em uma função que retorna ```Option```, mas você não pode misturar e combinar. O operador **?** não converterá automaticamente um ```Result``` em um ```Option``` ou vice-versa; nesses casos, você pode usar métodos como o método ```ok()``` em ```Result``` ou o método ```ok_or()``` em ```Option``` para fazer a conversão explicitamente. 
+ 
+Até agora, todas as funções ```main()``` que usamos retornam ```()```. A função ```main()``` é especial porque é o ponto de entrada e saída de um programa executável, e existem restrições sobre qual pode ser seu tipo de retorno para que o programa se comporte como esperado. 
+ 
+Felizmente, ```main()``` também pode retornar um ```Result<(), E>```. Abaixo temos um código usado anteriormente, mas mudamos o tipo de retorno de ```main()``` para ser ```Result<(), Box<dyn Error>>``` e adicionamos um valor de retorno ```Ok(())``` no final. Este código agora irá compilar.
+
+```
+use std::error::Error;
+use std::fs::File;
+
+fn main() -> Result<(), Box<dyn Error>> {
+    let greeting_file = File::open("hello.txt")?;
+
+    Ok(())
+}
+```
+
+O tipo ```Box<dyn Error>``` é um objeto trait. Você pode ler ```Box<dyn Error>``` como “qualquer tipo de erro”. Usar **?** em um valor ```Result``` em uma função ```main()``` com o tipo error ```Box<dyn Error>``` é permitido porque permite que qualquer valor ```Err``` seja retornado antecipadamente. Embora o corpo desta função ```main()``` só retorne erros do tipo ```std::io::Error```, ao especificar ```Box<dyn Error>```, esta assinatura continuará correta mesmo se mais código que retorna outros erros for adicionado ao corpo de ```main()```. 
+ 
+Quando uma função ```main()``` retorna um ```Result<(), E>```, o executável sairá com um valor de 0 se ```main()``` retornar ```Ok(())``` e sairá com um valor diferente de zero se ```main()``` retornar um valor ```Err```. Executáveis escritos em C retornam inteiros quando saem: programas que saem com sucesso retornam o inteiro 0, e programas que geram erros retornam algum inteiro diferente de 0. O Rust também retorna inteiros de executáveis para ser compatível com essa convenção. 
+
+A função ```main()``` pode retornar qualquer tipo que implemente a trait [std::process::Termination](https://doc.rust-lang.org/std/process/trait.Termination.html), que contém uma função ```report()``` que retorna um ```ExitCode```. Consulte a documentação da biblioteca padrão para obter mais informações sobre a implementação da trait ```Termination``` para seus próprios tipos.
+
+Agora que discutimos os detalhes de chamar ```panic!``` ou retornar ```Result```, vamos voltar ao tópico de como decidir qual é apropriado para usar em quais casos.
+
+---
+
+## Quando entrar em pânico e quando não
+
 asd
- 
- 
- 
 
-
- 
  
 
 
@@ -410,7 +491,6 @@ asd
 
 
 
-
 ## Referências
 
 [The Book - Chapter 9](https://doc.rust-lang.org/book/ch09-00-error-handling.html)
@@ -419,4 +499,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20250102
+Última atualização: 20250103
