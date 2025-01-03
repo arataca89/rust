@@ -6,6 +6,7 @@
 
 [Box&lt;T&gt;](#boxt) 
 
+[Tratando Ponteiros Inteligentes como Referências  com a trait Deref](#tratando-ponteiros-inteligentes-como-referências-com-a-trait-deref)
 
 ---
 
@@ -151,6 +152,60 @@ enum Message {
 }
 ```
 
+Para determinar quanto espaço alocar para um valor **Message**, Rust percorre cada uma das variantes para ver qual variante precisa de mais espaço. Rust vê que **Message::Quit** não precisa de espaço, **Message::Move** precisa de espaço suficiente para armazenar dois valores ```i32```, e assim por diante. Como apenas uma variante será usada, o maior espaço que um valor **Message** precisará é o espaço que levaria para armazenar a maior de suas variantes.
+
+Compare isso com o que acontece quando Rust tenta determinar quanto espaço um tipo recursivo como o **List**,mostrado mais acima, precisa. O compilador começa olhando para a variante **Cons**, que contém um valor do tipo **i32** e um valor do tipo **List**. Portanto, **Cons** precisa de uma quantidade de espaço igual ao tamanho de um **i32** mais o tamanho de uma **List**. Para descobrir quanta memória o tipo **List** precisa, o compilador olha para as variantes, começando com a variante **Cons**. A variante **Cons** contém um valor do tipo **i32** e um valor do tipo **List**, e esse processo continua infinitamente, como mostrado na figura abaixo.
+
+<img src="images/box1.svg" width="500" alt="CONS">
+
+#### Usando Box&lt;T&gt; para obter um tipo recursivo com tamanho conhecido
+
+Como o Rust não consegue determinar quanto espaço alocar para tipos definidos recursivamente, o compilador gera um erro com esta sugestão útil:
+
+```
+help: insert some indirection (e.g., a `Box`, `Rc`, or `&`) to break the cycle
+  |
+2 |     Cons(i32, Box<List>),
+  |               ++++    +
+```
+
+Nesta sugestão, "indireção" significa que, em vez de armazenar um valor diretamente, devemos mudar a estrutura de dados para armazenar o valor indiretamente, armazenando um ponteiro para o valor em vez do valor propriamente dito.
+
+Como um ```Box<T>``` é um ponteiro, o Rust sempre sabe quanto espaço um ```Box<T>``` precisa: o tamanho de um ponteiro não muda com base na quantidade de dados para os quais ele está apontando. Isso significa que podemos colocar um ```Box<T>``` dentro da variante **Cons** em vez de outro valor **List** diretamente. O ```Box<T>``` apontará para o próximo valor **List** que estará na heap em vez de dentro da variante **Cons**. Conceitualmente, ainda temos uma lista, criada com listas contendo outras listas, mas essa implementação agora é mais como colocar os itens um ao lado do outro em vez de um dentro do outro.
+
+Podemos agora alterar a definição da **enum List** e sua utilização com, um código que irá compilar.
+
+```
+enum List {
+    Cons(i32, Box<List>),
+    Nil,
+}
+
+use crate::List::{Cons, Nil};
+
+fn main() {
+    let list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
+}
+```
+
+A variante **Cons** precisa do tamanho de um ```i32``` mais o espaço para armazenar os dados do ponteiro da ```Box```. A variante **Nil** não armazena valores, então precisa de menos espaço do que a variante **Cons**. Agora sabemos que qualquer valor **List** ocupará o tamanho de um ```i32``` mais o tamanho do ponteiro de uma ```Box```. Ao usar uma ```Box```, quebramos a cadeia infinita e recursiva, então o compilador pode descobrir o tamanho que precisa para armazenar um valor **List**. A figra abaixo mostra como a variante **Cons** se parece agora. 
+ 
+ 
+<img src="images/box2.svg" width="350" alt="CONS">
+
+As ```Box``` fornecem apenas a indireção e a alocação na memória heap; elas não têm nenhuma outra capacidade especial, como aquelas que veremos com os outros tipos de ponteiros inteligentes. Elas também não têm a sobrecarga de desempenho (overhead de performance) que essas capacidades especiais incorrem, então elas podem ser úteis em casos como a **cons list**, onde a indireção é o único recurso de que precisamos. 
+
+O tipo ```Box<T>``` é um ponteiro inteligente porque implementa a trait ```Deref```, que permite que valores ```Box<T>``` sejam tratados como referências. Quando um valor ```Box<T>``` sai do escopo, os dados da heap para os quais a ```Box``` está apontando também são limpos por causa da implementação da trait ```Drop```. Essas duas traits serão ainda mais importantes para a funcionalidade fornecida pelos outros tipos de ponteiros inteligentes que discutiremos mais a frente. Vamos explorar essas duas traits em mais detalhes.
+
+---
+
+## Tratando Ponteiros Inteligentes como Referências com a trait Deref
+
+asd 
+
+ 
+
+
 ---
 
 <img src="images/em_construcao.png" width="250" alt="EM CONSTRUCAO">
@@ -165,4 +220,4 @@ enum Message {
 
 arataca89@gmail.com
 
-Última atualização: 20250102
+Última atualização: 20250103
