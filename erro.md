@@ -478,10 +478,53 @@ Agora que discutimos os detalhes de chamar ```panic!``` ou retornar ```Result```
 
 ## Quando entrar em pânico e quando não
 
-asd
+Então, como você decide quando deve chamar ```panic!``` e quando deve retornar ```Result```? Quando o código entra em pânico, não há como se recuperar. Você pode chamar ```panic!``` para qualquer situação de erro, haja ou não uma maneira possível de se recuperar, mas então você está tomando a decisão de que uma situação é irrecuperável em nome do código chamador. Quando você escolhe retornar um valor ```Result```, você dá opções ao código chamador. Ele pode escolher tentar se recuperar de uma forma que seja apropriada para sua situação, ou pode decidir que um valor ```Err``` neste caso é irrecuperável, então ele pode chamar ```panic!``` e transformar seu erro recuperável em um irrecuperável. Portanto, retornar ```Result``` é uma boa escolha padrão quando você está definindo uma função que pode falhar.
 
+Em situações como exemplos, código de protótipo e testes, é mais apropriado escrever código que causa pânico em vez de retornar um ```Result```. Vamos explorar porquê, e depois discutir situações em que o compilador não consegue dizer que a falha é impossível, mas você, como humano, pode. Concluiremos com algumas diretrizes gerais sobre como decidir se deve causar pânico no código da biblioteca.
+
+#### Exemplos, códigos de protótipo e testes
+
+Quando você está escrevendo um exemplo para ilustrar algum conceito, incluir código de tratamento de erros robusto também pode tornar o exemplo menos claro. Em exemplos, é entendido que uma chamada a um método como ```unwrap()```, que pode causar pânico, é um local de possível futura substituição do código para a maneira como você deseja que seu aplicativo trate o erro, o que pode variar com base no que o resto do seu código está fazendo. 
  
+Da mesma forma, os métodos ```unwrap()``` e ```expect()``` são muito úteis durante a prototipagem, antes de você estar pronto para decidir como lidar com erros. Eles deixam marcadores claros em seu código para quando você estiver pronto para tornar seu programa mais robusto. 
 
+Se uma chamada de método falhar em um teste, você deseja que todo o teste falhe, mesmo que esse método não seja a funcionalidade em teste. Como o ```panic!``` é como um teste é marcado como falha, chamar ```unwrap()``` ou ```expect()``` é exatamente o que deve acontecer.
+
+<font color="blue"><b>Conclusão: em exemplos, protótipos e testes normalmente você deve usar ```panic!``` explicitamente, ```unwrap()``` ou ```expect()```.</b></font>
+
+#### Quando você tem mais informações que o compilador
+
+Também seria apropriado chamar ```unwrap()``` ou ```expect()``` quando você tem alguma outra lógica que garante que o ```Result``` terá um valor ```Ok```, mas a lógica não é algo que o compilador entende. Você ainda terá um valor ```Result``` que precisa manipular: qualquer operação que você esteja chamando ainda tem a possibilidade de falhar em geral, mesmo que seja logicamente impossível em sua situação particular. Se você puder garantir, inspecionando o código, que nunca terá uma variante ```Err```, é perfeitamente aceitável chamar ```unwrap()```, e é ainda melhor usar ```expect()``` passando como argumento o motivo pelo qual você acha que nunca terá uma variante ```Err```. Aqui está um exemplo:
+
+```
+    use std::net::IpAddr;
+
+    let home: IpAddr = "127.0.0.1"
+        .parse()
+        .expect("O endereço IP foi codificado hardcode e deve ser válido");
+```
+
+Estamos criando uma instância ```IpAddr``` analisando uma string codificada. Podemos ver que **127.0.0.1** é um endereço IP válido, então é aceitável usar ```expect()``` aqui. No entanto, ter uma string codificada hardcode (diretamente no código) e válida não altera o tipo de retorno do método ```parse()```: ainda obtemos um valor ```Result```, e o compilador ainda nos fará lidar com ```Result``` como se a variante ```Err``` fosse uma possibilidade porque o compilador não é inteligente o suficiente para ver que essa string é sempre um endereço IP válido. Se a string do endereço IP viesse de um usuário em vez de ser codificada diretamente no programa (hardcode) e, portanto, tivesse uma possibilidade de falha, definitivamente gostaríamos de lidar com o ```Result``` de uma forma mais robusta. Mencionar a suposição de que esse endereço IP é codificado hardcode nos levará a mudar ```expect()``` para um código de tratamento de erros melhor se, no futuro, precisarmos obter o endereço IP de alguma outra fonte.
+
+#### Diretrizes para tratamento de erros
+
+É aconselhável fazer com que seu código entre em pânico quando houver a possibilidade de que ele possa acabar em um estado ruim. Nesse contexto, um estado ruim é quando alguma suposição, garantia, contrato ou invariante foi violada, como quando valores inválidos, valores contraditórios ou valores ausentes são passados para seu código - além de um ou mais dos seguintes:
+
+* O estado ruim é algo inesperado, ao contrário de algo que provavelmente acontecerá ocasionalmente, como um usuário inserindo dados no formato errado;
+* Seu código após este ponto precisa confiar em não estar nesse estado ruim, em vez de verificar o problema a cada passo;
+* Não há uma boa maneira de codificar essa informação nos tipos que você usa.
+
+Se alguém chamar seu código e passar valores que não fazem sentido, é melhor retornar um erro se puder para que o usuário da biblioteca possa decidir o que quer fazer nesse caso. No entanto, em casos em que continuar pode ser inseguro ou prejudicial, a melhor escolha pode ser chamar ```panic!``` e alertar a pessoa que usa sua biblioteca sobre o bug em seu código para que ela possa corrigi-lo durante o desenvolvimento. Da mesma forma, ```panic!``` geralmente é apropriado se você estiver chamando um código externo que está fora de seu controle e ele retorna um estado inválido que você não tem como corrigir.
+
+No entanto, quando o fracasso é esperado, é mais apropriado retornar um ```Result``` do que fazer uma chamada ```panic!``` . Exemplos incluem um parser recebendo dados malformados ou uma solicitação HTTP retornando um status que indica que você atingiu um limite de taxa. Nesses casos, retornar um ```Result``` indica que a falha é uma possibilidade esperada que o código de chamada deve decidir como lidar.
+
+Quando seu código executa uma operação que pode colocar um usuário em risco se for chamada usando valores inválidos, seu código deve verificar se os valores são válidos primeiro e entrar em pânico se os valores não forem válidos. Isso ocorre principalmente por motivos de segurança: tentar operar em dados inválidos pode expor seu código a vulnerabilidades. Esta é a principal razão pela qual a biblioteca padrão chamará ```panic!``` se você tentar um acesso de memória fora dos limites: tentar acessar memória que não pertence à estrutura de dados atual é um problema de segurança comum. Funções geralmente têm contratos: seu comportamento só é garantido se as entradas atenderem a requisitos específicos. Entrar em pânico quando o contrato é violado faz sentido porque uma violação de contrato sempre indica um bug do lado do chamador, e não é um tipo de erro que você deseja que o código de chamada tenha que lidar explicitamente. Na verdade, não há uma maneira razoável para o código de chamada se recuperar; os programadores do código chamador precisam consertar o código. Contratos para uma função, especialmente quando uma violação causará pânico, devem ser explicados na documentação da API para a função.
+
+No entanto, ter muitas verificações de erro em todas as suas funções seria prolixo e irritante. Felizmente, você pode usar o sistema de tipos do Rust (e, portanto, a verificação de tipos feita pelo compilador) para fazer muitas das verificações para você. Se sua função tiver um tipo específico como parâmetro, você pode prosseguir com a lógica do seu código sabendo que o compilador já garantiu que você tem um valor válido. Por exemplo, se você tiver um tipo em vez de uma ```Option```, seu programa espera ter sempre algo em vez de poder ter nada em alguma situação. Seu código então não precisa lidar com dois casos para as variantes ```Some``` e ```None```: ele terá apenas um caso para definitivamente ter um valor. O código que tenta passar nada para sua função nem será compilado, então sua função não precisa verificar esse caso em tempo de execução. Outro exemplo é usar um tipo inteiro sem sinal, como ```u32```, que garante que o parâmetro nunca seja negativo.
+
+#### Criando tipos personalizados para validação 
+ 
+asd
 
 ---
 
@@ -499,4 +542,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20250103
+Última atualização: 20250104
