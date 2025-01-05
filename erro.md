@@ -26,6 +26,8 @@ A maioria das linguagens não distingue entre esses dois tipos de erros e lida c
 
 [Quando entrar em pânico e quando não](#quando-entrar-em-pânico-e-quando-não)
 
+[Conclusão](#conclusão)
+
 ---
 
 ## panic!
@@ -524,15 +526,70 @@ No entanto, ter muitas verificações de erro em todas as suas funções seria p
 
 #### Criando tipos personalizados para validação 
  
-asd
+Vamos levar a ideia de usar o sistema de tipos do Rust para garantir que temos um valor válido um passo adiante e analisar a criação de um tipo personalizado para validação. Lembre-se do [jogo de adivinhação no Capítulo 2 do Livro](https://doc.rust-lang.org/book/ch02-00-guessing-game-tutorial.html), no qual nosso código pedia ao usuário para adivinhar um número entre 1 e 100. Nunca validamos que o palpite do usuário estava entre esses números antes de compará-lo com nosso número secreto; apenas validamos que o palpite era positivo. Nesse caso, as consequências não foram muito terríveis: nossa saída de "Muito alto" ou "Muito baixo" ainda estaria correta. Mas seria um aprimoramento útil orientar o usuário em direção a palpites válidos e ter um comportamento diferente quando o usuário adivinha um número que está fora do intervalo em comparação quando o usuário digita, por exemplo, letras.
+
+Uma maneira de fazer isso seria analisar o palpite como um ```i32``` em vez de um ```u32``` para permitir números potencialmente negativos, e então adicionar uma verificação para o número estar no intervalo, assim:
+
+```
+    loop {
+        // -- código omitido--
+
+        let guess: i32 = match guess.trim().parse() {
+            Ok(num) => num,
+            Err(_) => continue,
+        };
+
+        if guess < 1 || guess > 100 {
+            println!("O número secreto deve estar entre 1 e 100.");
+            continue;
+        }
+
+        match guess.cmp(&secret_number) {
+            // -- código omitido --
+    }
+```
+
+A expressão **if** verifica se nosso valor está fora do intervalo, informa o usuário sobre o problema e chama **continue** para iniciar a próxima iteração do loop e solicitar outra tentativa. Após a expressão **if**, podemos prosseguir com as comparações entre **guess** e o número secreto, sabendo que **guess** está entre 1 e 100.
+
+No entanto, esta não é uma solução ideal: se fosse absolutamente crítico que o programa operasse apenas em valores entre 1 e 100, e tivesse muitas funções com esse requisito, ter uma verificação como esta em cada função seria tedioso (e poderia afetar o desempenho). 
+
+Em vez disso, podemos criar um novo tipo e colocar as validações em uma função para criar uma instância do tipo, em vez de repetir as validações em todos os lugares. Dessa forma, é seguro para as funções usarem o novo tipo em suas assinaturas e usarem com confiança os valores que recebem. O código abaixo mostra uma maneira de definir um tipo ```Guess``` que só criará uma instância de ```Guess``` se a função ```new()``` receber um valor entre 1 e 100.
+
+```
+pub struct Guess {
+    value: i32,
+}
+
+impl Guess {
+    pub fn new(value: i32) -> Guess {
+        if value < 1 || value > 100 {
+            panic!("O valor de Guess deve estar entre 1 e 100, mas foi passado {value}.");
+        }
+
+        Guess { value }
+    }
+
+    pub fn value(&self) -> i32 {
+        self.value
+    }
+}
+```
+
+Primeiro, definimos uma estrutura chamada ```Guess``` que possui um campo chamado **value** que armazena um ```i32```. É aqui que o número será armazenado.
+
+Em seguida, implementamos uma função associada chamada ```new()``` em ```Guess``` que cria instâncias de valores ```Guess```. A função ```new()``` é definida para ter um parâmetro chamado **value** do tipo ```i32``` e retornar um ```Guess```. O código no corpo da função ```new()``` testa **value** para garantir que esteja entre 1 e 100. Se **value** não passar neste teste, fazemos uma chamada a ```panic!```, que alertará o programador que está escrevendo o código chamador de que há um bug que precisa corrigir, porque criar um ```Guess``` com um valor fora deste intervalo violaria o contrato no qual ```Guess::new()``` está confiando. As condições nas quais ```Guess::new()``` pode entrar em pânico devem ser discutidas em sua documentação de API pública. Se **value** passar no teste, criamos um novo ```Guess``` com seu campo **value** definido para o parâmetro **value** e retornamos o ```Guess```. 
+
+Em seguida, implementamos um método chamado ```value()``` que toma emprestado ```self```, não tem nenhum outro parâmetro e retorna um ```i32```. Esse tipo de método às vezes é chamado de **getter** porque seu propósito é obter alguns dados de seus campos e retorná-los. Esse método público é necessário porque o campo **value** da estrutura ```Guess``` é privado. É importante que o campo **value** seja privado para que o código que usa a estrutura ```Guess``` não tenha permissão para definir **value** diretamente: o código fora do módulo deve usar a função ```Guess::new()``` para criar uma instância de ```Guess```, garantindo assim que não haja como um ```Guess``` ter um valor que não tenha sido verificado pelas condições na função ```Guess::new()```.
+
+Uma função que tem um parâmetro ou retorna apenas números entre 1 e 100 poderia então declarar em sua assinatura que recebe ou retorna um ```Guess``` em vez de um ```i32``` e não precisaria fazer nenhuma verificação adicional em seu corpo.
 
 ---
 
-<img src="images/em_construcao.png" width="250" alt="EM CONSTRUCAO">
+## Conclusão
+
+Os recursos de tratamento de erros do Rust são projetados para ajudar você a escrever um código mais robusto. A macro ```panic!``` sinaliza que seu programa está em um estado que ele não consegue lidar e permite que você diga ao processo para parar em vez de tentar prosseguir com valores inválidos ou incorretos. A enumeração ```Result``` usa o sistema de tipos do Rust para indicar que as operações podem falhar de uma forma que seu código poderia se recuperar. Você pode usar ```Result``` para dizer ao código chamador que ele precisa lidar com sucesso ou falha em potencial também. Usar ```panic!``` e ```Result``` nas situações apropriadas tornará seu código mais confiável diante de problemas inevitáveis.
 
 ---
-
-
 
 ## Referências
 
@@ -542,4 +599,4 @@ asd
 
 arataca89@gmail.com
 
-Última atualização: 20250104
+Última atualização: 20250105
