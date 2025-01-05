@@ -10,12 +10,13 @@
 
 [Implementar Display para imprimir com ```{}```](#implementar-display-para-imprimir-com-)
 
+[Diferença entre clone() e to_owned()](#diferença-entre-clone-e-to_owned)
 
 ---
 
 # Desabilitar as mensagens de warning
 Insira a seguinte atributo no início do seu arquivo fonte
-```
+```rust
 #![allow(warnings)]
 ```
 
@@ -29,7 +30,7 @@ Um atributo é um metadado geral e de forma livre que é interpretado de acordo 
 
 Se não for precisar mais do vetor pode usar ```into_inter()``` e ```collect()```.
 
-```
+```rust
 fn main() {
     let v = vec!['a', 'b', 'c', 'd'];
     let s: String = v.into_iter().collect();
@@ -40,7 +41,7 @@ fn main() {
 
 Se for usar o vetor depois pode usar ```iter()``` e ```collect()```.
 
-```
+```rust
 fn main() {
     let v = vec!['a', 'b', 'c', 'd'];
     let s: String = v.iter().collect();
@@ -55,7 +56,7 @@ Fonte: [https://stackoverflow.com/questions/23430735/how-to-convert-vecchar-to-a
 
 # Ler um arquivo texto para uma String
 
-```
+```rust
 use std::fs;
 use std::io;
 /********************************************************************
@@ -84,7 +85,7 @@ Erro: O sistema não pode encontrar o arquivo especificado. (os error 2)
 # Implementar Display para imprimir com ```{}```
 
 
-```
+```rust
 // Importa o módulo 'fmt'
 use std::fmt;
 
@@ -99,6 +100,43 @@ impl fmt::Display for Structure {
     }
 }
 ```
+
+---
+
+# Diferença entre clone() e to_owned()
+
+Em Rust, tanto `clone()` quanto `to_owned()` são usados para criar cópias de dados, mas eles têm propósitos e comportamentos ligeiramente diferentes, dependendo do contexto em que são utilizados.
+
+### `clone()`
+- **Propósito**: O método `clone()` é usado para criar uma cópia profunda (deep copy) de um valor. Isso significa que ele copia tanto o valor em si quanto qualquer dado associado que o valor possua (por exemplo, se for uma `String`, ele copia a string inteira, incluindo seu conteúdo na heap).
+- **Implementação**: O método `clone()` é definido na trait `Clone`, que pode ser implementada por tipos que desejam permitir a clonagem.
+- **Uso comum**: `clone()` é frequentemente usado quando você precisa de uma cópia independente de um valor, especialmente quando o valor é armazenado na heap (como `String`, `Vec`, etc.).
+
+Exemplo:
+
+```rust
+let s1 = String::from("hello");
+let s2 = s1.clone(); // s2 é uma cópia independente de s1
+```
+
+### `to_owned()`
+- **Propósito**: O método `to_owned()` é usado para converter um tipo que pode ser referenciado (como uma fatia `&str`) em um tipo que possui seus dados (como `String`). Em outras palavras, ele cria uma cópia dos dados e os coloca em uma nova alocação na heap, transferindo a propriedade (ownership) para o novo valor.
+- **Implementação**: O método `to_owned()` é definido na trait `ToOwned`, que é usada para tipos que podem ser convertidos em um tipo "owned" (ou seja, que possui seus dados).
+- **Uso comum**: `to_owned()` é frequentemente usado para converter referências (como `&str`) em tipos owned (como `String`).
+
+Exemplo:
+```rust
+let s1 = "hello"; // s1 é do tipo &str (uma fatia de string)
+let s2 = s1.to_owned(); // s2 é do tipo String, uma cópia owned de s1
+```
+
+### Resumo das diferenças:
+- **`clone`**: Cria uma cópia profunda de um valor, independentemente de ser uma referência ou um tipo owned. É mais geral e pode ser usado em qualquer tipo que implemente a trait `Clone`.
+- **`to_owned`**: Converte uma referência (como `&str`) em um tipo owned (como `String`). É mais específico para conversões de referências para tipos owned.
+
+Em resumo, `clone` é mais geral e pode ser usado para copiar qualquer tipo que implemente `Clone`, enquanto `to_owned` é mais específico para converter referências em tipos owned.
+
+[deepseek](https://www.deepseek.com)
 
 ---
 
