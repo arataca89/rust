@@ -3,6 +3,7 @@
 [Rust by Example](https://doc.rust-lang.org/rust-by-example/index.html) (RBE ou Rust através de exemplos, numa tradução livre) é uma coleção de exemplos executáveis que ilustram vários conceitos e bibliotecas padrão do Rust. Este artigo aborda alguns tópicos do RBE .
 
 * [Tuplas](#tuplas)
+* [enum](#enum)
 * [match](#match)
 * [Option](#option)
 * [Result](#result)
@@ -25,7 +26,7 @@
 
 Rust tem uma construção chamada ```match``` que pode ser usada como um switch da linguagem C. 
 
-```
+```rust
 fn main() {
     // Teste diferentes valores para 'number'
     let number = 1;
@@ -67,7 +68,7 @@ O enum ```Option<T>``` possui duas variantes:
 * ```None```, para indicar falha ou falta de valor; e
 * ```Some(valor)```, uma estrutura de tupla que envolve um ```valor``` com tipo ```T```.
 
-```
+```rust
 // rbe_option
 
 // Executa uma divisão e não chama 'panic!' em caso de erro
@@ -133,7 +134,7 @@ O enum ```Result<T, E>``` tem duas variantes:
 * ```Ok(value)```, que indica que a operação foi bem-sucedida e encapsula o valor retornado pela operação. (```value``` tem o tipo ```T```)
 * ```Err(why)```, que indica que a operação falhou e encapsula ```why```, que (esperançosamente) explica a causa da falha. (```why``` tem o tipo ```E```)
 
-```
+```rust
 // rbe_result
 
 mod checked {
@@ -211,7 +212,7 @@ error: process didn't exit successfully: `target\debug\rbe_result.exe` (exit cod
 
 Encadear resultados usando ```match``` pode ficar confuso. O operador ```?``` pode ser usado para deixar o código mais fácil de entender. O operador ```?``` é usado no final de uma expressão que retorna um ```Result```, e é equivalente a uma expressão ```match```, onde o ramo ```Err(err)``` se expande para ```return Err(From::from(err))```, e o ramo ```Ok(ok)``` se expande para uma expressão ```ok```.
 
-```
+```rust
 // rbe_opearador_interrogacao
 
 mod checked {
@@ -301,7 +302,7 @@ A macro ```panic!``` pode ser usada para gerar um pânico e iniciar a desmontage
 
 Como estamos lidando com programas com apenas uma thread, ```panic!``` fará com que o programa reporte a mensagem de pânico e saia. 
 
-```
+```rust
 fn division(dividend: i32, divisor: i32) -> i32 {
     if divisor == 0 {
         // Divisão por zero irá gerar pânico
@@ -353,7 +354,7 @@ Enquanto vetores armazenam valores por um índice inteiro, ```HashMaps``` armaze
 
 Assim como vetores, HashMaps são expansíveis, mas HashMaps também podem diminuir de tamanho quando têm espaço em excesso. Você pode criar um ```HashMap``` com uma determinada capacidade inicial usando ```HashMap::with_capacity(uint)```, ou usar ```HashMap::new()``` para obter um ```HashMap``` com uma capacidade inicial padrão(recomendado). 
 
-```
+```rust
 // rbe_hashmap
 
 use std::collections::HashMap;
@@ -421,7 +422,7 @@ Os tipos que são coleção implementam ```Eq``` e ```Hash``` se seu tipo contid
  
 Você pode facilmente implementar ```Eq``` e ```Hash``` para um tipo personalizado com apenas uma linha:
 
-```
+```rust
 #[derive(PartialEq, Eq, Hash)]
 ```
 
@@ -429,7 +430,7 @@ O compilador fará o resto. Se você quiser mais controle sobre os detalhes, pod
 
 Para demonstrar o uso de uma ```struct``` em um ```HashMap```, vamos criar um sistema de login de usuário muito simples: 
  
-```
+```rust
 // rbe_hashmap2
 
 use std::collections::HashMap;
@@ -529,7 +530,7 @@ Conjuntos(sets) possuem 4 operações primárias (todas retornam um iterador):
 * ```intersection```(interseção): obter todos os elementos que estão apenas em ambos os conjuntos.
 * ```symmetric_difference```(diferença simétrica): obter todos os elementos que estão em um conjunto ou no outro, mas não em ambos.
 
-```
+```rust
 // rbe_hashset
 
 use std::collections::HashSet;
@@ -578,7 +579,7 @@ A contagem de referência de um ```Rc``` aumenta em 1 sempre que um ```Rc``` é 
 
 Clonar um ```Rc``` nunca realiza uma cópia profunda (deep copy). A clonagem cria apenas outro ponteiro para o valor encapsulado e incrementa a contagem. 
 
-```
+```rust
  // rbe_rc
 
 use std::rc::Rc;
@@ -631,7 +632,7 @@ Veja também:
 
 Quando a propriedade compartilhada entre threads é necessária, ```Arc``` (Atomically Reference Counted) pode ser usado. Esta estrutura, por meio da implementação ```Clone```, pode criar um ponteiro de referência para a localização de um valor na memória heap enquanto aumenta o contador de referência. Como compartilha a propriedade entre threads, quando o último ponteiro de referência para um valor sair do escopo, a variável é descartada.
 
-```
+```rust
 // rbe_arc
 
 use std::time::Duration;
@@ -666,7 +667,7 @@ fn main() {
 
 Uma tupla é uma coleção de valores de diferentes tipos. Tuplas são construídas usando parênteses **( )**, e cada tupla em si é um valor com assinatura de tipo **(T1, T2, ...)**, onde **T1**, **T2** são os tipos de seus membros. Funções podem usar tuplas para retornar vários valores, pois tuplas podem conter qualquer número de valores.
 
-```
+```rust
 // Tuplas podem ser usadas como argumentos e valores de retorno de funções.
 fn reverse(pair: (i32, bool)) -> (bool, i32) {
     //'let' pode ser usada para vincular membros de uma tupla a variáveis.
@@ -717,6 +718,54 @@ fn main() {
 
 ---
 
+# enum
+
+```rust
+// Cria uma 'enum' para classificar um evento da web.
+// Observe como ambos nomes e informações de tipo juntos
+// especificam a variante:
+// 'PageLoad != PageUnload' e 'KeyPress(char) != Paste(String)'.
+// Cada um é diferente e independente.
+enum WebEvent {
+    // Uma variante 'enum' pode ser 'tipo unidade'( '()' ),...
+    PageLoad,
+    PageUnload,
+    // ...pode ser tupla,...
+    KeyPress(char),
+    Paste(String),
+    // ...e pode ser struct.
+    Click { x: i64, y: i64 },
+}
+
+fn inspect(event: WebEvent) {
+    match event {
+        WebEvent::PageLoad => println!("page loaded"),
+        WebEvent::PageUnload => println!("page unloaded"),
+        WebEvent::KeyPress(c) => println!("pressed '{}'.", c),
+        WebEvent::Paste(s) => println!("pasted \"{}\".", s),
+        WebEvent::Click { x, y } => {
+            println!("clicked at x={}, y={}.", x, y);
+        },
+    }
+}
+
+fn main() {
+    let pressed = WebEvent::KeyPress('x');
+    let pasted  = WebEvent::Paste("my text".to_owned());
+    let click   = WebEvent::Click { x: 20, y: 80 };
+    let load    = WebEvent::PageLoad;
+    let unload  = WebEvent::PageUnload;
+
+    inspect(pressed);
+    inspect(pasted);
+    inspect(click);
+    inspect(load);
+    inspect(unload);
+}
+```
+
+---
+
 ## Referências
 
 [Rust by Example (RBE)](https://doc.rust-lang.org/rust-by-example/index.html)
@@ -741,8 +790,10 @@ fn main() {
 
 [RBE - Tuples](https://doc.rust-lang.org/rust-by-example/primitives/tuples.html)
 
+[RBE - enum](https://doc.rust-lang.org/rust-by-example/custom_types/enum.html)
+
 ---
 
 arataca89@gmail.com
 
-Última atualização: 20241226
+Última atualização: 20250105
