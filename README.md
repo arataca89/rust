@@ -29,6 +29,7 @@
 [Result](https://github.com/arataca89/rust/blob/main/result.md)
 
 [Tratamento de erro - panic! e Result](https://github.com/arataca89/rust/blob/main/erro.md)
+
 [Option](https://github.com/arataca89/rust/blob/main/option.md)
 
 [Genéricos](https://github.com/arataca89/rust/tree/main/genericos)
