@@ -4,9 +4,11 @@
 
 [Introdução](#introdução)
 
-[Enum ao estilo C](#enum-ao-estilo-c)
+[enum ao estilo C](#enum-ao-estilo-c)
 
 [enum pode ter métodos](#enum-pode-ter-métodos)
+
+[enum com dados](#enum-com-dados)
 
 ---
 
@@ -136,7 +138,7 @@ Aqui, verificamos se o divisor é zero; se for, retornamos um ```Result``` que �
 
 ---
 
-## Enum ao estilo C
+## enum ao estilo C
 
 A enumeração ao estilo da linguagem C possui apenas os nomes, sem valores embutidos, como mostrado no exemplo anterior. Abaixo temos outro exemplo.
 
@@ -236,14 +238,152 @@ fn main(){
 
 ## enum pode ter métodos
 
-asd
+```
+enum Token {
+    Num,
+    Plus,
+    Minus,
+    Unknown,
+}
+
+impl Token {
+    pub fn print(&self){
+        match self {
+            Token::Num     => println!("Token{{Num}}"),
+            Token::Plus    => println!("Token{{Plus}}"),
+            Token::Minus   => println!("Token{{Minus}}"),
+            Token::Unknown => println!("Token{{Unknown}}"),
+        }
+    }
+}
+
+fn main(){
+    let tokens = vec![
+        Token::Num,
+        Token::Plus,
+        Token::Minus,
+        Token::Unknown,
+        ];
+
+    for t in tokens {
+        t.print();
+    }
+}
+```
+
+Saída:
+
+```
+Token{Num}
+Token{Plus}
+Token{Minus}
+Token{Unknown}
+```
+
+---
+
+## enum com dados
+
+```
+// Importa o módulo 'fmt'
+use std::fmt;
+
+enum TokenType {
+    Int,
+    Float,
+    Plus,
+}
+
+// Implementar 'Display' permite imprimir o tipo usando '{}'
+impl fmt::Display for TokenType {
+    // Esta trait requer o método 'fmt' com esta assinatura.
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            TokenType::Int => write!(f, "Int"),
+            TokenType::Float => write!(f, "Float"),
+            TokenType::Plus => write!(f, "Plus"),
+        }
+    }
+}
+
+enum Token{
+    Int(TokenType, i32),
+    Float(TokenType, f64),
+    Plus(TokenType, char),
+}
+
+impl fmt::Display for Token {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Token::Int(t,v) => write!(f, "Token{{{}, {}}}", t, v),
+            Token::Float(t,v) => write!(f, "Token{{{}, {}}}", t, v),
+            Token::Plus(t,v) => write!(f, "Token{{{}, {}}}", t, v),
+        }
+    }
+}
+
+fn main(){
+    let t1 = Token::Int(TokenType::Int, 13);
+    let t2 = Token::Float(TokenType::Float, 3.1415);
+    let t3 = Token::Plus(TokenType::Plus, '+');
+
+    println!("t1: {}", t1);
+    println!("t2: {}", t2);
+    println!("t3: {}", t3);
+}
+```
+
+Saída:
+
+```
+t1: Token{Int, 13}
+t2: Token{Float, 3.1415}
+t3: Token{Plus, +}
+```
+
+Rust tem três tipos de enumerações (```enum```) que correspondem aos três tipos de estruturas (```struct```):
+
+* ```enum``` com variantes sem dados corresponde a ```struct``` do tipo unidade (```()```); são enumerações similares as da linguagem C;
+* ```enum``` com variantes de tupla se parecem e funcionam como ```struct``` de tupla;
+* ```enum``` com variantes do tipo ```struct``` têm chaves e campos nomeados.
 
 
+Uma enumeração pode ter variantes de vários tipos diferentes.
 
+```
+#[derive(Debug)]
+enum VariosTipos {
+    SemDados,
+    ComDados(i32),
+    ComTupla(char, u8),
+    ComStruct{
+        R: i32,
+        G: i32,
+        B: i32,
+    }
+}
 
+fn main(){
+    let e1 = VariosTipos::SemDados;
+    let e2 = VariosTipos::ComDados(13);
+    let e3 = VariosTipos::ComTupla('+', 43);
+    let e4 = VariosTipos::ComStruct{R:0, G:0, B: 255};
 
+    println!("e1: {:?}", e1);
+    println!("e2: {:?}", e2);
+    println!("e3: {:?}", e3);
+    println!("e4: {:?}", e4);
+}
+```
 
+Saída:
 
+```
+e1: SemDados
+e2: ComDados(13)
+e3: ComTupla('+', 43)
+e4: ComStruct { R: 0, G: 0, B: 255 }
+```
 
 ---
 
@@ -267,4 +407,4 @@ Links:
 
 arataca89@gmail.com
 
-Última atualização: 20241230
+Última atualização: 20250105
