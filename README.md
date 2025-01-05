@@ -4,7 +4,7 @@
 
 ---
 
-<img src="images/dicas.png" width="100" alt="DICAS"> [Dicas](https://github.com/arataca89/rust/blob/main/dicas.md)
+[Dicas](https://github.com/arataca89/rust/blob/main/dicas.md)
 
 [Rust através de exemplos](https://github.com/arataca89/rust/blob/main/rust_by_example.md)
 
