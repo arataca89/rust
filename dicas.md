@@ -8,6 +8,9 @@
 
 [Ler um arquivo texto para uma String](#ler-um-arquivo-texto-para-uma-string)
 
+[Implementar Display para imprimir com ```{}```](#implementar-display-para-imprimir-com-)
+
+
 ---
 
 # Desabilitar as mensagens de warning
@@ -78,6 +81,27 @@ Erro: O sistema não pode encontrar o arquivo especificado. (os error 2)
 
 ---
 
+# Implementar Display para imprimir com ```{}```
+
+
+```
+// Importa o módulo 'fmt'
+use std::fmt;
+
+// Estrutura que implementará 'fmt::Dispaly'.
+struct Structure(i32);
+
+// Para imprimir usando '{}', o tipo tem que implementar 'fmt::Display'
+impl fmt::Display for Structure {
+    // Esta trait requer o método 'fmt' com esta assinatura.
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+```
+
+---
+
 arataca89@gmail.com
 
-Última atualização: 20250102
+Última atualização: 20250105
