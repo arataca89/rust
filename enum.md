@@ -16,7 +16,7 @@
 
 ```enum``` é um tipo definido pelo usuário que consiste de um container de nomes relacionados que podem conter valores. Por exemplo:
 
-```
+```rust
 enum Operacao {
     Adicao,
     Subtracao,
@@ -67,32 +67,28 @@ fn main() {
 
 Neste exemplo temos uma ```enum``` chamada **Operacao** que possui 4 nomes: **Adicao**, **Subtracao**, **Multiplicacao** e **Divisao**. Estes nomes são chamados **variantes** da ```enum```. 
 
-```
-.....
+```rust
 enum Operacao {
     Adicao,
     Subtracao,
     Multiplicacao,
     Divisao,
 }
-.....
 ```
 
 Note que as variantes estão relacionadas, elas são as quatro operações aritméticas básicas. A intenção é criar uma função que receba a operação e os operandos e retorne o resultado da operação aritmética, ou seja, uma simples calculadora.
 
 Neste caso a função citada é ```executar()``` que deve receber a operação aritmética a ser executada, e os dois operandos. Ela deve retonar o resultado da operação ou uma string de erro.
 
-```
-.....
+```rust
 fn executar(operacao: Operacao, x: f64, y: f64) -> Result<f64, &'static str> {
-.....
 ```
 
 Note que ela retorna um tipo ```Result``` que também é uma enumeração.
 
 ```Result``` é uma enumeração da biblioteca padrão Rust que possui duas variantes.
 
-```
+```rust
 pub enum Result<T, E> {
     Ok(T),
     Err(E),
@@ -110,12 +106,10 @@ Em Rust, quando uma função pode retornar um valor de sucesso ou um erro, podem
 
 Dentro da função ```executar()``` temos um **match** que é uma instrução que faz o casamento de padrões. 
 
-```
-.....
+```rust
     match operacao {
         Operacao::Adicao => Ok(x + y),
         Operacao::Subtracao => Ok(x - y),
-.....
 ```
 
 Aqui ela faz o casamento do parâmetro de função **operacao** que refere-se a operação aritmética desejada. Aqui podemos ver uma das aplicações de uma enumeração. Os nomes significativos ajudam a termos um código bem mais fácil de entender. Conforme a operação desejada, o **match** retorna um objeto ```Result``` que é uma variante **OK** com o valor da operação dentro dele. Esta é uma das aplicações do valor dentro de uma variante de uma enumeração.
@@ -124,7 +118,7 @@ Normalmente as enumerações são usadas junto com o casamento de padrões, como
 
 No caso da operação de divisão observe que temos um código mais extenso.
 
-```
+```rust
 Operacao::Divisao => {
             if y == 0.0 {
                 return Err("Divisao por zero");
@@ -142,7 +136,7 @@ Aqui, verificamos se o divisor é zero; se for, retornamos um ```Result``` que �
 
 A enumeração ao estilo da linguagem C possui apenas os nomes, sem valores embutidos, como mostrado no exemplo anterior. Abaixo temos outro exemplo.
 
-```
+```rust
 enum HttpStatus {
     Ok,
     NotModified,
@@ -164,7 +158,7 @@ fn main(){
 
 Assim como na linguagem C, este tipo de enumeração pode ter valores inteiros associados; e a conversão para inteiro é permitida; conversão de inteiro para a variante da ```enum``` não é permitida.
 
-```
+```rust
 enum HttpStatus {
     Ok = 200,
     NotModified = 304,
@@ -189,7 +183,7 @@ fn main(){
 
 Se inteiros não forem atribuídos, assim como na linguagem C, serão atribuidos automaticamente, iniciando com zero.
 
-```
+```rust
 enum TokenType {
     Eof,
     Plus,
@@ -212,7 +206,8 @@ fn main(){
 ```
 
 Variantes que não recebem valor, após uma que recebe, seguirão a ordem crescente dos valores.
-```
+
+```rust
 enum TokenType {
     Eof,
     Plus = 43,
@@ -238,7 +233,7 @@ fn main(){
 
 ## enum pode ter métodos
 
-```
+```rust
 enum Token {
     Num,
     Plus,
@@ -284,7 +279,7 @@ Token{Unknown}
 
 ## enum com dados
 
-```
+```rust
 // Importa o módulo 'fmt'
 use std::fmt;
 
@@ -350,7 +345,7 @@ Rust tem três tipos de enumerações (```enum```) que correspondem aos três ti
 
 Uma enumeração pode ter variantes de vários tipos diferentes.
 
-```
+```rust
 #[derive(Debug)]
 enum VariosTipos {
     SemDados,
@@ -385,13 +380,6 @@ e3: ComTupla('+', 43)
 e4: ComStruct { R: 0, G: 0, B: 255 }
 ```
 
----
-
-<img src="images/em_construcao.png" width="250" alt="EM CONSTRUCAO">
-
----
-
-
 
 ## Referências
 
@@ -407,4 +395,4 @@ Links:
 
 arataca89@gmail.com
 
-Última atualização: 20250105
+Última atualização: 20250106
