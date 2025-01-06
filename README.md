@@ -26,6 +26,8 @@
 
 [Estrutura (struct)](https://github.com/arataca89/rust/blob/main/structs.md)
 
+[Enumeração (enum)](https://github.com/arataca89/rust/blob/main/enum.md)
+
 [Result](https://github.com/arataca89/rust/blob/main/result.md)
 
 [Tratamento de erro - panic! e Result](https://github.com/arataca89/rust/blob/main/erro.md)
@@ -58,4 +60,4 @@
 
 arataca89@gmail.com
 
-Última atualização: 20250105
+Última atualização: 20250106
