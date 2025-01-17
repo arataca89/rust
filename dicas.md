@@ -178,7 +178,7 @@ fn main() {
 
 # Lendo argumentos da linha de comando
 
-```
+```rust
 use std::env;
 
 fn main() {
