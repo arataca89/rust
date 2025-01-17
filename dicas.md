@@ -12,6 +12,10 @@
 
 [Diferença entre clone() e to_owned()](#diferença-entre-clone-e-to_owned)
 
+[Implementar um smart pointer](#implementar-um-smart-pointer)
+
+[Lendo argumentos da linha de comando](#lendo-argumentos-da-linha-de-comando)
+
 ---
 
 # Desabilitar as mensagens de warning
@@ -140,6 +144,69 @@ Em resumo, `clone` é mais geral e pode ser usado para copiar qualquer tipo que 
 
 ---
 
+# Implementar um smart pointer
+
+```rust
+use std::ops::Deref;
+
+struct MyBox<T>(T);
+
+impl<T> MyBox<T> {
+    fn new(x: T) -> MyBox<T> {
+        MyBox(x)
+    }
+}
+
+impl<T> Deref for MyBox<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+fn main() {
+    let x = 5;
+    let y = MyBox::new(x);
+
+    assert_eq!(5, x);
+    assert_eq!(5, *y);
+}
+```
+
+---
+
+# Lendo argumentos da linha de comando
+
+```
+use std::env;
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+    println!("\nNúmero de argumentos passados: {}\n", args.len());
+    for s in args{
+        println!("{s}");
+    }
+}
+```
+
+Saída:
+
+```
+>cargo run -- arg1 arg2 arg3
+
+Número de argumentos passados: 4
+
+target\debug\to_pfix.exe
+arg1
+arg2
+arg3
+```
+
+Note que o primeiro argumento passado (`args[0]`) é o nome do programa sendo executado.
+
+---
+
 arataca89@gmail.com
 
-Última atualização: 20250105
+Última atualização: 20250117
