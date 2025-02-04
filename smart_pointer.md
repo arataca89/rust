@@ -195,7 +195,7 @@ Para determinar quanto espaço alocar para um valor **Message**, Rust percorre c
 
 Compare isso com o que acontece quando Rust tenta determinar quanto espaço um tipo recursivo como o **List**,mostrado mais acima, precisa. O compilador começa olhando para a variante **Cons**, que contém um valor do tipo **i32** e um valor do tipo **List**. Portanto, **Cons** precisa de uma quantidade de espaço igual ao tamanho de um **i32** mais o tamanho de uma **List**. Para descobrir quanta memória o tipo **List** precisa, o compilador olha para as variantes, começando com a variante **Cons**. A variante **Cons** contém um valor do tipo **i32** e um valor do tipo **List**, e esse processo continua infinitamente, como mostrado na figura abaixo.
 
-<img src="images/box1.svg" width="500" alt="CONS">
+<img src="images/box1.svg" width="500" alt="BOX1">
 
 #### Usando Box&lt;T&gt; para obter um tipo recursivo com tamanho conhecido
 
@@ -230,7 +230,7 @@ fn main() {
 A variante **Cons** precisa do tamanho de um ```i32``` mais o espaço para armazenar os dados do ponteiro da ```Box```. A variante **Nil** não armazena valores, então precisa de menos espaço do que a variante **Cons**. Agora sabemos que qualquer valor **List** ocupará o tamanho de um ```i32``` mais o tamanho do ponteiro de uma ```Box```. Ao usar uma ```Box```, quebramos a cadeia infinita e recursiva, então o compilador pode descobrir o tamanho que precisa para armazenar um valor **List**. A figra abaixo mostra como a variante **Cons** se parece agora. 
  
  
-<img src="images/box2.svg" width="350" alt="CONS">
+<img src="images/box2.svg" width="350" alt="BOX2">
 
 As ```Box``` fornecem apenas a indireção e a alocação na memória heap; elas não têm nenhuma outra capacidade especial, como aquelas que veremos com os outros tipos de ponteiros inteligentes. Elas também não têm a sobrecarga de desempenho (overhead de performance) que essas capacidades especiais incorrem, então elas podem ser úteis em casos como a **cons list**, onde a indireção é o único recurso de que precisamos. 
 
@@ -604,7 +604,7 @@ Observe que `Rc<T>` é usado apenas em cenários de uma única thread. Quando di
 
 Vamos voltar ao nosso exemplo "cons list". Lembre-se de que o definimos usando `Box<T>`. Desta vez, criaremos duas listas que compartilham a propriedade de uma terceira lista. Conceitualmente, isso se parece com a figura abaixo:
 
-<img src="images/rc_t_1.svg" width="700" alt="EM CONSTRUCAO">
+<img src="images/rc_t_1.svg" width="700" alt="RC_T_1">
 
 Criaremos uma lista chamada "a" que conterá 5 e depois 10. Em seguida, faremos mais duas listas: "b" que começa com 3 e "c" que começa com 4. Ambas as listas "b" e "c" continuarão então para a primeira lista "a" contendo 5 e 10. Em outras palavras, ambas as listas compartilharão a primeira lista contendo 5 e 10. 
 
