@@ -54,6 +54,8 @@
 
 [Smart Pointers](https://github.com/arataca89/rust/blob/main/smart_pointer.md)
 
+[Módulo `Collections`](https://github.com/arataca89/rust/blob/main/collections.md)
+
 ---
 
 [Escrevendo um programa de linha de comando - minigrep](https://github.com/arataca89/rust/tree/main/minigrep)
@@ -64,4 +66,4 @@
 
 arataca89@gmail.com
 
-Última atualização: 20250204
+Última atualização: 20250212
