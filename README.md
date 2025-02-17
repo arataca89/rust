@@ -44,7 +44,7 @@
 
 [Lifetimes (tempos de vida)](https://github.com/arataca89/rust/tree/main/lifetimes)
 
-[Closures](https://github.com/arataca89/rust/tree/main/closures)
+[Closures](https://github.com/arataca89/rust/blob/main/closures.md)
 
 [Iteradores](https://github.com/arataca89/rust/tree/main/iteradores)
 
@@ -66,4 +66,4 @@
 
 arataca89@gmail.com
 
-Última atualização: 20250212
+Última atualização: 20250217
