@@ -16,6 +16,8 @@
 
 [Lendo argumentos da linha de comando](#lendo-argumentos-da-linha-de-comando)
 
+[o que significa a palavra-chave `dyn`](dyn.md#arataca89)
+
 ---
 
 # Desabilitar as mensagens de warning
@@ -209,4 +211,4 @@ Note que o primeiro argumento passado (`args[0]`) é o nome do programa sendo ex
 
 arataca89@gmail.com
 
-Última atualização: 20250117
+Última atualização: 20250223
