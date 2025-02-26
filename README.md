@@ -56,6 +56,8 @@
 
 [Módulo `Collections`](https://github.com/arataca89/rust/blob/main/collections.md)
 
+[Concorrência](https://github.com/arataca89/rust/blob/main/concorrencia.md)
+
 ---
 
 [Escrevendo um programa de linha de comando - minigrep](https://github.com/arataca89/rust/tree/main/minigrep)
