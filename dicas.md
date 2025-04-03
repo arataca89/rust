@@ -18,7 +18,7 @@
 
 [o que significa a palavra-chave `dyn`](dyn.md#arataca89)
 
-[Convertendo um tipo em outro com `into()`](into.md#arataca89))
+[Convertendo um tipo em outro com `into()`](into.md#arataca89)
 
 ---
 
